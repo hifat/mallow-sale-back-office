@@ -4,19 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package } from "lucide-react"
-
-interface Recipe {
-  id: string
-  name: string
-  ingredients: Array<{
-    inventoryId: string
-    inventoryName: string
-    quantity: number
-    unit: string
-  }>
-  createdAt: string
-  updatedAt: string
-}
+import { Recipe } from "@/lib/recipe-api"
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -69,12 +57,12 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{ingredient.inventoryName}</p>
-                        <p className="text-sm text-gray-600">Inventory ID: {ingredient.inventoryId}</p>
+                        <p className="font-medium text-gray-900">{ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}</p>
+                        <p className="text-sm text-gray-600">Inventory ID: {ingredient.inventory ? ingredient.inventory.id : '-'}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
-                          {ingredient.quantity} {ingredient.unit}
+                          {ingredient.quantity} {(typeof ingredient.unit === 'string' ? ingredient.unit : (ingredient.unit as { code: string }).code)}
                         </p>
                       </div>
                     </div>

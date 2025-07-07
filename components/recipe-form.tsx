@@ -9,51 +9,66 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X, Plus, Trash2 } from "lucide-react"
-
-interface Recipe {
-  id: string
-  name: string
-  ingredients: Array<{
-    inventoryId: string
-    inventoryName: string
-    quantity: number
-    unit: string
-  }>
-  createdAt: string
-  updatedAt: string
-}
+import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
+import { UsageUnit, Recipe, RecipePayload } from "@/lib/recipe-api"
+import { useEffect } from "react"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
-  onSave: (data: Omit<Recipe, "id" | "createdAt" | "updatedAt">) => void
+  onSave: (data: RecipePayload) => void
   onCancel: () => void
 }
 
-// Mock inventory data
-const mockInventory = [
-  { id: "1", name: "Premium Flour", unit: "kg" },
-  { id: "2", name: "Organic Sugar", unit: "kg" },
-  { id: "3", name: "Vanilla Extract", unit: "l" },
-  { id: "4", name: "Butter", unit: "kg" },
-  { id: "5", name: "Eggs", unit: "pieces" },
-]
-
-const units = [
-  { value: "kg", label: "Kilogram (kg)" },
-  { value: "g", label: "Gram (g)" },
-  { value: "l", label: "Liter (l)" },
-  { value: "ml", label: "Milliliter (ml)" },
-  { value: "pieces", label: "Pieces" },
-  { value: "dozen", label: "Dozen" },
+const units: UsageUnit[] = [
+  { code: "kg", name: "Kilogram (kg)" },
+  { code: "g", name: "Gram (g)" },
+  { code: "l", name: "Liter (l)" },
+  { code: "ml", name: "Milliliter (ml)" },
+  { code: "pieces", name: "Pieces" },
+  { code: "dozen", name: "Dozen" },
 ]
 
 export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
+  const blankInventory: InventoryItem = {
+    createdAt: '',
+    id: '',
+    name: '',
+    purchasePrice: 0,
+    purchaseQuantity: 0,
+    purchaseUnit: { code: '', name: '' },
+    remark: '',
+    updatedAt: '',
+    yieldPercentage: 0,
+  }
   const [formData, setFormData] = useState({
     name: recipe?.name || "",
-    ingredients: recipe?.ingredients || [{ inventoryId: "", inventoryName: "", quantity: 0, unit: "" }],
+    ingredients: recipe?.ingredients?.map(ing => ({
+      inventory: ing.inventory,
+      quantity: ing.quantity,
+      unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
+    })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } }],
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  // Add state for inventory search results and loading
+  const [inventoryOptions, setInventoryOptions] = useState<InventoryItem[]>([])
+  const [inventoryLoading, setInventoryLoading] = useState(false)
+  const [inventorySearch, setInventorySearch] = useState<string>("")
+
+  // Handler to search inventory
+  const handleInventorySearch = async (search: string) => {
+    setInventorySearch(search)
+    setInventoryLoading(true)
+    try {
+      const items = await fetchInventories({ fields: "name", search })
+      setInventoryOptions(items)
+    } catch (e) {
+      setInventoryOptions([])
+    } finally {
+      setInventoryLoading(false)
+    }
+  }
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -67,7 +82,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     }
 
     formData.ingredients.forEach((ingredient, index) => {
-      if (!ingredient.inventoryId) {
+      if (!ingredient.inventory) {
         newErrors[`ingredient_${index}_inventory`] = "Please select an inventory item"
       }
       if (ingredient.quantity <= 0) {
@@ -92,14 +107,21 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    onSave(formData)
+    onSave({
+      name: formData.name,
+      ingredients: formData.ingredients.map(ing => ({
+        inventoryID: ing.inventory?.id || "",
+        quantity: ing.quantity,
+        unit: { code: ing.unit.code || "" }
+      }))
+    })
     setIsLoading(false)
-  }
+  } 
 
   const addIngredient = () => {
     setFormData((prev) => ({
       ...prev,
-      ingredients: [...prev.ingredients, { inventoryId: "", inventoryName: "", quantity: 0, unit: "" }],
+      ingredients: [...prev.ingredients, { inventory: blankInventory, quantity: 0, unit: { code: '' } }],
     }))
   }
 
@@ -115,14 +137,15 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       ...prev,
       ingredients: prev.ingredients.map((ingredient, i) => {
         if (i === index) {
-          if (field === "inventoryId") {
-            const selectedInventory = mockInventory.find((item) => item.id === value)
+          if (field === "inventory") {
+            const selectedInventory = inventoryOptions.find((item) => item.id === value)
             return {
               ...ingredient,
-              inventoryId: value,
-              inventoryName: selectedInventory?.name || "",
-              unit: selectedInventory?.unit || ingredient.unit,
+              inventory: selectedInventory || blankInventory,
             }
+          }
+          if (field === "unit") {
+            return { ...ingredient, unit: { code: value } }
           }
           return { ...ingredient, [field]: value }
         }
@@ -131,7 +154,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     }))
 
     // Clear related errors
-    const errorKey = `ingredient_${index}_${field === "inventoryId" ? "inventory" : field}`
+    const errorKey = `ingredient_${index}_${field}`
     if (errors[errorKey]) {
       setErrors((prev) => ({ ...prev, [errorKey]: "" }))
     }
@@ -181,27 +204,41 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="space-y-2">
                         <Label>Inventory Item *</Label>
-                        <Select
-                          value={ingredient.inventoryId}
-                          onValueChange={(value) => updateIngredient(index, "inventoryId", value)}
-                        >
-                          <SelectTrigger
-                            className={
-                              errors[`ingredient_${index}_inventory`]
-                                ? "border-red-500"
-                                : "border-yellow-200 focus:border-yellow-500"
-                            }
-                          >
-                            <SelectValue placeholder="Select item" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mockInventory.map((item) => (
-                              <SelectItem key={item.id} value={item.id}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          placeholder="Search inventory..."
+                          value={ingredient.inventory?.name || ""}
+                          onChange={async (e) => {
+                            const value = e.target.value
+                            updateIngredient(index, "inventoryName", value)
+                            await handleInventorySearch(value)
+                          }}
+                          className={
+                            errors[`ingredient_${index}_inventory`]
+                              ? "border-red-500"
+                              : "border-yellow-200 focus:border-yellow-500"
+                          }
+                        />
+                        <div className="relative">
+                          {inventoryLoading && <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>}
+                          {!inventoryLoading && inventoryOptions.length > 0 && (
+                            <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
+                              {inventoryOptions.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="px-3 py-2 hover:bg-yellow-50 cursor-pointer text-sm"
+                                  onClick={() => {
+                                    updateIngredient(index, "inventory", item.id)
+                                    updateIngredient(index, "inventoryName", item.name)
+                                    updateIngredient(index, "unit", item.purchaseUnit?.code || "")
+                                    setInventoryOptions([])
+                                  }}
+                                >
+                                  {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                         {errors[`ingredient_${index}_inventory`] && (
                           <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
                         )}
@@ -230,7 +267,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                       <div className="space-y-2">
                         <Label>Unit *</Label>
                         <Select
-                          value={ingredient.unit}
+                          value={ingredient.unit.code}
                           onValueChange={(value) => updateIngredient(index, "unit", value)}
                         >
                           <SelectTrigger
@@ -244,8 +281,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {units.map((unit) => (
-                              <SelectItem key={unit.value} value={unit.value}>
-                                {unit.label}
+                              <SelectItem key={unit.code} value={unit.code}>
+                                {unit.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,84 +9,79 @@ import { Plus, Search, Edit, Trash2, Eye, ChefHat } from "lucide-react"
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
-
-interface Recipe {
-  id: string
-  name: string
-  ingredients: Array<{
-    inventoryId: string
-    inventoryName: string
-    quantity: number
-    unit: string
-  }>
-  createdAt: string
-  updatedAt: string
-}
-
-const mockRecipes: Recipe[] = [
-  {
-    id: "1",
-    name: "Classic Marshmallow",
-    ingredients: [
-      { inventoryId: "1", inventoryName: "Premium Flour", quantity: 2, unit: "kg" },
-      { inventoryId: "2", inventoryName: "Organic Sugar", quantity: 1.5, unit: "kg" },
-      { inventoryId: "3", inventoryName: "Vanilla Extract", quantity: 0.1, unit: "l" },
-    ],
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "2",
-    name: "Chocolate Delight",
-    ingredients: [
-      { inventoryId: "1", inventoryName: "Premium Flour", quantity: 1.8, unit: "kg" },
-      { inventoryId: "2", inventoryName: "Organic Sugar", quantity: 1.2, unit: "kg" },
-    ],
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-18",
-  },
-]
+import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload } from "@/lib/recipe-api"
+import { formatDate } from "@/lib/utils"
 
 export default function RecipesPage() {
-  const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes)
+  const [recipes, setRecipes] = useState<Recipe[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
   const [deletingRecipe, setDeletingRecipe] = useState<Recipe | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    fetchRecipes()
+      .then(setRecipes)
+      .catch((e) => console.error(e))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filteredRecipes = recipes.filter((recipe) => recipe.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleSave = (data: Omit<Recipe, "id" | "createdAt" | "updatedAt">) => {
-    if (editingRecipe) {
-      setRecipes((prev) =>
-        prev.map((recipe) =>
-          recipe.id === editingRecipe.id
-            ? { ...recipe, ...data, updatedAt: new Date().toISOString().split("T")[0] }
-            : recipe,
-        ),
-      )
-    } else {
-      const newRecipe: Recipe = {
-        ...data,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
+  const handleSave = async (data: RecipePayload) => {
+    setLoading(true)
+    try {
+      if (editingRecipe) {
+        await updateRecipe(editingRecipe.id!, data)
+      } else {
+        await createRecipe(data)
       }
-      setRecipes((prev) => [...prev, newRecipe])
+      // Always refresh the recipes list after create/update
+      const newRecipes = await fetchRecipes()
+      setRecipes(newRecipes)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setShowForm(false)
+      setEditingRecipe(null)
+      setLoading(false)
     }
-    setShowForm(false)
-    setEditingRecipe(null)
   }
 
-  const handleDelete = (recipe: Recipe) => {
-    setRecipes((prev) => prev.filter((r) => r.id !== recipe.id))
-    setDeletingRecipe(null)
+  const handleDelete = async (recipe: Recipe) => {
+    setLoading(true)
+    try {
+      await deleteRecipe(recipe.id)
+      setRecipes((prev) => prev.filter((r) => r.id !== recipe.id))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDeletingRecipe(null)
+      setLoading(false)
+    }
   }
 
   const handleEdit = (recipe: Recipe) => {
     setEditingRecipe(recipe)
     setShowForm(true)
+  }
+
+  const handleShowDetails = async (id: string) => {
+    setDetailLoading(true)
+    setShowDetails(id)
+    try {
+      const recipe = await fetchRecipeById(id)
+      setDetailRecipe(recipe)
+    } catch (e) {
+      setDetailRecipe(null)
+    } finally {
+      setDetailLoading(false)
+    }
   }
 
   return (
@@ -133,27 +128,13 @@ export default function RecipesPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-700">Ingredients:</p>
-                    <div className="space-y-1">
-                      {recipe.ingredients.slice(0, 3).map((ingredient, index) => (
-                        <p key={index} className="text-sm text-gray-600">
-                          • {ingredient.inventoryName} ({ingredient.quantity} {ingredient.unit})
-                        </p>
-                      ))}
-                      {recipe.ingredients.length > 3 && (
-                        <p className="text-sm text-gray-500">+{recipe.ingredients.length - 3} more...</p>
-                      )}
-                    </div>
-                  </div>
-
                   <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="text-xs text-gray-500">Updated: {recipe.updatedAt}</span>
+                    <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
                     <div className="flex items-center space-x-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setShowDetails(recipe.id)}
+                        onClick={() => handleShowDetails(recipe.id)}
                         className="hover:bg-yellow-50"
                       >
                         <Eye className="h-4 w-4" />
@@ -203,12 +184,32 @@ export default function RecipesPage() {
       )}
 
       {showDetails && (
-        <RecipeDetails
-          recipe={recipes.find((r) => r.id === showDetails)!}
-          onClose={() => setShowDetails(null)}
-          onEdit={(recipe) => {
-            setShowDetails(null)
-            handleEdit(recipe)
+        detailLoading ? (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-8 rounded shadow text-gray-700">Loading...</div>
+          </div>
+        ) : detailRecipe && !editingRecipe && (
+          <RecipeDetails
+            recipe={detailRecipe}
+            onClose={() => {
+              setShowDetails(null)
+              setDetailRecipe(null)
+            }}
+            onEdit={(recipe) => {
+              setEditingRecipe(recipe)
+              setShowDetails(null)
+              setDetailRecipe(null)
+            }}
+          />
+        )
+      )}
+
+      {editingRecipe && (
+        <RecipeForm
+          recipe={editingRecipe}
+          onSave={handleSave}
+          onCancel={() => {
+            setEditingRecipe(null)
           }}
         />
       )}

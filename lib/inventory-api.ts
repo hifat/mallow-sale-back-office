@@ -17,11 +17,17 @@ export interface InventoryItem {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchInventories(): Promise<InventoryItem[]> {
-  const res = await fetch(`${API_BASE}/inventories`)
+export async function fetchInventories(params?: { fields?: string; search?: string }) {
+  let url = `${API_BASE}/inventories`;
+  if (params && (params.fields || params.search)) {
+    const searchParams = new URLSearchParams();
+    if (params.fields) searchParams.set("fields", params.fields);
+    if (params.search) searchParams.set("search", params.search);
+    url += `?${searchParams.toString()}`;
+  }
+  const res = await fetch(url)
   if (!res.ok) throw new Error("Failed to fetch inventories")
   const data = await res.json()
-  // The swagger spec returns { items: [...] }
   return data.items || []
 }
 
