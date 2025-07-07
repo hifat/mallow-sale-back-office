@@ -16,6 +16,7 @@ import {
   deleteInventory,
   InventoryItem,
 } from "@/lib/inventory-api"
+import { formatDate } from "@/lib/utils"
 
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([])
@@ -131,9 +132,19 @@ export default function InventoryPage() {
                     </td>
                     <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
                     <td className="py-3 px-4 text-gray-900">{item.purchaseQuantity}</td>
-                    <td className="py-3 px-4">{item.purchaseUnit?.name || '-'}</td>
+                    <td className="py-3 px-4">
+                      {item.purchaseUnit?.name ? (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          {item.purchaseUnit.name}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-500">
+                          -
+                        </Badge>
+                      )}
+                    </td>
                     <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
-                    <td className="py-3 px-4 text-gray-600">{item.updatedAt}</td>
+                    <td className="py-3 px-4 text-gray-600">{formatDate(item.updatedAt)}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Button

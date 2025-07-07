@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, DollarSign, Package, Percent } from "lucide-react"
+import { formatDate } from "@/lib/utils"
 
 interface UsageUnit {
   code: string
@@ -92,7 +93,7 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
                 <Calendar className="h-5 w-5 text-gray-600" />
                 <div>
                   <p className="text-sm text-gray-600">Last Updated</p>
-                  <p className="text-lg font-semibold text-gray-900">{item.updatedAt}</p>
+                  <p className="text-lg font-semibold text-gray-900">{formatDate(item.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -118,7 +119,7 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
 
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Created: {item.createdAt}</span>
+              <span>Created: {formatDate(item.createdAt)}</span>
               <span>ID: {item.id}</span>
             </div>
           </div>
