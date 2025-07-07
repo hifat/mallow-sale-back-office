@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,87 +9,68 @@ import { Plus, Search, Edit, Trash2, Eye } from "lucide-react"
 import { InventoryForm } from "@/components/inventory-form"
 import { InventoryDetails } from "@/components/inventory-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
-
-interface InventoryItem {
-  id: string
-  name: string
-  purchasePrice: number
-  purchaseQuantity: number
-  purchaseUnit: string
-  yieldPercentage: number
-  remark?: string
-  createdAt: string
-  updatedAt: string
-}
-
-const mockInventory: InventoryItem[] = [
-  {
-    id: "1",
-    name: "Premium Flour",
-    purchasePrice: 25.5,
-    purchaseQuantity: 50,
-    purchaseUnit: "kg",
-    yieldPercentage: 95,
-    remark: "High quality wheat flour",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "2",
-    name: "Organic Sugar",
-    purchasePrice: 45.0,
-    purchaseQuantity: 25,
-    purchaseUnit: "kg",
-    yieldPercentage: 100,
-    remark: "Certified organic",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-18",
-  },
-  {
-    id: "3",
-    name: "Vanilla Extract",
-    purchasePrice: 120.0,
-    purchaseQuantity: 2,
-    purchaseUnit: "l",
-    yieldPercentage: 98,
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-19",
-  },
-]
+import {
+  fetchInventories,
+  createInventory,
+  updateInventory,
+  deleteInventory,
+  InventoryItem,
+} from "@/lib/inventory-api"
 
 export default function InventoryPage() {
-  const [inventory, setInventory] = useState<InventoryItem[]>(mockInventory)
+  const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [deletingItem, setDeletingItem] = useState<InventoryItem | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    fetchInventories()
+      .then(setInventory)
+      .catch((e) => console.error(e))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filteredInventory = inventory.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleSave = (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => {
-    if (editingItem) {
-      setInventory((prev) =>
-        prev.map((item) =>
-          item.id === editingItem.id ? { ...item, ...data, updatedAt: new Date().toISOString().split("T")[0] } : item,
-        ),
-      )
-    } else {
-      const newItem: InventoryItem = {
-        ...data,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
+  const handleSave = async (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => {
+    setLoading(true)
+    try {
+      if (editingItem) {
+        const updated = await updateInventory(editingItem.id, data)
+        setInventory((prev) =>
+          prev.map((item) =>
+            item.id === editingItem.id ? { ...item, ...data, updatedAt: new Date().toISOString().split("T")[0] } : item,
+          ),
+        )
+      } else {
+        const created = await createInventory(data)
+        // The API may return the new item in different structure; adjust as needed
+        setInventory((prev) => [...prev, created.item || created])
       }
-      setInventory((prev) => [...prev, newItem])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setShowForm(false)
+      setEditingItem(null)
+      setLoading(false)
     }
-    setShowForm(false)
-    setEditingItem(null)
   }
 
-  const handleDelete = (item: InventoryItem) => {
-    setInventory((prev) => prev.filter((i) => i.id !== item.id))
-    setDeletingItem(null)
+  const handleDelete = async (item: InventoryItem) => {
+    setLoading(true)
+    try {
+      await deleteInventory(item.id)
+      setInventory((prev) => prev.filter((i) => i.id !== item.id))
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDeletingItem(null)
+      setLoading(false)
+    }
   }
 
   const handleEdit = (item: InventoryItem) => {
@@ -148,13 +129,9 @@ export default function InventoryPage() {
                         {item.remark && <p className="text-sm text-gray-600">{item.remark}</p>}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-gray-900">${item.purchasePrice.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
                     <td className="py-3 px-4 text-gray-900">{item.purchaseQuantity}</td>
-                    <td className="py-3 px-4">
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        {item.purchaseUnit}
-                      </Badge>
-                    </td>
+                    <td className="py-3 px-4">{item.purchaseUnit?.name || '-'}</td>
                     <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
                     <td className="py-3 px-4 text-gray-600">{item.updatedAt}</td>
                     <td className="py-3 px-4">
@@ -195,8 +172,8 @@ export default function InventoryPage() {
 
       {showForm && (
         <InventoryForm
-          item={editingItem}
-          onSave={handleSave}
+          item={editingItem || undefined}
+          onSave={handleSave as any}
           onCancel={() => {
             setShowForm(false)
             setEditingItem(null)
@@ -210,7 +187,7 @@ export default function InventoryPage() {
           onClose={() => setShowDetails(null)}
           onEdit={(item) => {
             setShowDetails(null)
-            handleEdit(item)
+            handleEdit(item as any)
           }}
         />
       )}

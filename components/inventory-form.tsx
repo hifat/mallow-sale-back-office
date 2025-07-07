@@ -11,12 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X } from "lucide-react"
 
+interface UsageUnit {
+  code: string
+  name: string
+}
+
 interface InventoryItem {
   id: string
   name: string
   purchasePrice: number
   purchaseQuantity: number
-  purchaseUnit: string
+  purchaseUnit: UsageUnit
   yieldPercentage: number
   remark?: string
   createdAt: string
@@ -29,15 +34,15 @@ interface InventoryFormProps {
   onCancel: () => void
 }
 
-const units = [
-  { value: "kg", label: "Kilogram (kg)" },
-  { value: "g", label: "Gram (g)" },
-  { value: "l", label: "Liter (l)" },
-  { value: "ml", label: "Milliliter (ml)" },
-  { value: "pieces", label: "Pieces" },
-  { value: "dozen", label: "Dozen" },
-  { value: "box", label: "Box" },
-  { value: "bag", label: "Bag" },
+const units: UsageUnit[] = [
+  { code: "kg", name: "Kilogram (kg)" },
+  { code: "g", name: "Gram (g)" },
+  { code: "l", name: "Liter (l)" },
+  { code: "ml", name: "Milliliter (ml)" },
+  { code: "pieces", name: "Pieces" },
+  { code: "dozen", name: "Dozen" },
+  { code: "box", name: "Box" },
+  { code: "bag", name: "Bag" },
 ]
 
 export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
@@ -45,7 +50,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
     name: item?.name || "",
     purchasePrice: item?.purchasePrice || 0,
     purchaseQuantity: item?.purchaseQuantity || 0,
-    purchaseUnit: item?.purchaseUnit || "",
+    purchaseUnit: item?.purchaseUnit?.code || "",
     yieldPercentage: item?.yieldPercentage || 0,
     remark: item?.remark || "",
   })
@@ -82,10 +87,12 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
 
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    onSave(formData)
+    // Find the selected unit object
+    const selectedUnit = units.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
+    onSave({
+      ...formData,
+      purchaseUnit: selectedUnit,
+    })
     setIsLoading(false)
   }
 
@@ -159,8 +166,8 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {units.map((unit) => (
-                      <SelectItem key={unit.value} value={unit.value}>
-                        {unit.label}
+                      <SelectItem key={unit.code} value={unit.code}>
+                        {unit.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

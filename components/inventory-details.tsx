@@ -5,12 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, DollarSign, Package, Percent } from "lucide-react"
 
+interface UsageUnit {
+  code: string
+  name: string
+}
+
 interface InventoryItem {
   id: string
   name: string
   purchasePrice: number
   purchaseQuantity: number
-  purchaseUnit: string
+  purchaseUnit: UsageUnit
   yieldPercentage: number
   remark?: string
   createdAt: string
@@ -67,7 +72,7 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
                   <p className="text-lg font-semibold text-gray-900">
                     {item.purchaseQuantity}
                     <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">
-                      {item.purchaseUnit}
+                      {item.purchaseUnit?.name || item.purchaseUnit?.code}
                     </Badge>
                   </p>
                 </div>
@@ -99,13 +104,13 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Effective Quantity</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {((item.purchaseQuantity * item.yieldPercentage) / 100).toFixed(2)} {item.purchaseUnit}
+                  {((item.purchaseQuantity * item.yieldPercentage) / 100).toFixed(2)} {item.purchaseUnit?.name || item.purchaseUnit?.code}
                 </p>
               </div>
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Cost per Unit</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  ${(item.purchasePrice / item.purchaseQuantity).toFixed(2)} per {item.purchaseUnit}
+                  ${(item.purchasePrice / item.purchaseQuantity).toFixed(2)} per {item.purchaseUnit?.name || item.purchaseUnit?.code}
                 </p>
               </div>
             </div>
