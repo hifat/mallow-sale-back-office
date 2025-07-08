@@ -55,6 +55,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   const [inventoryLoading, setInventoryLoading] = useState(false)
   const [inventorySearch, setInventorySearch] = useState<string>("")
   const [activeIngredientIndex, setActiveIngredientIndex] = useState<number | null>(null)
+  const [searchText, setSearchText] = useState<string[]>([])
 
   // On mount or when editing a recipe, initialize ingredient inventory objects from recipe.ingredients directly
   useEffect(() => {
@@ -67,13 +68,15 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
           unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
         }))
       }))
+      setSearchText(recipe.ingredients.map((ing) => ing.inventory?.name || ""))
+    } else {
+      setSearchText([""])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipe])
 
   // Handler to search inventory
   const handleInventorySearch = async (search: string, index: number) => {
-    setInventorySearch(search)
     setActiveIngredientIndex(index)
     setInventoryLoading(true)
     try {
@@ -84,6 +87,15 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     } finally {
       setInventoryLoading(false)
     }
+  }
+
+  // Update searchText for a specific ingredient
+  const updateSearchText = (index: number, value: string) => {
+    setSearchText((prev) => {
+      const updated = [...prev]
+      updated[index] = value
+      return updated
+    })
   }
 
   const validate = () => {
@@ -139,6 +151,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       ...prev,
       ingredients: [...prev.ingredients, { inventory: blankInventory, quantity: 0, unit: { code: '' } }],
     }))
+    setSearchText((prev) => [...prev, ""])
   }
 
   const removeIngredient = (index: number) => {
@@ -146,6 +159,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       ...prev,
       ingredients: prev.ingredients.filter((_, i) => i !== index),
     }))
+    setSearchText((prev) => prev.filter((_, i) => i !== index))
   }
 
   const updateIngredient = (index: number, field: string, value: any) => {
@@ -155,6 +169,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
         if (i === index) {
           if (field === "inventory") {
             const selectedInventory = inventoryOptions.find((item) => item.id === value)
+            if (selectedInventory) {
+              updateSearchText(index, selectedInventory.name)
+            }
             return {
               ...ingredient,
               inventory: selectedInventory || blankInventory,
@@ -162,6 +179,10 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
           }
           if (field === "unit") {
             return { ...ingredient, unit: { code: value } }
+          }
+          if (field === "inventoryName") {
+            updateSearchText(index, value)
+            return ingredient
           }
           return { ...ingredient, [field]: value }
         }
@@ -222,7 +243,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                         <Label>Inventory Item *</Label>
                         <Input
                           placeholder="Search inventory..."
-                          value={ingredient.inventory?.name || ""}
+                          value={searchText[index] || ""}
                           onFocus={() => setActiveIngredientIndex(index)}
                           onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
                           onChange={async (e) => {
