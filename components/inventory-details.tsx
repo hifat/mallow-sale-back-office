@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, DollarSign, Package, Percent } from "lucide-react"
-import { formatDate } from "@/lib/utils"
+import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 
 interface UsageUnit {
   code: string
@@ -111,7 +111,13 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">Cost per Unit</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  ${(item.purchasePrice / item.purchaseQuantity).toFixed(2)} per {item.purchaseUnit?.name || item.purchaseUnit?.code}
+                  ${calculateCostPerUnit(item.purchasePrice, item.purchaseQuantity).toFixed(2)} per {item.purchaseUnit?.name || item.purchaseUnit?.code}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">Actual Price</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  ${calculateActualPrice(item.purchasePrice, item.yieldPercentage).toFixed(2)}
                 </p>
               </div>
             </div>

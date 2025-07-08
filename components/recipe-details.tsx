@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
+import { formatDate } from "@/lib/utils"
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -77,11 +78,11 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Created: {recipe.createdAt}</span>
+                  <span>Created: {formatDate(recipe.createdAt)}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Updated: {recipe.updatedAt}</span>
+                  <span>Updated: {formatDate(recipe.updatedAt)}</span>
                 </div>
               </div>
               <span>ID: {recipe.id}</span>

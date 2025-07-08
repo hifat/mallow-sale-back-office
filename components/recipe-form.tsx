@@ -61,7 +61,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     setInventorySearch(search)
     setInventoryLoading(true)
     try {
-      const items = await fetchInventories({ fields: "name", search })
+      const items = await fetchInventories({ fields: "name,ingredients", search })
       setInventoryOptions(items)
     } catch (e) {
       setInventoryOptions([])
