@@ -67,7 +67,14 @@ export default function RecipesPage() {
   }
 
   const handleEdit = (recipe: Recipe) => {
-    setEditingRecipe(recipe)
+    setLoading(true)
+    fetchRecipeById(recipe.id)
+      .then((fullRecipe) => setEditingRecipe(fullRecipe))
+      .catch((e) => {
+        setEditingRecipe(recipe)
+        console.error(e)
+      })
+      .finally(() => setLoading(false))
   }
 
   const handleShowDetails = async (id: string) => {

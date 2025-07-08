@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X, Plus, Trash2 } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { UsageUnit, Recipe, RecipePayload } from "@/lib/recipe-api"
-import { useEffect } from "react"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -55,10 +54,27 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   const [inventoryOptions, setInventoryOptions] = useState<InventoryItem[]>([])
   const [inventoryLoading, setInventoryLoading] = useState(false)
   const [inventorySearch, setInventorySearch] = useState<string>("")
+  const [activeIngredientIndex, setActiveIngredientIndex] = useState<number | null>(null)
+
+  // On mount or when editing a recipe, initialize ingredient inventory objects from recipe.ingredients directly
+  useEffect(() => {
+    if (recipe && recipe.ingredients) {
+      setFormData((prev) => ({
+        ...prev,
+        ingredients: recipe.ingredients.map((ing) => ({
+          inventory: ing.inventory || blankInventory,
+          quantity: ing.quantity,
+          unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
+        }))
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe])
 
   // Handler to search inventory
-  const handleInventorySearch = async (search: string) => {
+  const handleInventorySearch = async (search: string, index: number) => {
     setInventorySearch(search)
+    setActiveIngredientIndex(index)
     setInventoryLoading(true)
     try {
       const items = await fetchInventories({ fields: "name,ingredients", search })
@@ -207,10 +223,12 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                         <Input
                           placeholder="Search inventory..."
                           value={ingredient.inventory?.name || ""}
+                          onFocus={() => setActiveIngredientIndex(index)}
+                          onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
                           onChange={async (e) => {
                             const value = e.target.value
                             updateIngredient(index, "inventoryName", value)
-                            await handleInventorySearch(value)
+                            await handleInventorySearch(value, index)
                           }}
                           className={
                             errors[`ingredient_${index}_inventory`]
@@ -219,8 +237,10 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           }
                         />
                         <div className="relative">
-                          {inventoryLoading && <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>}
-                          {!inventoryLoading && inventoryOptions.length > 0 && (
+                          {inventoryLoading && activeIngredientIndex === index && (
+                            <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>
+                          )}
+                          {!inventoryLoading && activeIngredientIndex === index && inventoryOptions.length > 0 && (
                             <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
                               {inventoryOptions.map((item) => (
                                 <div
@@ -231,6 +251,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                                     updateIngredient(index, "inventoryName", item.name)
                                     updateIngredient(index, "unit", item.purchaseUnit?.code || "")
                                     setInventoryOptions([])
+                                    setActiveIngredientIndex(null)
                                   }}
                                 >
                                   {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
