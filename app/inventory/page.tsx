@@ -49,8 +49,9 @@ export default function InventoryPage() {
         )
       } else {
         const created = await createInventory(data)
-        // The API may return the new item in different structure; adjust as needed
-        setInventory((prev) => [...prev, created.item || created])
+        // Refetch the inventory list to ensure all data (including unit name) is up-to-date
+        const latestInventory = await fetchInventories()
+        setInventory(latestInventory)
       }
     } catch (e) {
       console.error(e)
@@ -79,6 +80,19 @@ export default function InventoryPage() {
     setShowForm(true)
   }
 
+  const handleOpenForm = async () => {
+    setLoading(true)
+    try {
+      const latestInventory = await fetchInventories()
+      setInventory(latestInventory)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+      setShowForm(true)
+    }
+  }
+
   return (
     <>
       <div className="space-y-6">
@@ -87,7 +101,7 @@ export default function InventoryPage() {
             <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
             <p className="text-gray-600 mt-2">Manage your inventory items and stock levels</p>
           </div>
-          <Button onClick={() => setShowForm(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+          <Button onClick={handleOpenForm} className="bg-yellow-500 hover:bg-yellow-600 text-white">
             <Plus className="h-4 w-4 mr-2" />
             Add Item
           </Button>
