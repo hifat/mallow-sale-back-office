@@ -83,11 +83,6 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                {recipe.ingredients.length} ingredients
-              </Badge>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -95,6 +90,9 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                 <Package className="h-5 w-5 mr-2" />
                 Ingredients
+                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                  {recipe.ingredients.length}
+                </Badge>
               </h3>
               <div className="text-right font-bold text-lg text-green-700">
                 Total Cost: ฿{new Recipe(recipe).totalCost().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
