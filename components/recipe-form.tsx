@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { X, Plus, Trash2 } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
-import { UsageUnit, Recipe, RecipePayload } from "@/lib/recipe-api"
+import { Recipe, RecipePayload } from "@/lib/recipe-api"
+import { UsageUnit } from "@/lib/inventory-api"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -46,6 +47,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       quantity: ing.quantity,
       unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
     })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } }],
+    costPercentage: recipe?.costPercentage ?? 0,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -104,6 +106,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     if (!formData.name.trim()) {
       newErrors.name = "Recipe name is required"
     }
+    if (isNaN(formData.costPercentage) || formData.costPercentage < 0 || formData.costPercentage > 100) {
+      newErrors.costPercentage = "Cost percentage must be a number between 0 and 100"
+    }
 
     if (formData.ingredients.length === 0) {
       newErrors.ingredients = "At least one ingredient is required"
@@ -141,7 +146,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
         inventoryID: ing.inventory?.id || "",
         quantity: ing.quantity,
         unit: { code: ing.unit.code || "" }
-      }))
+      })),
+      costPercentage: formData.costPercentage,
     })
     setIsLoading(false)
   } 
@@ -218,6 +224,22 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 placeholder="Enter recipe name"
               />
               {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
+              <Input
+                id="costPercentage"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                value={formData.costPercentage}
+                onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
+                className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter cost percentage"
+              />
+              {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
             </div>
 
             <div className="space-y-4">

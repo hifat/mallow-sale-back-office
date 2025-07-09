@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { X, Edit, Calendar, ChefHat, Package } from "lucide-react"
+import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
-import { formatDate, calculateCostPerUnit, calculateActualPrice } from "@/lib/utils"
+import { formatDate, calculateCostPerUnit, calculateActualPrice, calculateReasonablePriceForSale } from "@/lib/utils"
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -40,6 +40,49 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
         <CardContent className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{recipe.name}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
+              {typeof recipe.costPercentage === 'number' && (
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                  <Percent className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Cost Percentage</p>
+                    <p className="text-lg font-semibold text-gray-900">{recipe.costPercentage}%</p>
+                  </div>
+                </div>
+              )}
+              {/* (Total Cost card removed; will display near Ingredients) */}
+              {/* Reasonable Price for Sale Card */}
+              {(() => {
+                const totalCost = new Recipe(recipe).totalCost();
+                const reasonablePrice = calculateReasonablePriceForSale(totalCost, recipe.costPercentage);
+                if (reasonablePrice === null) return null;
+                return (
+                  <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-orange-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+              {/* Selling Price Card (mocked) */}
+              <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                <DollarSign className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="text-sm text-gray-600">Selling Price</p>
+                  <p className="text-lg font-semibold text-gray-900">฿120.00</p>
+                </div>
+              </div>
+              {/* Profit Card (mocked) */}
+              <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
+                <DollarSign className="h-5 w-5 text-pink-600" />
+                <div>
+                  <p className="text-sm text-gray-600">Profit</p>
+                  <p className="text-lg font-semibold text-gray-900">฿30.00</p>
+                </div>
+              </div>
+            </div>
             <div className="flex items-center space-x-2">
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                 {recipe.ingredients.length} ingredients
@@ -48,54 +91,48 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Package className="h-5 w-5 mr-2" />
-              Ingredients
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                Ingredients
+              </h3>
+              <div className="text-right font-bold text-lg text-green-700">
+                Total Cost: ฿{new Recipe(recipe).totalCost().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            </div>
             <div className="grid gap-3">
               {/* Calculate total cost */}
-              {(() => {
-                let totalCost = 0
+              {recipe.ingredients.map((ingredient, index) => {
+                let costPerUnit = 0
+                let costUsed = 0
+                if (ingredient.inventory && ingredient.inventory.purchasePrice && ingredient.inventory.purchaseQuantity && ingredient.inventory.yieldPercentage !== undefined) {
+                  const actualPrice = calculateActualPrice(ingredient.inventory.purchasePrice, ingredient.inventory.yieldPercentage)
+                  costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity)
+                  costUsed = costPerUnit * ingredient.quantity
+                }
                 return (
-                  <>
-                    {recipe.ingredients.map((ingredient, index) => {
-                      let costPerUnit = 0
-                      let costUsed = 0
-                      if (ingredient.inventory && ingredient.inventory.purchasePrice && ingredient.inventory.purchaseQuantity && ingredient.inventory.yieldPercentage !== undefined) {
-                        const actualPrice = calculateActualPrice(ingredient.inventory.purchasePrice, ingredient.inventory.yieldPercentage)
-                        costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity)
-                        costUsed = costPerUnit * ingredient.quantity
-                        totalCost += costUsed
-                      }
-                      return (
-                        <Card key={index} className="border-gray-200">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium text-gray-900">{ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}</p>
-                                {ingredient.inventory && (
-                                  <p className="text-sm text-gray-600">Cost per unit: ฿{costPerUnit.toFixed(2)}</p>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <p className="font-semibold text-gray-900">
-                                  {ingredient.quantity} {(typeof ingredient.unit === 'string' ? ingredient.unit : (ingredient.unit as { code: string }).code)}
-                                </p>
-                                {ingredient.inventory && (
-                                  <p className="text-sm text-gray-700">Cost used: ฿{costUsed.toFixed(2)}</p>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    })}
-                    <div className="flex justify-end mt-2">
-                      <div className="font-bold text-lg text-gray-900">Total Cost: ฿{totalCost.toFixed(2)}</div>
-                    </div>
-                  </>
+                  <Card key={index} className="border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">{ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}</p>
+                          {ingredient.inventory && (
+                            <p className="text-sm text-gray-600">Cost per unit: ฿{costPerUnit.toFixed(2)}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900">
+                            {ingredient.quantity} {(typeof ingredient.unit === 'string' ? ingredient.unit : (ingredient.unit as { code: string }).code)}
+                          </p>
+                          {ingredient.inventory && (
+                            <p className="text-sm text-gray-700">Cost used: ฿{costUsed.toFixed(2)}</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )
-              })()}
+              })}
             </div>
           </div>
 

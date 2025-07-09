@@ -1,7 +1,5 @@
-export interface UsageUnit {
-  code: string
-  name?: string // name is optional for payloads
-}
+import { UsageUnit } from "./inventory-api"
+import { calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 
 export interface InventoryItem {
   createdAt: string
@@ -21,12 +19,42 @@ export interface RecipeIngredient {
   unit: string
 }
 
-export interface Recipe {
+export class Recipe {
+  constructor(data: any) {
+    this.id = data.id
+    this.name = data.name
+    this.ingredients = data.ingredients
+    this.createdAt = data.createdAt
+    this.updatedAt = data.updatedAt
+    this.costPercentage = data.costPercentage
+  }
+
   id: string
   name: string
   ingredients: RecipeIngredient[]
   createdAt: string
   updatedAt: string
+  costPercentage?: number
+
+  totalCost(): number {
+    let total = 0
+    for (const ingredient of this.ingredients) {
+      if (
+        ingredient.inventory &&
+        ingredient.inventory.purchasePrice &&
+        ingredient.inventory.purchaseQuantity &&
+        ingredient.inventory.yieldPercentage !== undefined
+      ) {
+        const actualPrice = calculateActualPrice(
+          ingredient.inventory.purchasePrice,
+          ingredient.inventory.yieldPercentage
+        )
+        const costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity)
+        total += costPerUnit * ingredient.quantity
+      }
+    }
+    return total
+  }
 }
 
 export interface RecipeIngredientPayload {
@@ -38,6 +66,7 @@ export interface RecipeIngredientPayload {
 export interface RecipePayload {
   name: string
   ingredients: RecipeIngredientPayload[]
+  costPercentage?: number
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
