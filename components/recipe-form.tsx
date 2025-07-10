@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { X, Plus, Trash2 } from "lucide-react"
+import { X, Plus, Trash2, Tag } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
 import { UsageUnit } from "@/lib/inventory-api"
+import { calculateActualPrice, calculateCostPerUnit, calculateReasonablePriceForSale } from "@/lib/utils"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -83,7 +84,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     setActiveIngredientIndex(index)
     setInventoryLoading(true)
     try {
-      const items = await fetchInventories({ fields: "name,ingredients", search })
+      const items = await fetchInventories({ fields: "name,ingredients,purchase_price,yield_percentage,purchase_quantity", search })
       setInventoryOptions(items)
     } catch (e) {
       setInventoryOptions([])
@@ -231,35 +232,68 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
-              <Input
-                id="costPercentage"
-                type="number"
-                min={0}
-                max={100}
-                step={0.01}
-                value={formData.costPercentage}
-                onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
-                className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                placeholder="Enter cost percentage"
-              />
-              {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
+            <div className="flex flex-col md:flex-row md:space-x-4">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
+                <Input
+                  id="costPercentage"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.01}
+                  value={formData.costPercentage}
+                  onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
+                  className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                  placeholder="Enter cost percentage"
+                />
+                {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
+              </div>
+              <div className="flex-1 space-y-2 mt-2 md:mt-0">
+                <Label htmlFor="price">Selling Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formData.price}
+                  onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                  className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                  placeholder="Enter selling price"
+                />
+                {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Selling Price</Label>
-              <Input
-                id="price"
-                type="number"
-                min={0}
-                step={0.01}
-                value={formData.price}
-                onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
-                className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                placeholder="Enter selling price"
-              />
-              {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
-            </div>
+
+            {/* Reasonable Price for Sale Preview */}
+            {(() => {
+              let totalCost = 0;
+              for (const ingredient of formData.ingredients) {
+                if (
+                  ingredient.inventory &&
+                  ingredient.inventory.purchasePrice &&
+                  ingredient.inventory.purchaseQuantity &&
+                  ingredient.inventory.yieldPercentage !== undefined
+                ) {
+                  const actualPrice = calculateActualPrice(
+                    ingredient.inventory.purchasePrice,
+                    ingredient.inventory.yieldPercentage
+                  );
+                  const costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity);
+                  totalCost += costPerUnit * ingredient.quantity;
+                }
+              }
+              let reasonablePrice = calculateReasonablePriceForSale(totalCost, formData.costPercentage);
+              if (!reasonablePrice || isNaN(reasonablePrice) || reasonablePrice === Infinity) reasonablePrice = 0;
+              return (
+                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg mb-2 mt-2">
+                  <Tag className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
