@@ -13,6 +13,7 @@ import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
 import { UsageUnit } from "@/lib/inventory-api"
 import { calculateActualPrice, calculateCostPerUnit, calculateReasonablePriceForSale } from "@/lib/utils"
+import { fetchSettings } from "@/lib/setting-api"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -74,9 +75,14 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       }))
       setSearchText(recipe.ingredients.map((ing) => ing.inventory?.name || ""))
     } else {
+      // On create, fetch default costPercentage from settings
+      fetchSettings()
+        .then((settings) => {
+          setFormData((prev) => ({ ...prev, costPercentage: settings.costPercentage ?? 0 }))
+        })
+        .catch(() => {})
       setSearchText([""])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipe])
 
   // Handler to search inventory
@@ -360,41 +366,25 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
                         )}
                       </div>
-
                       <div className="space-y-2">
                         <Label>Quantity *</Label>
                         <Input
                           type="number"
-                          step="0.01"
-                          min="0"
+                          min={0}
+                          step={0.01}
                           value={ingredient.quantity}
-                          onChange={(e) => updateIngredient(index, "quantity", Number.parseFloat(e.target.value) || 0)}
-                          className={
-                            errors[`ingredient_${index}_quantity`]
-                              ? "border-red-500"
-                              : "border-yellow-200 focus:border-yellow-500"
-                          }
-                          placeholder="0"
+                          onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
+                          className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                         />
                         {errors[`ingredient_${index}_quantity`] && (
                           <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
                         )}
                       </div>
-
                       <div className="space-y-2">
                         <Label>Unit *</Label>
-                        <Select
-                          value={ingredient.unit.code}
-                          onValueChange={(value) => updateIngredient(index, "unit", value)}
-                        >
-                          <SelectTrigger
-                            className={
-                              errors[`ingredient_${index}_unit`]
-                                ? "border-red-500"
-                                : "border-yellow-200 focus:border-yellow-500"
-                            }
-                          >
-                            <SelectValue placeholder="Select unit" />
+                        <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
+                          <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
+                            <SelectValue placeholder="Select a unit" />
                           </SelectTrigger>
                           <SelectContent>
                             {units.map((unit) => (
@@ -408,15 +398,13 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
                         )}
                       </div>
-
-                      <div className="flex items-end">
+                      <div className="flex items-center space-x-2">
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => removeIngredient(index)}
-                          className="hover:bg-red-50 hover:text-red-600"
-                          disabled={formData.ingredients.length === 1}
+                          className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -425,15 +413,13 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                   </CardContent>
                 </Card>
               ))}
-
-              {errors.ingredients && <p className="text-sm text-red-600">{errors.ingredients}</p>}
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save Recipe"}
               </Button>
             </div>
