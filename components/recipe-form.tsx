@@ -90,7 +90,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     setActiveIngredientIndex(index)
     setInventoryLoading(true)
     try {
-      const items = await fetchInventories({ fields: "name,ingredients,purchase_price,yield_percentage,purchase_quantity", search })
+      const items = await fetchInventories({ fields: "name,ingredients,purchase_price,yield_percentage,purchase_quantity,purchase_unit", search })
       setInventoryOptions(items)
     } catch (e) {
       setInventoryOptions([])
@@ -189,6 +189,12 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
             const selectedInventory = inventoryOptions.find((item) => item.id === value)
             if (selectedInventory) {
               updateSearchText(index, selectedInventory.name)
+              // Set unit to purchaseUnit.code from API response if present
+              return {
+                ...ingredient,
+                inventory: selectedInventory,
+                unit: { code: selectedInventory.purchaseUnit?.code || "" },
+              }
             }
             return {
               ...ingredient,
