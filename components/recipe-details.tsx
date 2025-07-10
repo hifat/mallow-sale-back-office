@@ -66,22 +66,32 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   </div>
                 );
               })()}
-              {/* Selling Price Card (mocked) */}
-              <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Selling Price</p>
-                  <p className="text-lg font-semibold text-gray-900">฿120.00</p>
+              {/* Selling Price Card */}
+              {typeof recipe.price === 'number' && recipe.price > 0 && (
+                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Selling Price</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{recipe.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
                 </div>
-              </div>
-              {/* Profit Card (mocked) */}
-              <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-pink-600" />
-                <div>
-                  <p className="text-sm text-gray-600">Profit</p>
-                  <p className="text-lg font-semibold text-gray-900">฿30.00</p>
-                </div>
-              </div>
+              )}
+              {/* Profit Card */}
+              {typeof recipe.price === 'number' && recipe.price > 0 && (
+                (() => {
+                  const totalCost = new Recipe(recipe).totalCost();
+                  const profit = recipe.price - totalCost;
+                  return (
+                    <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-pink-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Profit</p>
+                        <p className="text-lg font-semibold text-gray-900">฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
             </div>
           </div>
 

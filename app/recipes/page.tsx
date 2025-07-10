@@ -125,10 +125,17 @@ export default function RecipesPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredRecipes.map((recipe) => (
-                <Card key={recipe.id} className="border-gray-200 hover:shadow-md transition-shadow">
+                <Card key={recipe.id} className="border-gray-200 hover:shadow-md transition-shadow relative">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-gray-900">{recipe.name}</CardTitle>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg text-gray-900">{recipe.name}</CardTitle>
+                      {typeof recipe.price === 'number' && recipe.price > 0 && (
+                        <span className="text-2xl font-extrabold text-purple-700 ml-2 mt-1">
+                          ฿{recipe.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-2">
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                         {recipe.ingredients.length} ingredients
                       </Badge>

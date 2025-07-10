@@ -48,6 +48,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
     })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } }],
     costPercentage: recipe?.costPercentage ?? 0,
+    price: recipe?.price ?? 0,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -109,6 +110,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     if (isNaN(formData.costPercentage) || formData.costPercentage < 0 || formData.costPercentage > 100) {
       newErrors.costPercentage = "Cost percentage must be a number between 0 and 100"
     }
+    if (isNaN(formData.price) || formData.price < 0) {
+      newErrors.price = "Price must be a number greater than or equal to 0"
+    }
 
     if (formData.ingredients.length === 0) {
       newErrors.ingredients = "At least one ingredient is required"
@@ -148,6 +152,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
         unit: { code: ing.unit.code || "" }
       })),
       costPercentage: formData.costPercentage,
+      price: formData.price,
     })
     setIsLoading(false)
   } 
@@ -240,6 +245,20 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 placeholder="Enter cost percentage"
               />
               {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Selling Price</Label>
+              <Input
+                id="price"
+                type="number"
+                min={0}
+                step={0.01}
+                value={formData.price}
+                onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter selling price"
+              />
+              {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
             </div>
 
             <div className="space-y-4">
