@@ -129,11 +129,11 @@ export default function InventoryPage() {
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Yield %</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Actual Price</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Cost/Unit</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Quantity</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Unit</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Yield %</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Updated</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
                   </tr>
@@ -148,6 +148,7 @@ export default function InventoryPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
+                      <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
                       <td className="py-3 px-4 text-gray-900">฿{calculateActualPrice(item.purchasePrice, item.yieldPercentage).toFixed(2)}</td>
                       <td className="py-3 px-4 text-gray-900">฿{calculateCostPerUnit(item.purchasePrice, item.purchaseQuantity).toFixed(2)}</td>
                       <td className="py-3 px-4 text-gray-900">{item.purchaseQuantity}</td>
@@ -162,7 +163,6 @@ export default function InventoryPage() {
                           </Badge>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
                       <td className="py-3 px-4 text-gray-600">{formatDate(item.updatedAt)}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-2">
