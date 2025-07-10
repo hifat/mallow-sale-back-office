@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign } from "lucide-react"
+import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
 import { formatDate, calculateCostPerUnit, calculateActualPrice, calculateReasonablePriceForSale } from "@/lib/utils"
 
@@ -58,7 +58,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                 if (reasonablePrice === null) return null;
                 return (
                   <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-orange-600" />
+                    <Tag className="h-5 w-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
                       <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
@@ -76,7 +76,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               </div>
               {/* Profit Card (mocked) */}
               <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
-                <DollarSign className="h-5 w-5 text-pink-600" />
+                <TrendingUp className="h-5 w-5 text-pink-600" />
                 <div>
                   <p className="text-sm text-gray-600">Profit</p>
                   <p className="text-lg font-semibold text-gray-900">฿30.00</p>
