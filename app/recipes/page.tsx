@@ -11,6 +11,8 @@ import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload } from "@/lib/recipe-api"
 import { formatDate } from "@/lib/utils"
+import { ProductCard, ProductCardActions } from "@/components/product-card";
+import { IngredientCard } from "@/components/ingredient-card";
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -125,57 +127,49 @@ export default function RecipesPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredRecipes.map((recipe) => (
-                <Card key={recipe.id} className="border-gray-200 hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <CardTitle
-                      className="text-lg text-gray-900 truncate max-w-[12rem] md:max-w-[16rem] lg:max-w-[24rem]"
-                      title={recipe.name}
-                    >
-                      {recipe.name}
-                    </CardTitle>
-                    <div className="flex items-center justify-between mt-2">
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        {recipe.ingredients.length} ingredients
-                      </Badge>
-                      {typeof recipe.price === 'number' && recipe.price > 0 && (
-                        <span className="text-2xl font-extrabold text-purple-700 ml-2">
-                          ฿{recipe.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleShowDetails(recipe.id)}
-                          className="hover:bg-yellow-50"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(recipe)}
-                          className="hover:bg-yellow-50"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingRecipe(recipe)}
-                          className="hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ProductCard
+                  key={recipe.id}
+                  title={recipe.name}
+                  badge={
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                      {recipe.ingredients.length} ingredients
+                    </Badge>
+                  }
+                  price={typeof recipe.price === 'number' ? recipe.price : 0}
+                  actions={
+                    <ProductCardActions>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShowDetails(recipe.id)}
+                        className="hover:bg-yellow-50"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(recipe)}
+                        className="hover:bg-yellow-50"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingRecipe(recipe)}
+                        className="hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </ProductCardActions>
+                  }
+                  className=""
+                >
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
+                  </div>
+                </ProductCard>
               ))}
             </div>
 

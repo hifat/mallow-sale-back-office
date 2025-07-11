@@ -17,6 +17,7 @@ import {
   InventoryItem,
 } from "@/lib/inventory-api"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
+import { ListCardTable } from "@/components/list-card-table";
 
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([])
@@ -107,22 +108,20 @@ export default function InventoryPage() {
           </Button>
         </div>
 
-        <Card className="border-yellow-200">
-          <CardHeader>
-            <CardTitle className="text-gray-900">Inventory Items</CardTitle>
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search inventory..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-yellow-200 focus:border-yellow-500"
-                />
-              </div>
+        <ListCardTable
+          title="Inventory Items"
+          search={
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search inventory..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-yellow-200 focus:border-yellow-500"
+              />
             </div>
-          </CardHeader>
-          <CardContent>
+          }
+          table={
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -197,8 +196,8 @@ export default function InventoryPage() {
                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
+          }
+        />
       </div>
 
       {showForm && (

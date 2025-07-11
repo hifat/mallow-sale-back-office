@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Edit, Trash2, Scale } from "lucide-react"
 import { UsageUnitForm } from "@/components/usage-unit-form"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { ProductCard, ProductCardActions } from "@/components/product-card";
 
 interface UsageUnit {
   id: string
@@ -138,35 +139,34 @@ export default function UsageUnitsPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredUnits.map((unit) => (
-              <Card key={unit.id} className="border-gray-200 hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 mb-2">
-                        {unit.code}
-                      </Badge>
-                      <h3 className="font-semibold text-gray-900">{unit.name}</h3>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(unit)} className="hover:bg-yellow-50">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingUnit(unit)}
-                        className="hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {unit.description && <p className="text-sm text-gray-600 mb-3">{unit.description}</p>}
-
-                  <div className="text-xs text-gray-500">Updated: {unit.updatedAt}</div>
-                </CardContent>
-              </Card>
+              <ProductCard
+                key={unit.id}
+                title={unit.name}
+                badge={
+                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 mb-2">
+                    {unit.code}
+                  </Badge>
+                }
+                actions={
+                  <ProductCardActions>
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(unit)} className="hover:bg-yellow-50">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeletingUnit(unit)}
+                      className="hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </ProductCardActions>
+                }
+                className=""
+              >
+                {unit.description && <p className="text-sm text-gray-600 mb-3">{unit.description}</p>}
+                <div className="text-xs text-gray-500">Updated: {unit.updatedAt}</div>
+              </ProductCard>
             ))}
           </div>
 

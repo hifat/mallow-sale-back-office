@@ -12,8 +12,9 @@ import { X, Plus, Trash2, Tag } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
 import { UsageUnit } from "@/lib/inventory-api"
-import { getTotalCostFromIngredients, getReasonablePrice } from "@/lib/utils"
+import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
+import { IngredientCard } from "@/components/ingredient-card";
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -306,10 +307,31 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 </Button>
               </div>
 
-              {formData.ingredients.map((ingredient, index) => (
-                <Card key={index} className="border-gray-200">
-                  <CardContent className="pt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {formData.ingredients.map((ingredient, index) => {
+                const costPerUnit = getIngredientCostPerUnit(ingredient.inventory);
+                const costUsed = getIngredientCostUsed(ingredient.inventory, ingredient.quantity);
+                return (
+                  <IngredientCard
+                    key={index}
+                    name={ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}
+                    costPerUnit={costPerUnit}
+                    quantity={ingredient.quantity}
+                    unit={ingredient.unit.code}
+                    costUsed={costUsed}
+                    right={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeIngredient(index)}
+                        className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    }
+                  >
+                    {/* Editable fields for inventory, quantity, unit */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                       <div className="space-y-2">
                         <Label>Inventory Item *</Label>
                         <Input
@@ -388,21 +410,10 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
                         )}
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeIngredient(index)}
-                          className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </IngredientCard>
+                );
+              })}
             </div>
 
             <div className="flex justify-end space-x-2">

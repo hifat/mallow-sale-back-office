@@ -56,3 +56,20 @@ export function getTotalCostFromIngredients(ingredients: Array<{inventory: any, 
   }
   return totalCost;
 }
+
+/**
+ * Calculate cost per unit for an ingredient, factoring in yield percentage.
+ */
+export function getIngredientCostPerUnit(inventory: any): number {
+  if (!inventory || !inventory.purchasePrice || !inventory.purchaseQuantity || inventory.yieldPercentage === undefined) return 0;
+  const actualPrice = calculateActualPrice(inventory.purchasePrice, inventory.yieldPercentage);
+  return calculateCostPerUnit(actualPrice, inventory.purchaseQuantity);
+}
+
+/**
+ * Calculate cost used for an ingredient (cost per unit * quantity).
+ */
+export function getIngredientCostUsed(inventory: any, quantity: number): number {
+  const costPerUnit = getIngredientCostPerUnit(inventory);
+  return costPerUnit * quantity;
+}

@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
 import { formatDate, calculateCostPerUnit, calculateActualPrice, getReasonablePrice, getTotalCostFromIngredients } from "@/lib/utils"
+import { IngredientCard } from "@/components/ingredient-card";
+import { getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils";
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -111,34 +113,17 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
             <div className="grid gap-3">
               {/* Calculate total cost */}
               {recipe.ingredients.map((ingredient, index) => {
-                let costPerUnit = 0
-                let costUsed = 0
-                if (ingredient.inventory && ingredient.inventory.purchasePrice && ingredient.inventory.purchaseQuantity && ingredient.inventory.yieldPercentage !== undefined) {
-                  const actualPrice = calculateActualPrice(ingredient.inventory.purchasePrice, ingredient.inventory.yieldPercentage)
-                  costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity)
-                  costUsed = costPerUnit * ingredient.quantity
-                }
+                const costPerUnit = getIngredientCostPerUnit(ingredient.inventory);
+                const costUsed = getIngredientCostUsed(ingredient.inventory, ingredient.quantity);
                 return (
-                  <Card key={index} className="border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900">{ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}</p>
-                          {ingredient.inventory && (
-                            <p className="text-sm text-gray-600">Cost per unit: ฿{costPerUnit.toFixed(2)}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">
-                            {ingredient.quantity} {(typeof ingredient.unit === 'string' ? ingredient.unit : (ingredient.unit as { code: string }).code)}
-                          </p>
-                          {ingredient.inventory && (
-                            <p className="text-sm text-gray-700">Cost used: ฿{costUsed.toFixed(2)}</p>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <IngredientCard
+                    key={index}
+                    name={ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}
+                    costPerUnit={costPerUnit}
+                    quantity={ingredient.quantity}
+                    unit={typeof ingredient.unit === 'string' ? ingredient.unit : (ingredient.unit as { code: string }).code}
+                    costUsed={costUsed}
+                  />
                 )
               })}
             </div>
