@@ -33,3 +33,26 @@ export function getReasonablePrice(totalCost: number, costPercentage?: number | 
   if (!isFinite(price) || isNaN(price)) return 0;
   return price;
 }
+
+/**
+ * Calculate the total cost from an array of ingredients (with inventory and quantity).
+ */
+export function getTotalCostFromIngredients(ingredients: Array<{inventory: any, quantity: number}>): number {
+  let totalCost = 0;
+  for (const ingredient of ingredients) {
+    if (
+      ingredient.inventory &&
+      ingredient.inventory.purchasePrice &&
+      ingredient.inventory.purchaseQuantity &&
+      ingredient.inventory.yieldPercentage !== undefined
+    ) {
+      const actualPrice = calculateActualPrice(
+        ingredient.inventory.purchasePrice,
+        ingredient.inventory.yieldPercentage
+      );
+      const costPerUnit = calculateCostPerUnit(actualPrice, ingredient.inventory.purchaseQuantity);
+      totalCost += costPerUnit * ingredient.quantity;
+    }
+  }
+  return totalCost;
+}

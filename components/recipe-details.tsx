@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
-import { formatDate, calculateCostPerUnit, calculateActualPrice, getReasonablePrice } from "@/lib/utils"
+import { formatDate, calculateCostPerUnit, calculateActualPrice, getReasonablePrice, getTotalCostFromIngredients } from "@/lib/utils"
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -53,7 +53,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               {/* (Total Cost card removed; will display near Ingredients) */}
               {/* Reasonable Price for Sale Card */}
               {(() => {
-                const totalCost = new Recipe(recipe).totalCost();
+                const totalCost = getTotalCostFromIngredients(recipe.ingredients);
                 const reasonablePrice = getReasonablePrice(totalCost, recipe.costPercentage);
                 if (!reasonablePrice) return null;
                 return (
@@ -105,7 +105,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                 </Badge>
               </h3>
               <div className="text-right font-bold text-lg text-green-700">
-                Total Cost: ฿{new Recipe(recipe).totalCost().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                Total Cost: ฿{getTotalCostFromIngredients(recipe.ingredients).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </div>
             <div className="grid gap-3">
