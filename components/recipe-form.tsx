@@ -366,7 +366,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                   <Card key={index} className="border-gray-200">
                     <CardContent className="pt-4">
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="space-y-1">
+                        <div>
                           <Label>Inventory Item *</Label>
                           <Input
                             placeholder="Search inventory..."
@@ -411,13 +411,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           {errors[`ingredient_${index}_inventory`] && (
                             <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
                           )}
-                          {/* Cost per unit and cost used display */}
-                          <div className="flex flex-col text-xs text-gray-600 mt-1">
-                            <span>Cost per unit: ฿{costPerUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            <span>Cost used: ฿{costUsed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          </div>
                         </div>
-                        <div className="space-y-1">
+                        <div>
                           <Label>Quantity *</Label>
                           <Input
                             type="number"
@@ -431,7 +426,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                             <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
                           )}
                         </div>
-                        <div className="space-y-1">
+                        <div>
                           <Label>Unit *</Label>
                           <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
                             <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
@@ -449,7 +444,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                             <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 mt-auto">
                           <Button
                             type="button"
                             variant="outline"
@@ -459,6 +454,12 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
+                        </div>
+                        <div className="text-xs text-gray-600 col-span-2">
+                          <span>Cost per unit: ฿{costPerUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="text-xs text-gray-600 text-right">
+                          <span>Cost used: ฿{costUsed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     </CardContent>
