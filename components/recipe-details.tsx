@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
-import { formatDate, calculateCostPerUnit, calculateActualPrice, calculateReasonablePriceForSale } from "@/lib/utils"
+import { formatDate, calculateCostPerUnit, calculateActualPrice, getReasonablePrice } from "@/lib/utils"
 
 interface RecipeDetailsProps {
   recipe: Recipe
@@ -54,8 +54,8 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               {/* Reasonable Price for Sale Card */}
               {(() => {
                 const totalCost = new Recipe(recipe).totalCost();
-                const reasonablePrice = calculateReasonablePriceForSale(totalCost, recipe.costPercentage);
-                if (reasonablePrice === null) return null;
+                const reasonablePrice = getReasonablePrice(totalCost, recipe.costPercentage);
+                if (!reasonablePrice) return null;
                 return (
                   <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
                     <Tag className="h-5 w-5 text-orange-600" />

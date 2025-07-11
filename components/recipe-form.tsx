@@ -12,7 +12,7 @@ import { X, Plus, Trash2, Tag } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
 import { UsageUnit } from "@/lib/inventory-api"
-import { calculateActualPrice, calculateCostPerUnit, calculateReasonablePriceForSale } from "@/lib/utils"
+import { calculateActualPrice, calculateCostPerUnit, getReasonablePrice } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
 
 interface RecipeFormProps {
@@ -294,8 +294,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                   totalCost += costPerUnit * ingredient.quantity;
                 }
               }
-              let reasonablePrice = calculateReasonablePriceForSale(totalCost, formData.costPercentage);
-              if (!reasonablePrice || isNaN(reasonablePrice) || reasonablePrice === Infinity) reasonablePrice = 0;
+              const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);
               return (
                 <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg mb-2 mt-2">
                   <Tag className="h-5 w-5 text-orange-600" />

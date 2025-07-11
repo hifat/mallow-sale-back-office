@@ -22,3 +22,14 @@ export function calculateReasonablePriceForSale(totalCost: number, costPercentag
   if (typeof costPercentage !== 'number' || costPercentage <= 0) return null;
   return totalCost / (costPercentage / 100);
 }
+
+/**
+ * Calculate the reasonable price for sale given total cost and cost percentage.
+ * Returns 0 if costPercentage is not valid.
+ */
+export function getReasonablePrice(totalCost: number, costPercentage?: number | null): number {
+  if (!costPercentage || isNaN(costPercentage) || costPercentage <= 0) return 0;
+  const price = totalCost / (costPercentage / 100);
+  if (!isFinite(price) || isNaN(price)) return 0;
+  return price;
+}
