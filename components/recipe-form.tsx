@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { X, Plus, Trash2, Tag } from "lucide-react"
+import { X, Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
 import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
 import { UsageUnit } from "@/lib/inventory-api"
@@ -298,16 +298,47 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
             </div>
 
-            {/* Reasonable Price for Sale Preview */}
+            {/* Summary section matching recipe-details.tsx */}
             {(() => {
               const totalCost = getTotalCostFromIngredients(formData.ingredients);
               const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);
+              const other = typeof formData.otherPercentage === 'number' ? formData.otherPercentage : 0;
+              const totalWithOther = totalCost * (1 + other / 100);
+              const price = typeof formData.price === 'number' ? formData.price : 0;
+              const profit = price - totalCost;
+              const profitWithOther = price - totalWithOther;
               return (
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg mb-2 mt-2">
-                  <Tag className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
-                    <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
+                  <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                    <Tag className="h-5 w-5 text-orange-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-pink-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Profit</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        ฿{profitWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <span className="text-sm text-gray-500 ml-2">(no other %: ฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Total Cost</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-cyan-100 rounded-lg">
+                    <ArrowUpRight className="h-5 w-5 text-cyan-600" />
+                    <div>
+                      <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
                   </div>
                 </div>
               );
@@ -380,6 +411,11 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           {errors[`ingredient_${index}_inventory`] && (
                             <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
                           )}
+                          {/* Cost per unit and cost used display */}
+                          <div className="flex flex-col text-xs text-gray-600 mt-1">
+                            <span>Cost per unit: ฿{costPerUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span>Cost used: ฿{costUsed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
                         </div>
                         <div className="space-y-1">
                           <Label>Quantity *</Label>
