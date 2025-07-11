@@ -28,6 +28,7 @@ export class Recipe {
     this.updatedAt = data.updatedAt
     this.costPercentage = data.costPercentage
     this.price = data.price
+    this.otherPercentage = data.otherPercentage
   }
 
   id: string
@@ -37,6 +38,7 @@ export class Recipe {
   updatedAt: string
   costPercentage?: number
   price?: number
+  otherPercentage?: number
 
   totalCost(): number {
     let total = 0
@@ -70,6 +72,7 @@ export interface RecipePayload {
   ingredients: RecipeIngredientPayload[]
   costPercentage?: number
   price?: number
+  otherPercentage?: number
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"

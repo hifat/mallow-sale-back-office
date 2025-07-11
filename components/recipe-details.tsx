@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp } from "lucide-react"
+import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp, ArrowUpRight } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
 import { formatDate, calculateCostPerUnit, calculateActualPrice, getReasonablePrice, getTotalCostFromIngredients } from "@/lib/utils"
 import { IngredientCard } from "@/components/ingredient-card";
@@ -52,6 +52,15 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   </div>
                 </div>
               )}
+              {typeof recipe.otherPercentage === 'number' && (
+                <div className="flex items-center space-x-3 p-3 bg-cyan-50 rounded-lg">
+                  <Percent className="h-5 w-5 text-cyan-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Other Percentage</p>
+                    <p className="text-lg font-semibold text-gray-900">{recipe.otherPercentage}%</p>
+                  </div>
+                </div>
+              )}
               {/* (Total Cost card removed; will display near Ingredients) */}
               {/* Reasonable Price for Sale Card */}
               {(() => {
@@ -78,17 +87,38 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   </div>
                 </div>
               )}
+              {/* Total Cost with Other Percentage */}
+              {(() => {
+                const totalCost = getTotalCostFromIngredients(recipe.ingredients);
+                const other = typeof recipe.otherPercentage === 'number' ? recipe.otherPercentage : 0;
+                const totalWithOther = totalCost * (1 + other / 100);
+                return (
+                  <div className="flex items-center space-x-3 p-3 bg-cyan-100 rounded-lg">
+                    <ArrowUpRight className="h-5 w-5 text-cyan-600" />
+                    <div>
+                      <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                  </div>
+                );
+              })()}
               {/* Profit Card */}
               {typeof recipe.price === 'number' && recipe.price > 0 && (
                 (() => {
                   const totalCost = new Recipe(recipe).totalCost();
                   const profit = recipe.price - totalCost;
+                  const other = typeof recipe.otherPercentage === 'number' ? recipe.otherPercentage : 0;
+                  const totalWithOther = totalCost * (1 + other / 100);
+                  const profitWithOther = recipe.price - totalWithOther;
                   return (
                     <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
                       <TrendingUp className="h-5 w-5 text-pink-600" />
                       <div>
                         <p className="text-sm text-gray-600">Profit</p>
-                        <p className="text-lg font-semibold text-gray-900">฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          ฿{profitWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className="text-sm text-gray-500">(no other %: ฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                        </p>
                       </div>
                     </div>
                   );

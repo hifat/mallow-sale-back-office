@@ -52,6 +52,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } }],
     costPercentage: recipe?.costPercentage ?? 0,
     price: recipe?.price ?? 0,
+    otherPercentage: recipe?.otherPercentage ?? 0,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -121,6 +122,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     if (isNaN(formData.price) || formData.price < 0) {
       newErrors.price = "Price must be a number greater than or equal to 0"
     }
+    if (isNaN(formData.otherPercentage) || formData.otherPercentage < 0 || formData.otherPercentage > 100) {
+      newErrors.otherPercentage = "Other percentage must be a number between 0 and 100"
+    }
 
     if (formData.ingredients.length === 0) {
       newErrors.ingredients = "At least one ingredient is required"
@@ -161,6 +165,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       })),
       costPercentage: formData.costPercentage,
       price: formData.price,
+      otherPercentage: formData.otherPercentage,
     })
     setIsLoading(false)
   } 
@@ -275,6 +280,22 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 />
                 {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="otherPercentage">Other Percentage</Label>
+              <Input
+                id="otherPercentage"
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                value={formData.otherPercentage}
+                onChange={e => setFormData(prev => ({ ...prev, otherPercentage: parseFloat(e.target.value) }))}
+                className={errors.otherPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter other percentage (optional)"
+              />
+              {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
             </div>
 
             {/* Reasonable Price for Sale Preview */}
