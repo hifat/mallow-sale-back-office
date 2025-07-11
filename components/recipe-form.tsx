@@ -82,7 +82,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
         .then((settings) => {
           setFormData((prev) => ({ ...prev, costPercentage: settings.costPercentage ?? 0 }))
         })
-        .catch(() => {})
+        .catch(() => { })
       setSearchText([""])
     }
   }, [recipe])
@@ -168,7 +168,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       otherPercentage: formData.otherPercentage,
     })
     setIsLoading(false)
-  } 
+  }
 
   const addIngredient = () => {
     setFormData((prev) => ({
@@ -332,107 +332,101 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 const costPerUnit = getIngredientCostPerUnit(ingredient.inventory);
                 const costUsed = getIngredientCostUsed(ingredient.inventory, ingredient.quantity);
                 return (
-                  <IngredientCard
-                    key={index}
-                    name={ingredient.inventory ? ingredient.inventory.name : 'Unknown inventory'}
-                    costPerUnit={costPerUnit}
-                    quantity={ingredient.quantity}
-                    unit={ingredient.unit.code}
-                    costUsed={costUsed}
-                    right={
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeIngredient(index)}
-                        className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    }
-                  >
-                    {/* Editable fields for inventory, quantity, unit */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                      <div className="space-y-2">
-                        <Label>Inventory Item *</Label>
-                        <Input
-                          placeholder="Search inventory..."
-                          value={searchText[index] || ""}
-                          onFocus={() => setActiveIngredientIndex(index)}
-                          onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
-                          onChange={async (e) => {
-                            const value = e.target.value
-                            updateIngredient(index, "inventoryName", value)
-                            await handleInventorySearch(value, index)
-                          }}
-                          className={
-                            errors[`ingredient_${index}_inventory`]
-                              ? "border-red-500"
-                              : "border-yellow-200 focus:border-yellow-500"
-                          }
-                        />
-                        <div className="relative">
-                          {inventoryLoading && activeIngredientIndex === index && (
-                            <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>
-                          )}
-                          {!inventoryLoading && activeIngredientIndex === index && inventoryOptions.length > 0 && (
-                            <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
-                              {inventoryOptions.map((item) => (
-                                <div
-                                  key={item.id}
-                                  className="px-3 py-2 hover:bg-yellow-50 cursor-pointer text-sm"
-                                  onClick={() => {
-                                    updateIngredient(index, "inventory", item.id)
-                                    updateIngredient(index, "inventoryName", item.name)
-                                    updateIngredient(index, "unit", item.purchaseUnit?.code || "")
-                                    setInventoryOptions([])
-                                    setActiveIngredientIndex(null)
-                                  }}
-                                >
-                                  {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
-                                </div>
-                              ))}
-                            </div>
+                  <Card key={index} className="border-gray-200">
+                    <CardContent className="pt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="space-y-1">
+                          <Label>Inventory Item *</Label>
+                          <Input
+                            placeholder="Search inventory..."
+                            value={searchText[index] || ""}
+                            onFocus={() => setActiveIngredientIndex(index)}
+                            onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
+                            onChange={async (e) => {
+                              const value = e.target.value
+                              updateIngredient(index, "inventoryName", value)
+                              await handleInventorySearch(value, index)
+                            }}
+                            className={
+                              errors[`ingredient_${index}_inventory`]
+                                ? "border-red-500"
+                                : "border-yellow-200 focus:border-yellow-500"
+                            }
+                          />
+                          <div className="relative">
+                            {inventoryLoading && activeIngredientIndex === index && (
+                              <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>
+                            )}
+                            {!inventoryLoading && activeIngredientIndex === index && inventoryOptions.length > 0 && (
+                              <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
+                                {inventoryOptions.map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className="px-3 py-2 hover:bg-yellow-50 cursor-pointer text-sm"
+                                    onClick={() => {
+                                      updateIngredient(index, "inventory", item.id)
+                                      updateIngredient(index, "inventoryName", item.name)
+                                      updateIngredient(index, "unit", item.purchaseUnit?.code || "")
+                                      setInventoryOptions([])
+                                      setActiveIngredientIndex(null)
+                                    }}
+                                  >
+                                    {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {errors[`ingredient_${index}_inventory`] && (
+                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
                           )}
                         </div>
-                        {errors[`ingredient_${index}_inventory`] && (
-                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
-                        )}
+                        <div className="space-y-1">
+                          <Label>Quantity *</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={ingredient.quantity}
+                            onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
+                            className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                          />
+                          {errors[`ingredient_${index}_quantity`] && (
+                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Unit *</Label>
+                          <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
+                            <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
+                              <SelectValue placeholder="Select a unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {units.map((unit) => (
+                                <SelectItem key={unit.code} value={unit.code}>
+                                  {unit.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {errors[`ingredient_${index}_unit`] && (
+                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeIngredient(index)}
+                            className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Quantity *</Label>
-                        <Input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          value={ingredient.quantity}
-                          onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
-                          className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                        />
-                        {errors[`ingredient_${index}_quantity`] && (
-                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Unit *</Label>
-                        <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
-                          <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
-                            <SelectValue placeholder="Select a unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {units.map((unit) => (
-                              <SelectItem key={unit.code} value={unit.code}>
-                                {unit.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors[`ingredient_${index}_unit`] && (
-                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
-                        )}
-                      </div>
-                    </div>
-                  </IngredientCard>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
