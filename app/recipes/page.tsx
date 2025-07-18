@@ -12,8 +12,6 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo } from "@/lib/recipe-api"
 import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
-import { useRef } from "react"
-import { useAutoAnimate } from "@formkit/auto-animate/react"
 import { ReactSortable } from "react-sortablejs"
 
 export default function RecipesPage() {
@@ -28,7 +26,6 @@ export default function RecipesPage() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
   const [orderRecipes, setOrderRecipes] = useState<Recipe[]>([])
-  const [animationParent] = useAutoAnimate()
 
   useEffect(() => {
     setLoading(true)
@@ -38,16 +35,8 @@ export default function RecipesPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Sort recipes by orderNo if present, else fallback to name
-  const sortedRecipes = [...recipes].sort((a, b) => {
-    if (typeof a.orderNo === 'number' && typeof b.orderNo === 'number') {
-      return a.orderNo - b.orderNo
-    }
-    return a.name.localeCompare(b.name)
-  })
-
   const startOrdering = () => {
-    setOrderRecipes(sortedRecipes)
+    setOrderRecipes([...recipes])
     setIsOrdering(true)
   }
   const cancelOrdering = () => {
