@@ -79,8 +79,8 @@ export interface RecipePayload {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchRecipes(): Promise<Recipe[]> {
-  const res = await fetch(`${API_BASE}/recipes`)
+export async function fetchRecipes(sort: string = "order_no", order: "asc" | "desc" = "asc"): Promise<Recipe[]> {
+  const res = await fetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
   if (!res.ok) throw new Error("Failed to fetch recipes")
   const data = await res.json()
   return data.items || []

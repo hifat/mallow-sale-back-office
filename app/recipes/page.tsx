@@ -160,8 +160,15 @@ export default function RecipesPage() {
                   disabled={isOrdering}
                 />
               </div>
+              <div className="flex-1" />
               {!isOrdering && (
-                <Button variant="outline" onClick={startOrdering} className="ml-2">
+                <Button
+                  variant="outline"
+                  onClick={startOrdering}
+                  className="ml-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-semibold rounded-lg transition-colors duration-200 px-6 py-2"
+                  style={{ minWidth: 120, borderWidth: 2 }}
+                >
+                  <GripVertical className="inline-block text-yellow-500" />
                   Reorder
                 </Button>
               )}
