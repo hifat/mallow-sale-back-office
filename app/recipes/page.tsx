@@ -182,9 +182,14 @@ export default function RecipesPage() {
               disabled={!isOrdering}
             >
               {(isOrdering ? orderRecipes : filteredRecipes).map((recipe) => (
-                <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90" : ""}>
+                <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90 relative" : "relative"}>
+                  {isOrdering && (
+                    <div className="absolute top-6 z-10 p-1">
+                      <GripVertical className="text-gray-400 w-5 h-5" />
+                    </div>
+                  )}
                   <ProductCard
-                    title={<span className="flex items-center">{isOrdering && <GripVertical className="mr-2 text-gray-400" />} {recipe.name}</span>}
+                    title={<span className="flex items-center">{recipe.name}</span>}
                     badge={
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                         {recipe.ingredients.length} ingredients
