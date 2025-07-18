@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripVertical } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical } from "lucide-react"
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -184,8 +184,8 @@ export default function RecipesPage() {
               {(isOrdering ? orderRecipes : filteredRecipes).map((recipe) => (
                 <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90 relative" : "relative"}>
                   {isOrdering && (
-                    <div className="absolute top-6 z-10 p-1">
-                      <GripVertical className="text-gray-400 w-5 h-5" />
+                    <div className="absolute left-1/2 -translate-x-1/2 z-10 p-1">
+                      <GripHorizontal className="text-gray-400 w-6 h-6" />
                     </div>
                   )}
                   <ProductCard
