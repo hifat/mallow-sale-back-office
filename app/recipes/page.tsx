@@ -5,14 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye, ChefHat } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripVertical } from "lucide-react"
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
-import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload } from "@/lib/recipe-api"
+import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo } from "@/lib/recipe-api"
 import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
-import { IngredientCard } from "@/components/ingredient-card";
+import { useRef } from "react"
+import { useAutoAnimate } from "@formkit/auto-animate/react"
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -24,6 +25,11 @@ export default function RecipesPage() {
   const [loading, setLoading] = useState(false)
   const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [isOrdering, setIsOrdering] = useState(false)
+  const [orderRecipes, setOrderRecipes] = useState<Recipe[]>([])
+  const dragItem = useRef<number | null>(null)
+  const dragOverItem = useRef<number | null>(null)
+  const [animationParent] = useAutoAnimate()
 
   useEffect(() => {
     setLoading(true)
@@ -32,6 +38,55 @@ export default function RecipesPage() {
       .catch((e) => console.error(e))
       .finally(() => setLoading(false))
   }, [])
+
+  // Sort recipes by orderNo if present, else fallback to name
+  const sortedRecipes = [...recipes].sort((a, b) => {
+    if (typeof a.orderNo === 'number' && typeof b.orderNo === 'number') {
+      return a.orderNo - b.orderNo
+    }
+    return a.name.localeCompare(b.name)
+  })
+
+  const handleDragStart = (index: number) => {
+    dragItem.current = index
+  }
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index
+  }
+  const handleDragEnd = () => {
+    const from = dragItem.current
+    const to = dragOverItem.current
+    if (from === null || to === null || from === to) return
+    const updated = [...orderRecipes]
+    const [removed] = updated.splice(from, 1)
+    updated.splice(to, 0, removed)
+    setOrderRecipes(updated)
+    dragItem.current = null
+    dragOverItem.current = null
+  }
+  const startOrdering = () => {
+    setOrderRecipes(sortedRecipes)
+    setIsOrdering(true)
+  }
+  const cancelOrdering = () => {
+    setIsOrdering(false)
+    setOrderRecipes([])
+  }
+  const saveOrdering = async () => {
+    setLoading(true)
+    try {
+      const orderList = orderRecipes.map((r, idx) => ({ id: r.id, orderNo: idx + 1 }))
+      await updateRecipeOrderNo(orderList)
+      const newRecipes = await fetchRecipes()
+      setRecipes(newRecipes)
+      setIsOrdering(false)
+      setOrderRecipes([])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredRecipes = recipes.filter((recipe) => recipe.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -120,56 +175,85 @@ export default function RecipesPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 border-yellow-200 focus:border-yellow-500"
+                  disabled={isOrdering}
                 />
               </div>
+              {!isOrdering && (
+                <Button variant="outline" onClick={startOrdering} className="ml-2">
+                  Reorder
+                </Button>
+              )}
+              {isOrdering && (
+                <>
+                  <Button variant="outline" onClick={saveOrdering} disabled={loading} className="ml-2 bg-yellow-500 text-white">
+                    {loading ? "Saving..." : "Save Order"}
+                  </Button>
+                  <Button variant="outline" onClick={cancelOrdering} className="ml-2">
+                    Cancel
+                  </Button>
+                </>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredRecipes.map((recipe) => (
-                <ProductCard
+            <div ref={animationParent} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(isOrdering ? orderRecipes : filteredRecipes).map((recipe, idx) => (
+                <div
                   key={recipe.id}
-                  title={recipe.name}
-                  badge={
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                      {recipe.ingredients.length} ingredients
-                    </Badge>
-                  }
-                  price={typeof recipe.price === 'number' ? recipe.price : 0}
-                  actions={
-                    <ProductCardActions>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleShowDetails(recipe.id)}
-                        className="hover:bg-yellow-50"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(recipe)}
-                        className="hover:bg-yellow-50"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingRecipe(recipe)}
-                        className="hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </ProductCardActions>
-                  }
-                  className=""
+                  draggable={isOrdering}
+                  onDragStart={isOrdering ? () => handleDragStart(idx) : undefined}
+                  onDragEnter={isOrdering ? () => handleDragEnter(idx) : undefined}
+                  onDragEnd={isOrdering ? handleDragEnd : undefined}
+                  className={isOrdering ? "cursor-move opacity-90" : ""}
                 >
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
-                  </div>
-                </ProductCard>
+                  <ProductCard
+                    title={<span className="flex items-center">{isOrdering && <GripVertical className="mr-2 text-gray-400" />} {recipe.name}</span>}
+                    badge={
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                        {recipe.ingredients.length} ingredients
+                      </Badge>
+                    }
+                    price={typeof recipe.price === 'number' ? recipe.price : 0}
+                    actions={
+                      !isOrdering && (
+                        <ProductCardActions>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleShowDetails(recipe.id)}
+                            className="hover:bg-yellow-50"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(recipe)}
+                            className="hover:bg-yellow-50"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeletingRecipe(recipe)}
+                            className="hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </ProductCardActions>
+                      )
+                    }
+                    className=""
+                  >
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
+                      {typeof recipe.orderNo === 'number' && (
+                        <span className="text-xs text-gray-400">Order: {recipe.orderNo}</span>
+                      )}
+                    </div>
+                  </ProductCard>
+                </div>
               ))}
             </div>
 

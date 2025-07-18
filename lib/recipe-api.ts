@@ -29,6 +29,7 @@ export class Recipe {
     this.costPercentage = data.costPercentage
     this.price = data.price
     this.otherPercentage = data.otherPercentage
+    this.orderNo = data.orderNo
   }
 
   id: string
@@ -39,6 +40,7 @@ export class Recipe {
   costPercentage?: number
   price?: number
   otherPercentage?: number
+  orderNo?: number
 
   totalCost(): number {
     let total = 0
@@ -115,4 +117,14 @@ export async function fetchRecipeById(id: string): Promise<Recipe> {
   if (!res.ok) throw new Error("Failed to fetch recipe by id")
   const data = await res.json()
   return data.item || data
+}
+
+export async function updateRecipeOrderNo(orderList: { id: string; orderNo: number }[]) {
+  const res = await fetch(`${API_BASE}/recipes/order-no`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(orderList),
+  })
+  if (!res.ok) throw new Error("Failed to update recipe order numbers")
+  return res.json()
 } 
