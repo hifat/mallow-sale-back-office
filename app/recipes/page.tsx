@@ -14,6 +14,7 @@ import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
 import { useRef } from "react"
 import { useAutoAnimate } from "@formkit/auto-animate/react"
+import { ReactSortable } from "react-sortablejs"
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -27,8 +28,6 @@ export default function RecipesPage() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
   const [orderRecipes, setOrderRecipes] = useState<Recipe[]>([])
-  const dragItem = useRef<number | null>(null)
-  const dragOverItem = useRef<number | null>(null)
   const [animationParent] = useAutoAnimate()
 
   useEffect(() => {
@@ -47,23 +46,6 @@ export default function RecipesPage() {
     return a.name.localeCompare(b.name)
   })
 
-  const handleDragStart = (index: number) => {
-    dragItem.current = index
-  }
-  const handleDragEnter = (index: number) => {
-    dragOverItem.current = index
-  }
-  const handleDragEnd = () => {
-    const from = dragItem.current
-    const to = dragOverItem.current
-    if (from === null || to === null || from === to) return
-    const updated = [...orderRecipes]
-    const [removed] = updated.splice(from, 1)
-    updated.splice(to, 0, removed)
-    setOrderRecipes(updated)
-    dragItem.current = null
-    dragOverItem.current = null
-  }
   const startOrdering = () => {
     setOrderRecipes(sortedRecipes)
     setIsOrdering(true)
@@ -196,16 +178,15 @@ export default function RecipesPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div ref={animationParent} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(isOrdering ? orderRecipes : filteredRecipes).map((recipe, idx) => (
-                <div
-                  key={recipe.id}
-                  draggable={isOrdering}
-                  onDragStart={isOrdering ? () => handleDragStart(idx) : undefined}
-                  onDragEnter={isOrdering ? () => handleDragEnter(idx) : undefined}
-                  onDragEnd={isOrdering ? handleDragEnd : undefined}
-                  className={isOrdering ? "cursor-move opacity-90" : ""}
-                >
+            <ReactSortable
+              list={isOrdering ? orderRecipes : filteredRecipes}
+              setList={isOrdering ? setOrderRecipes : () => {}}
+              animation={200}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              disabled={!isOrdering}
+            >
+              {(isOrdering ? orderRecipes : filteredRecipes).map((recipe) => (
+                <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90" : ""}>
                   <ProductCard
                     title={<span className="flex items-center">{isOrdering && <GripVertical className="mr-2 text-gray-400" />} {recipe.name}</span>}
                     badge={
@@ -255,7 +236,7 @@ export default function RecipesPage() {
                   </ProductCard>
                 </div>
               ))}
-            </div>
+            </ReactSortable>
 
             {filteredRecipes.length === 0 && (
               <div className="text-center py-8">
