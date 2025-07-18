@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical, Copy } from "lucide-react"
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -64,8 +64,8 @@ export default function RecipesPage() {
   const handleSave = async (data: RecipePayload) => {
     setLoading(true)
     try {
-      if (editingRecipe) {
-        await updateRecipe(editingRecipe.id!, data)
+      if (editingRecipe && editingRecipe.id) {
+        await updateRecipe(editingRecipe.id, data)
       } else {
         await createRecipe(data)
       }
@@ -115,6 +115,43 @@ export default function RecipesPage() {
       setDetailRecipe(null)
     } finally {
       setDetailLoading(false)
+    }
+  }
+
+  // Add a handler for duplicating a recipe
+  const handleDuplicate = async (recipe: Recipe) => {
+    setLoading(true)
+    try {
+      const fullRecipe = await fetchRecipeById(recipe.id)
+      const payload: RecipePayload = {
+        name: fullRecipe.name + " (Copy)",
+        ingredients: fullRecipe.ingredients
+          .filter(ing => ing.inventory && ing.inventory.id)
+          .map(ing => ({
+            inventoryID: ing.inventory.id,
+            quantity: ing.quantity,
+            unit: { code: typeof ing.unit === 'string'
+              ? ing.unit
+              : (ing.unit && typeof ing.unit === 'object' && 'code' in ing.unit ? (ing.unit as any).code : '')
+            },
+          })),
+        costPercentage: fullRecipe.costPercentage,
+        price: fullRecipe.price,
+        otherPercentage: fullRecipe.otherPercentage,
+      }
+      const newRecipe = new Recipe({
+        ...fullRecipe,
+        id: '',
+        name: payload.name,
+        createdAt: '',
+        updatedAt: '',
+      })
+      setEditingRecipe(newRecipe)
+      setShowForm(true)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -214,6 +251,14 @@ export default function RecipesPage() {
                             className="hover:bg-yellow-50"
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDuplicate(recipe)}
+                            className="hover:bg-yellow-50"
+                          >
+                            <Copy className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
