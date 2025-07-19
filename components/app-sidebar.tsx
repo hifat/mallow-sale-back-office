@@ -32,6 +32,11 @@ const data = {
       icon: Package,
     },
     {
+      title: "Suppliers",
+      url: "/suppliers",
+      icon: Package,
+    },
+    {
       title: "Recipes",
       url: "/recipes",
       icon: ChefHat,

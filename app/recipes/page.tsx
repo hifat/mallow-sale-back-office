@@ -130,9 +130,10 @@ export default function RecipesPage() {
           .map(ing => ({
             inventoryID: ing.inventory.id,
             quantity: ing.quantity,
-            unit: { code: typeof ing.unit === 'string'
-              ? ing.unit
-              : (ing.unit && typeof ing.unit === 'object' && 'code' in ing.unit ? (ing.unit as any).code : '')
+            unit: {
+              code: typeof ing.unit === 'string'
+                ? ing.unit
+                : (ing.unit && typeof ing.unit === 'object' && 'code' in ing.unit ? (ing.unit as any).code : '')
             },
           })),
         costPercentage: fullRecipe.costPercentage,
@@ -213,7 +214,7 @@ export default function RecipesPage() {
           <CardContent>
             <ReactSortable
               list={isOrdering ? orderRecipes : filteredRecipes}
-              setList={isOrdering ? setOrderRecipes : () => {}}
+              setList={isOrdering ? setOrderRecipes : () => { }}
               animation={200}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               disabled={!isOrdering}
