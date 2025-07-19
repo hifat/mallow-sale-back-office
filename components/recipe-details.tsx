@@ -115,10 +115,10 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                       <TrendingUp className="h-5 w-5 text-pink-600" />
                       <div>
                         <p className="text-sm text-gray-600">Profit</p>
-                        <p className="text-lg font-semibold text-gray-900">
+                        <div className="text-lg font-semibold text-gray-900">
                           ฿{profitWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           <div className="text-sm text-gray-500">(no other %: ฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
-                        </p>
+                        </div>
                       </div>
                     </div>
                   );

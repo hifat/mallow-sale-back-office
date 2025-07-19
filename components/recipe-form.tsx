@@ -259,7 +259,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                   min={0}
                   max={100}
                   step={0.01}
-                  value={formData.costPercentage}
+                  value={isNaN(formData.costPercentage) ? '' : formData.costPercentage}
                   onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
                   className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                   placeholder="Enter cost percentage"
@@ -273,7 +273,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                   type="number"
                   min={0}
                   step={0.01}
-                  value={formData.price}
+                  value={isNaN(formData.price) ? '' : formData.price}
                   onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
                   className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                   placeholder="Enter selling price"
@@ -290,7 +290,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                 min={0}
                 max={100}
                 step={0.01}
-                value={formData.otherPercentage}
+                value={isNaN(formData.otherPercentage) ? '' : formData.otherPercentage}
                 onChange={e => setFormData(prev => ({ ...prev, otherPercentage: parseFloat(e.target.value) }))}
                 className={errors.otherPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                 placeholder="Enter other percentage (optional)"
@@ -418,7 +418,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                             type="number"
                             min={0}
                             step={0.01}
-                            value={ingredient.quantity}
+                            value={isNaN(ingredient.quantity) ? '' : ingredient.quantity}
                             onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
                             className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                           />
