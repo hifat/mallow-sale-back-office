@@ -13,9 +13,10 @@ import {
   Supplier,
   SupplierPayload,
 } from "@/lib/supplier-api";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
+import { FormActionRow } from "@/components/ui/FormActionRow";
 
 function SupplierForm({ supplier, onSave, onCancel, loading }: {
   supplier?: Supplier | null;
@@ -81,14 +82,7 @@ function SupplierForm({ supplier, onSave, onCancel, loading }: {
               />
               {errors.imgUrl && <p className="text-sm text-red-600">{errors.imgUrl}</p>}
             </div>
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {supplier ? (loading ? "Saving..." : "Save") : (loading ? "Adding..." : "Add Supplier")}
-              </Button>
-            </div>
+            <FormActionRow onCancel={onCancel} loading={loading} isEdit={!!supplier} addLabel="Add Supplier" saveLabel="Save" />
           </form>
         </CardContent>
       </Card>
@@ -281,11 +275,11 @@ export default function SuppliersPage() {
             </div>
 
             {filteredSuppliers.length === 0 && (
-                <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No suppliers found</p>
-                    <p className="text-sm text-gray-500">Create your first supplier to get started</p>
-                </div>
+              <CenteredEmptyState
+                icon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+                title="No suppliers found"
+                subtitle="Create your first supplier to get started"
+              />
             )}
           </CardContent>
         </Card>

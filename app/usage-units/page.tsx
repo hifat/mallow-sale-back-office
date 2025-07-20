@@ -9,6 +9,7 @@ import { Plus, Search, Edit, Trash2, Scale } from "lucide-react"
 import { UsageUnitForm } from "@/components/usage-unit-form"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
+import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 
 interface UsageUnit {
   id: string
@@ -171,11 +172,11 @@ export default function UsageUnitsPage() {
           </div>
 
           {filteredUnits.length === 0 && (
-            <div className="text-center py-8">
-              <Scale className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No usage units found</p>
-              <p className="text-sm text-gray-500">Add your first usage unit to get started</p>
-            </div>
+            <CenteredEmptyState
+              icon={<Scale className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+              title="No usage units found"
+              subtitle="Add your first usage unit to get started"
+            />
           )}
         </CardContent>
       </Card>

@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, Package } from "lucide-react"
 import { InventoryForm } from "@/components/inventory-form"
 import { InventoryDetails } from "@/components/inventory-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -18,6 +17,7 @@ import {
 } from "@/lib/inventory-api"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table";
+import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([])
@@ -138,61 +138,73 @@ export default function InventoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInventory.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          {item.remark && <p className="text-sm text-gray-600">{item.remark}</p>}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
-                      <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
-                      <td className="py-3 px-4 text-gray-900">฿{calculateActualPrice(item.purchasePrice, item.yieldPercentage).toFixed(2)}</td>
-                      <td className="py-3 px-4 text-gray-900">฿{calculateCostPerUnit(item.purchasePrice, item.purchaseQuantity).toFixed(2)}</td>
-                      <td className="py-3 px-4 text-gray-900">{item.purchaseQuantity}</td>
-                      <td className="py-3 px-4">
-                        {item.purchaseUnit?.name ? (
-                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                            {item.purchaseUnit.name}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-500">
-                            -
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">{formatDate(item.updatedAt)}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowDetails(item.id)}
-                            className="hover:bg-yellow-50"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(item)}
-                            className="hover:bg-yellow-50"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeletingItem(item)}
-                            className="hover:bg-red-50 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  {filteredInventory.length === 0 ? (
+                    <tr>
+                      <td colSpan={9}>
+                        <CenteredEmptyState
+                          icon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+                          title="No inventory items found"
+                          subtitle="Create your first inventory item to get started"
+                        />
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredInventory.map((item) => (
+                      <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <div>
+                            <p className="font-medium text-gray-900">{item.name}</p>
+                            {item.remark && <p className="text-sm text-gray-600">{item.remark}</p>}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
+                        <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
+                        <td className="py-3 px-4 text-gray-900">฿{calculateActualPrice(item.purchasePrice, item.yieldPercentage).toFixed(2)}</td>
+                        <td className="py-3 px-4 text-gray-900">฿{calculateCostPerUnit(item.purchasePrice, item.purchaseQuantity).toFixed(2)}</td>
+                        <td className="py-3 px-4 text-gray-900">{item.purchaseQuantity}</td>
+                        <td className="py-3 px-4">
+                          {item.purchaseUnit?.name ? (
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                              {item.purchaseUnit.name}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-500">
+                              -
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-gray-600">{formatDate(item.updatedAt)}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowDetails(item.id)}
+                              className="hover:bg-yellow-50"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(item)}
+                              className="hover:bg-yellow-50"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeletingItem(item)}
+                              className="hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

@@ -18,14 +18,14 @@ export function DeleteConfirmDialog({ title, description, onConfirm, onCancel }:
         onClose={onCancel}
       />
       <div className="p-6 space-y-4">
-        <p className="text-gray-600">{description}</p>
+          <p className="text-gray-600">{description}</p>
         <ModalCardActions
           onCancel={onCancel}
           onConfirm={onConfirm}
           confirmText="Delete"
           confirmVariant="destructive"
         />
-      </div>
+          </div>
     </ModalCard>
   )
 }
