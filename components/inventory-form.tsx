@@ -3,18 +3,14 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { X } from "lucide-react"
-
-interface UsageUnit {
-  code: string
-  name: string
-}
+import { CardContent } from "@/components/ui/card"
+import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
+import { FormActionRow } from "@/components/ui/FormActionRow"
+import { UsageUnit, DEFAULT_UNITS } from "@/lib/inventory-api"
 
 interface InventoryItem {
   id: string
@@ -33,17 +29,6 @@ interface InventoryFormProps {
   onSave: (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => void
   onCancel: () => void
 }
-
-const units: UsageUnit[] = [
-  { code: "kg", name: "Kilogram (kg)" },
-  { code: "g", name: "Gram (g)" },
-  { code: "l", name: "Liter (l)" },
-  { code: "ml", name: "Milliliter (ml)" },
-  { code: "pieces", name: "Pieces" },
-  { code: "dozen", name: "Dozen" },
-  { code: "box", name: "Box" },
-  { code: "bag", name: "Bag" },
-]
 
 export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
   const [formData, setFormData] = useState({
@@ -88,7 +73,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
     setIsLoading(true)
 
     // Find the selected unit object
-    const selectedUnit = units.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
+    const selectedUnit = DEFAULT_UNITS.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
     onSave({
       ...formData,
       purchaseUnit: selectedUnit,
@@ -104,16 +89,13 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-900">{item ? "Edit Inventory Item" : "Add New Inventory Item"}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <ModalCard maxWidth="max-w-2xl">
+      <ModalCardHeader
+        title={item ? "Edit Inventory Item" : "Add New Inventory Item"}
+        onClose={onCancel}
+      />
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name *</Label>
@@ -165,7 +147,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
                     <SelectValue placeholder="Select unit" />
                   </SelectTrigger>
                   <SelectContent>
-                    {units.map((unit) => (
+                    {DEFAULT_UNITS.map((unit) => (
                       <SelectItem key={unit.code} value={unit.code}>
                         {unit.name}
                       </SelectItem>
@@ -203,17 +185,9 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save"}
-              </Button>
-            </div>
+            <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!item} saveLabel="Save" addLabel="Add" />
           </form>
         </CardContent>
-      </Card>
-    </div>
+      </ModalCard>
   )
 }

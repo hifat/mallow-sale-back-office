@@ -1,7 +1,8 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
+import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { Badge } from "@/components/ui/badge"
 import { X, Edit, Calendar, ChefHat, Package, Percent, DollarSign, Tag, TrendingUp, ArrowUpRight } from "lucide-react"
 import { Recipe } from "@/lib/recipe-api"
@@ -17,28 +18,22 @@ interface RecipeDetailsProps {
 
 export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-900 flex items-center">
-            <ChefHat className="h-5 w-5 mr-2 text-yellow-600" />
-            Recipe Details
-          </CardTitle>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(recipe)}
-              className="border-yellow-500 text-yellow-600 hover:bg-yellow-50"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
+    <ModalCard maxWidth="max-w-4xl">
+      <ModalCardHeader
+        title={<span className="flex items-center"><ChefHat className="h-5 w-5 mr-2 text-yellow-600" />Recipe Details</span>}
+        onClose={onClose}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEdit(recipe)}
+            className="border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        }
+      />
         <CardContent className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{recipe.name}</h2>
@@ -175,7 +170,6 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
-    </div>
+    </ModalCard>
   )
 }

@@ -3,12 +3,12 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { X } from "lucide-react"
+import { CardContent } from "@/components/ui/card"
+import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
+import { FormActionRow } from "@/components/ui/FormActionRow"
 
 interface UsageUnit {
   id: string
@@ -73,16 +73,13 @@ export function UsageUnitForm({ unit, onSave, onCancel }: UsageUnitFormProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-900">{unit ? "Edit Usage Unit" : "Add New Usage Unit"}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <ModalCard maxWidth="max-w-md">
+      <ModalCardHeader
+        title={unit ? "Edit Usage Unit" : "Add New Usage Unit"}
+        onClose={onCancel}
+      />
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="code">Unit Code *</Label>
               <Input
@@ -120,17 +117,9 @@ export function UsageUnitForm({ unit, onSave, onCancel }: UsageUnitFormProps) {
               />
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save"}
-              </Button>
-            </div>
+            <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!unit} saveLabel="Save" addLabel="Add" />
           </form>
         </CardContent>
-      </Card>
-    </div>
+    </ModalCard>
   )
 }

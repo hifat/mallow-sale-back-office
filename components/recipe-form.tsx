@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
+import { FormActionRow } from "@/components/ui/FormActionRow"
 import { X, Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
-import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
+import { fetchInventories, InventoryItem, DEFAULT_UNITS } from "@/lib/inventory-api"
 import { Recipe, RecipePayload } from "@/lib/recipe-api"
-import { UsageUnit } from "@/lib/inventory-api"
 import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
 import { IngredientCard } from "@/components/ingredient-card";
@@ -21,15 +22,6 @@ interface RecipeFormProps {
   onSave: (data: RecipePayload) => void
   onCancel: () => void
 }
-
-const units: UsageUnit[] = [
-  { code: "kg", name: "Kilogram (kg)" },
-  { code: "g", name: "Gram (g)" },
-  { code: "l", name: "Liter (l)" },
-  { code: "ml", name: "Milliliter (ml)" },
-  { code: "pieces", name: "Pieces" },
-  { code: "dozen", name: "Dozen" },
-]
 
 export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   const blankInventory: InventoryItem = {
@@ -228,16 +220,13 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-gray-900">{recipe ? "Edit Recipe" : "Add New Recipe"}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+    <ModalCard maxWidth="max-w-4xl">
+      <ModalCardHeader
+        title={recipe ? "Edit Recipe" : "Add New Recipe"}
+        onClose={onCancel}
+      />
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Recipe Name *</Label>
               <Input
@@ -433,7 +422,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                               <SelectValue placeholder="Select a unit" />
                             </SelectTrigger>
                             <SelectContent>
-                              {units.map((unit) => (
+                              {DEFAULT_UNITS.map((unit) => (
                                 <SelectItem key={unit.code} value={unit.code}>
                                   {unit.name}
                                 </SelectItem>
@@ -468,17 +457,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               })}
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Recipe"}
-              </Button>
-            </div>
+            <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!recipe} saveLabel="Save Recipe" addLabel="Add Recipe" />
           </form>
         </CardContent>
-      </Card>
-    </div>
+      </ModalCard>
   )
 }
