@@ -1,7 +1,7 @@
 "use client"
 
 import type * as React from "react"
-import { Package, ChefHat, Scale, BarChart3, Settings, LogOut } from "lucide-react"
+import { Package, ChefHat, Scale, BarChart3, Settings, LogOut, Warehouse } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -30,6 +30,11 @@ const data = {
       title: "Inventory",
       url: "/inventory",
       icon: Package,
+    },
+    {
+      title: "Stocks",
+      url: "/stocks",
+      icon: Warehouse,
     },
     {
       title: "Suppliers",
