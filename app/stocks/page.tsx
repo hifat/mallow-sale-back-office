@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Search, Edit, Trash2, Eye, Package2 } from "lucide-react"
 import { StockForm } from "@/components/stock-form"
 import { StockDetails } from "@/components/stock-details"
@@ -30,12 +31,15 @@ export default function StocksPage() {
 	const [showDetails, setShowDetails] = useState<string | null>(null)
 	const [editingItem, setEditingItem] = useState<Stock | null>(null)
 	const [deletingItem, setDeletingItem] = useState<Stock | null>(null)
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(true)
 	const [pagination, setPagination] = useState({
 		page: 1,
 		limit: 10,
 		total: 0,
 	})
+	
+	// Use ref to track initial load and prevent double fetch in development
+	const initialLoadRef = useRef(true)
 
 	const loadStocks = async (params?: StockListParams) => {
 		setLoading(true)
@@ -61,21 +65,66 @@ export default function StocksPage() {
 	}
 
 	useEffect(() => {
-		loadStocks()
-	}, [pagination.page, pagination.limit])
+		let isMounted = true
+		const controller = new AbortController()
 
-	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			if (searchTerm !== "") {
-				loadStocks({ search: searchTerm, page: 1 })
-				setPagination(prev => ({ ...prev, page: 1 }))
-			} else {
-				loadStocks({ page: 1 })
-				setPagination(prev => ({ ...prev, page: 1 }))
+		const fetchData = async () => {
+			try {
+				setLoading(true)
+				const response = await fetchStocks({
+					page: pagination.page,
+					limit: pagination.limit,
+					search: searchTerm,
+					sort: "createdAt",
+					order: "desc",
+				})
+
+				if (isMounted) {
+					setStocks(response.items)
+					setPagination(prev => ({
+						...prev,
+						total: response.meta.total
+					}))
+				}
+			} catch (error) {
+				if (error instanceof Error && error.name !== 'AbortError') {
+					console.error("Failed to fetch stocks:", error)
+				}
+			} finally {
+				if (isMounted) {
+					setLoading(false)
+				}
 			}
-		}, 300)
+		}
 
-		return () => clearTimeout(timeoutId)
+		// Only fetch if it's the initial load or if search/pagination changes
+		if (initialLoadRef.current || searchTerm || pagination.page !== 1) {
+			const timeoutId = setTimeout(() => {
+				fetchData()
+			}, searchTerm ? 300 : 0)
+
+			return () => {
+				clearTimeout(timeoutId)
+				controller.abort()
+			}
+		} else {
+			initialLoadRef.current = false
+		}
+
+		return () => {
+			isMounted = false
+			controller.abort()
+		}
+	}, [searchTerm, pagination.page, pagination.limit])
+
+	// Reset to page 1 when search term changes
+	useEffect(() => {
+		if (searchTerm !== '') {
+			setPagination(prev => ({
+				...prev,
+				page: 1
+			}))
+		}
 	}, [searchTerm])
 
 	const handleOpenForm = () => {
@@ -172,7 +221,41 @@ export default function StocksPage() {
 								</tr>
 							</thead>
 							<tbody>
-								{stocks.length === 0 ? (
+								{loading ? (
+									// Show skeleton loaders when data is loading
+									[...Array(5)].map((_, index) => (
+										<tr key={index} className="border-b border-gray-100">
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-24" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-20" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-16" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-12" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-6 w-16" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-20" />
+											</td>
+											<td className="py-3 px-4">
+												<Skeleton className="h-4 w-24" />
+											</td>
+											<td className="py-3 px-4">
+												<div className="flex space-x-2">
+													<Skeleton className="h-8 w-8 rounded" />
+													<Skeleton className="h-8 w-8 rounded" />
+													<Skeleton className="h-8 w-8 rounded" />
+												</div>
+											</td>
+										</tr>
+									))
+								) : stocks.length === 0 ? (
 									<tr>
 										<td colSpan={8}>
 											<CenteredEmptyState
