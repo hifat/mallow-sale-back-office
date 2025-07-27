@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Search, Edit, Trash2, Eye, Package } from "lucide-react"
 import { InventoryForm } from "@/components/inventory-form"
 import { InventoryDetails } from "@/components/inventory-details"
@@ -22,7 +23,7 @@ import { useTranslation } from "@/hooks/use-translation";
 
 export default function InventoryPage() {
   const { t } = useTranslation()
-  const [inventory, setInventory] = useState<InventoryItem[]>([])
+  const [inventories, setInventory] = useState<InventoryItem[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
@@ -34,30 +35,39 @@ export default function InventoryPage() {
     setLoading(true)
     fetchInventories()
       .then(setInventory)
-      .catch((e) => console.error(e))
+      .catch((e) => console.error("Failed to fetch inventory:", e))
       .finally(() => setLoading(false))
   }, [])
 
-  const filteredInventory = inventory.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-
+  const filteredInventory = inventories.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  
   const handleSave = async (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => {
     setLoading(true)
     try {
       if (editingItem) {
-        const updated = await updateInventory(editingItem.id, data)
-        setInventory((prev) =>
-          prev.map((item) =>
-            item.id === editingItem.id ? { ...item, ...data, updatedAt: new Date().toISOString().split("T")[0] } : item,
-          ),
+        await updateInventory(editingItem.id, data)
+        setInventory(prev =>
+          prev.map(item =>
+            item.id === editingItem.id 
+              ? { 
+                  ...item, 
+                  ...data, 
+                  updatedAt: new Date().toISOString().split("T")[0] 
+                } 
+              : item
+          )
         )
       } else {
-        const created = await createInventory(data)
-        // Refetch the inventory list to ensure all data (including unit name) is up-to-date
+        await createInventory(data)
+        // Refetch to ensure all data is up-to-date
         const latestInventory = await fetchInventories()
         setInventory(latestInventory)
       }
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.error("Error saving inventory:", error)
+      throw error // Re-throw to let the form handle the error
     } finally {
       setShowForm(false)
       setEditingItem(null)
@@ -66,12 +76,15 @@ export default function InventoryPage() {
   }
 
   const handleDelete = async (item: InventoryItem) => {
+    if (!item) return
+    
     setLoading(true)
     try {
       await deleteInventory(item.id)
-      setInventory((prev) => prev.filter((i) => i.id !== item.id))
-    } catch (e) {
-      console.error(e)
+      setInventory(prev => prev.filter(i => i.id !== item.id))
+    } catch (error) {
+      console.error("Error deleting inventory:", error)
+      throw error // Re-throw to let the dialog handle the error
     } finally {
       setDeletingItem(null)
       setLoading(false)
@@ -83,17 +96,8 @@ export default function InventoryPage() {
     setShowForm(true)
   }
 
-  const handleOpenForm = async () => {
-    setLoading(true)
-    try {
-      const latestInventory = await fetchInventories()
-      setInventory(latestInventory)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoading(false)
-      setShowForm(true)
-    }
+  const handleOpenForm = () => {
+    setShowForm(true)
   }
 
   return (
@@ -140,13 +144,50 @@ export default function InventoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInventory.length === 0 ? (
+                  {loading ? (
+                    // Skeleton loading state
+                    Array(5).fill(0).map((_, index) => (
+                      <tr key={`skeleton-${index}`} className="border-b border-gray-100">
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-32" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-16" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-16" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-12" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex space-x-2">
+                            <Skeleton className="h-8 w-8 rounded-md" />
+                            <Skeleton className="h-8 w-8 rounded-md" />
+                            <Skeleton className="h-8 w-8 rounded-md" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : filteredInventory.length === 0 ? (
                     <tr>
                       <td colSpan={9}>
                         <CenteredEmptyState
                           icon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
-                          title="No inventory items found"
-                          subtitle="Create your first inventory item to get started"
+                          title={t("inventory.emptyTitle")}
+                          subtitle={t("inventory.emptySubtitle")}
                         />
                       </td>
                     </tr>
@@ -227,7 +268,7 @@ export default function InventoryPage() {
 
       {showDetails && (
         <InventoryDetails
-          item={inventory.find((i) => i.id === showDetails)!}
+          item={inventories.find((i) => i.id === showDetails)!}
           onClose={() => setShowDetails(null)}
           onEdit={(item) => {
             setShowDetails(null)

@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -11,173 +13,161 @@ import { StockDetails } from "@/components/stock-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { useTranslation } from "@/hooks/use-translation"
 import {
-	fetchStocks,
-	createStock,
-	updateStock,
-	deleteStock,
-	Stock,
-	StockPayload,
-	StockListParams,
+  fetchStocks,
+  createStock,
+  updateStock,
+  deleteStock,
+  Stock,
+  StockPayload,
 } from "@/lib/stock-api"
 import { formatDate } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 
 export default function StocksPage() {
-	const { t } = useTranslation()
-	const [stocks, setStocks] = useState<Stock[]>([])
-	const [searchTerm, setSearchTerm] = useState("")
-	const [showForm, setShowForm] = useState(false)
-	const [showDetails, setShowDetails] = useState<string | null>(null)
-	const [editingItem, setEditingItem] = useState<Stock | null>(null)
-	const [deletingItem, setDeletingItem] = useState<Stock | null>(null)
-	const [loading, setLoading] = useState(true)
-	const [pagination, setPagination] = useState({
-		page: 1,
-		limit: 10,
-		total: 0,
-	})
-	
-	// Use ref to track initial load and prevent double fetch in development
-	const initialLoadRef = useRef(true)
+  const { t } = useTranslation()
+  const [stocks, setStocks] = useState<Stock[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [showForm, setShowForm] = useState(false)
+  const [showDetails, setShowDetails] = useState<string | null>(null)
+  const [editingItem, setEditingItem] = useState<Stock | null>(null)
+  const [deletingItem, setDeletingItem] = useState<Stock | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+  })
 
-	const loadStocks = async (params?: StockListParams) => {
-		setLoading(true)
-		try {
-			const response = await fetchStocks({
-				page: pagination.page,
-				limit: pagination.limit,
-				search: searchTerm,
-				sort: "createdAt",
-				order: "desc",
-				...params,
-			})
-			setStocks(response.items)
-			setPagination(prev => ({
-				...prev,
-				total: response.meta.total,
-			}))
-		} catch (error) {
-			console.error("Failed to fetch stocks:", error)
-		} finally {
-			setLoading(false)
-		}
-	}
+  // Load stocks on component mount and when pagination/search changes
+  useEffect(() => {
+    const loadStocks = async () => {
+      setLoading(true)
+      try {
+        const response = await fetchStocks({
+          page: pagination.page,
+          limit: pagination.limit,
+          search: searchTerm,
+          sort: "createdAt",
+          order: "desc"
+        })
+        
+        setStocks(response.items)
+        setPagination(prev => ({
+          ...prev,
+          total: response.meta.total
+        }))
+      } catch (error) {
+        console.error("Failed to fetch stocks:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-	useEffect(() => {
-		let isMounted = true
-		const controller = new AbortController()
+    loadStocks()
+  }, [pagination.page, pagination.limit, searchTerm])
 
-		const fetchData = async () => {
-			try {
-				setLoading(true)
-				const response = await fetchStocks({
-					page: pagination.page,
-					limit: pagination.limit,
-					search: searchTerm,
-					sort: "createdAt",
-					order: "desc",
-				})
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    if (searchTerm !== '') {
+      setPagination(prev => ({
+        ...prev,
+        page: 1
+      }))
+    }
+  }, [searchTerm])
 
-				if (isMounted) {
-					setStocks(response.items)
-					setPagination(prev => ({
-						...prev,
-						total: response.meta.total
-					}))
-				}
-			} catch (error) {
-				if (error instanceof Error && error.name !== 'AbortError') {
-					console.error("Failed to fetch stocks:", error)
-				}
-			} finally {
-				if (isMounted) {
-					setLoading(false)
-				}
-			}
-		}
+  const handleSave = async (data: StockPayload) => {
+    setLoading(true)
+    try {
+      if (editingItem) {
+        await updateStock(editingItem.id, data)
+      } else {
+        await createStock(data)
+      }
+      
+      // Refresh the list
+      const response = await fetchStocks({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: searchTerm,
+        sort: "createdAt",
+        order: "desc"
+      })
+      
+      setStocks(response.items)
+      setPagination(prev => ({
+        ...prev,
+        total: response.meta.total
+      }))
+      
+      setShowForm(false)
+      setEditingItem(null)
+    } catch (error) {
+      console.error("Failed to save stock:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-		// Only fetch if it's the initial load or if search/pagination changes
-		if (initialLoadRef.current || searchTerm || pagination.page !== 1) {
-			const timeoutId = setTimeout(() => {
-				fetchData()
-			}, searchTerm ? 300 : 0)
+  const handleDeleteClick = (item: Stock) => {
+    setDeletingItem(item)
+  }
 
-			return () => {
-				clearTimeout(timeoutId)
-				controller.abort()
-			}
-		} else {
-			initialLoadRef.current = false
-		}
+  const handleCloseDelete = () => {
+    setDeletingItem(null)
+  }
 
-		return () => {
-			isMounted = false
-			controller.abort()
-		}
-	}, [searchTerm, pagination.page, pagination.limit])
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return
+    
+    setLoading(true)
+    try {
+      await deleteStock(deletingItem.id)
+      
+      // Refresh the list
+      const response = await fetchStocks({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: searchTerm,
+        sort: "createdAt",
+        order: "desc"
+      })
+      
+      setStocks(response.items)
+      setPagination(prev => ({
+        ...prev,
+        total: response.meta.total
+      }))
+      
+      setDeletingItem(null)
+    } catch (error) {
+      console.error("Failed to delete stock:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-	// Reset to page 1 when search term changes
-	useEffect(() => {
-		if (searchTerm !== '') {
-			setPagination(prev => ({
-				...prev,
-				page: 1
-			}))
-		}
-	}, [searchTerm])
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, page: newPage }))
+  }
 
-	const handleOpenForm = () => {
-		setEditingItem(null)
-		setShowForm(true)
-	}
+  const handleOpenForm = () => {
+    setEditingItem(null)
+    setShowForm(true)
+  }
 
-	const handleEdit = (item: Stock) => {
-		setEditingItem(item)
-		setShowForm(true)
-	}
+  const handleEdit = (item: Stock) => {
+    setEditingItem(item)
+    setShowForm(true)
+  }
 
-	const handleCloseForm = () => {
-		setShowForm(false)
-		setEditingItem(null)
-	}
+  const handleCloseForm = () => {
+    setShowForm(false)
+    setEditingItem(null)
+  }
 
-	const handleSave = async (data: StockPayload) => {
-		setLoading(true)
-		try {
-			if (editingItem) {
-				await updateStock(editingItem.id, data)
-			} else {
-				await createStock(data)
-			}
-			await loadStocks()
-			handleCloseForm()
-		} catch (error) {
-			console.error("Failed to save stock:", error)
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	const handleDelete = async () => {
-		if (!deletingItem) return
-		setLoading(true)
-		try {
-			await deleteStock(deletingItem.id)
-			await loadStocks()
-			setDeletingItem(null)
-		} catch (error) {
-			console.error("Failed to delete stock:", error)
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	const handlePageChange = (newPage: number) => {
-		setPagination(prev => ({ ...prev, page: newPage }))
-	}
-
-	const totalPages = Math.ceil(pagination.total / pagination.limit)
+  const totalPages = Math.ceil(pagination.total / pagination.limit)
 
 	return (
 		<div className="space-y-6">
@@ -324,7 +314,7 @@ export default function StocksPage() {
 													<Button
 														variant="ghost"
 														size="sm"
-														onClick={() => setDeletingItem(stock)}
+														onClick={() => handleDeleteClick(stock)}
 														className="text-red-600 hover:text-red-800 hover:bg-red-50"
 													>
 														<Trash2 className="h-4 w-4" />
@@ -386,7 +376,7 @@ export default function StocksPage() {
 			{deletingItem && (
 				<DeleteConfirmDialog
 					onCancel={() => setDeletingItem(null)}
-					onConfirm={handleDelete}
+					onConfirm={handleConfirmDelete}
 					title="Delete Stock Entry"
 					description={`Are you sure you want to delete this stock entry? This action cannot be undone.`}
 				/>
