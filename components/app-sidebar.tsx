@@ -4,6 +4,7 @@ import type * as React from "react"
 import { Package, ChefHat, Scale, BarChart3, Settings, LogOut, Warehouse } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useI18n } from "@/contexts/i18n-context"
 
 import {
   Sidebar,
@@ -19,48 +20,56 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: BarChart3,
-    },
-    {
-      title: "Inventory",
-      url: "/inventory",
-      icon: Package,
-    },
-    {
-      title: "Stocks",
-      url: "/stocks",
-      icon: Warehouse,
-    },
-    {
-      title: "Suppliers",
-      url: "/suppliers",
-      icon: Package,
-    },
-    {
-      title: "Recipes",
-      url: "/recipes",
-      icon: ChefHat,
-    },
-    {
-      title: "Usage Units",
-      url: "/usage-units",
-      icon: Scale,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings,
-    },
-  ],
-}
+const getNavItems = (t: (key: string) => string) => [
+  {
+    titleKey: "navigation.dashboard",
+    title: t("navigation.dashboard"),
+    url: "/dashboard",
+    icon: BarChart3,
+  },
+  {
+    titleKey: "navigation.inventory",
+    title: t("navigation.inventory"),
+    url: "/inventory",
+    icon: Package,
+  },
+  {
+    titleKey: "navigation.stocks",
+    title: t("navigation.stocks"),
+    url: "/stocks",
+    icon: Warehouse,
+  },
+  {
+    titleKey: "navigation.suppliers",
+    title: t("navigation.suppliers"),
+    url: "/suppliers",
+    icon: Package,
+  },
+  {
+    titleKey: "navigation.recipes",
+    title: t("navigation.recipes"),
+    url: "/recipes",
+    icon: ChefHat,
+  },
+  {
+    titleKey: "navigation.usageUnits",
+    title: t("navigation.usageUnits"),
+    url: "/usage-units",
+    icon: Scale,
+  },
+  {
+    titleKey: "navigation.settings",
+    title: t("navigation.settings"),
+    url: "/settings",
+    icon: Settings,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const { t } = useI18n()
+  
+  const navItems = getNavItems(t)
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="bg-white" {...props}>
@@ -86,8 +95,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel className="text-gray-600">Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}

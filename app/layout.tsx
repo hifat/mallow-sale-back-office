@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Header } from "@/components/header"
 import { Toaster } from "@/components/ui/toaster"
+import { I18nProvider } from "@/contexts/i18n-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,16 +24,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SidebarProvider defaultOpen={true}>
-          <div className="flex h-screen w-full">
-            <AppSidebar />
-            <div className="flex flex-1 flex-col min-w-0 transition-all duration-300">
-              <Header />
-              <main className="flex-1 p-6 bg-gray-50 overflow-auto">{children}</main>
+        <I18nProvider>
+          <SidebarProvider defaultOpen={true}>
+            <div className="flex h-screen w-full">
+              <AppSidebar />
+              <div className="flex flex-1 flex-col min-w-0 transition-all duration-300">
+                <Header />
+                <main className="flex-1 p-6 bg-gray-50 overflow-auto">{children}</main>
+              </div>
             </div>
-          </div>
-        </SidebarProvider>
-        <Toaster />
+          </SidebarProvider>
+          <Toaster />
+        </I18nProvider>
       </body>
     </html>
   )

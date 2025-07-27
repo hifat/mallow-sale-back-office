@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Bell } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { LanguageToggle } from "@/components/language-toggle"
 
 export function Header() {
   const pathname = usePathname()
@@ -55,6 +56,7 @@ export function Header() {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-2">
+        <LanguageToggle />
         <Button variant="ghost" size="icon" className="hover:bg-yellow-50">
           <Bell className="h-4 w-4" />
         </Button>

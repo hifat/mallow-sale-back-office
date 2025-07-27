@@ -1,0 +1,97 @@
+{
+  "common": {
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "add": "เพิ่ม",
+    "search": "ค้นหา",
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "confirm": "ยืนยัน",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "actions": "การดำเนินการ",
+    "name": "ชื่อ",
+    "description": "คำอธิบาย",
+    "status": "สถานะ",
+    "createdAt": "สร้างเมื่อ",
+    "updatedAt": "อัปเดตเมื่อ"
+  },
+  "navigation": {
+    "dashboard": "แดชบอร์ด",
+    "inventory": "คลังสินค้า",
+    "stocks": "สต็อก",
+    "suppliers": "ผู้จัดจำหน่าย",
+    "recipes": "สูตรอาหาร",
+    "usageUnits": "หน่วยการใช้งาน",
+    "settings": "การตั้งค่า"
+  },
+  "dashboard": {
+    "title": "แดชบอร์ด",
+    "welcome": "ยินดีต้อนรับสู่ระบบจัดการหลังบ้าน Mallow Sale",
+    "overview": "ภาพรวม"
+  },
+  "inventory": {
+    "title": "คลังสินค้า",
+    "addItem": "เพิ่มรายการ",
+    "editItem": "แก้ไขรายการ",
+    "deleteItem": "ลบรายการ",
+    "itemName": "ชื่อรายการ",
+    "quantity": "จำนวน",
+    "unit": "หน่วย",
+    "price": "ราคา"
+  },
+  "stocks": {
+    "title": "สต็อก",
+    "addStock": "เพิ่มสต็อก",
+    "editStock": "แก้ไขสต็อก",
+    "deleteStock": "ลบสต็อก",
+    "inventoryId": "รหัสคลังสินค้า",
+    "supplierId": "รหัสผู้จัดจำหน่าย",
+    "purchasePrice": "ราคาซื้อ",
+    "purchaseQuantity": "จำนวนที่ซื้อ",
+    "purchaseUnit": "หน่วยซื้อ",
+    "remark": "หมายเหตุ"
+  },
+  "suppliers": {
+    "title": "ผู้จัดจำหน่าย",
+    "addSupplier": "เพิ่มผู้จัดจำหน่าย",
+    "editSupplier": "แก้ไขผู้จัดจำหน่าย",
+    "deleteSupplier": "ลบผู้จัดจำหน่าย",
+    "supplierName": "ชื่อผู้จัดจำหน่าย",
+    "contact": "ติดต่อ",
+    "address": "ที่อยู่"
+  },
+  "recipes": {
+    "title": "สูตรอาหาร",
+    "addRecipe": "เพิ่มสูตรอาหาร",
+    "editRecipe": "แก้ไขสูตรอาหาร",
+    "deleteRecipe": "ลบสูตรอาหาร",
+    "recipeName": "ชื่อสูตรอาหาร",
+    "ingredients": "ส่วนผสม"
+  },
+  "usageUnits": {
+    "title": "หน่วยการใช้งาน",
+    "addUnit": "เพิ่มหน่วย",
+    "editUnit": "แก้ไขหน่วย",
+    "deleteUnit": "ลบหน่วย",
+    "unitName": "ชื่อหน่วย",
+    "abbreviation": "ตัวย่อ"
+  },
+  "settings": {
+    "title": "การตั้งค่า",
+    "language": "ภาษา",
+    "theme": "ธีม",
+    "profile": "โปรไฟล์"
+  },
+  "errors": {
+    "invalidInventoryId": "รหัสคลังสินค้าไม่ถูกต้อง",
+    "invalidSupplierId": "รหัสผู้จัดจำหน่ายไม่ถูกต้อง",
+    "invalidUsageUnit": "หน่วยการใช้งานไม่ถูกต้อง",
+    "recordNotFound": "ไม่พบข้อมูล",
+    "validationError": "ข้อผิดพลาดในการตรวจสอบ",
+    "networkError": "ข้อผิดพลาดเครือข่าย"
+  }
+}

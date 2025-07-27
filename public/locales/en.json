@@ -1,0 +1,97 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "stocks": "Stocks",
+    "suppliers": "Suppliers",
+    "recipes": "Recipes",
+    "usageUnits": "Usage Units",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Mallow Sale Back Office",
+    "overview": "Overview"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "addItem": "Add Item",
+    "editItem": "Edit Item",
+    "deleteItem": "Delete Item",
+    "itemName": "Item Name",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "price": "Price"
+  },
+  "stocks": {
+    "title": "Stocks",
+    "addStock": "Add Stock",
+    "editStock": "Edit Stock",
+    "deleteStock": "Delete Stock",
+    "inventoryId": "Inventory ID",
+    "supplierId": "Supplier ID",
+    "purchasePrice": "Purchase Price",
+    "purchaseQuantity": "Purchase Quantity",
+    "purchaseUnit": "Purchase Unit",
+    "remark": "Remark"
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "addSupplier": "Add Supplier",
+    "editSupplier": "Edit Supplier",
+    "deleteSupplier": "Delete Supplier",
+    "supplierName": "Supplier Name",
+    "contact": "Contact",
+    "address": "Address"
+  },
+  "recipes": {
+    "title": "Recipes",
+    "addRecipe": "Add Recipe",
+    "editRecipe": "Edit Recipe",
+    "deleteRecipe": "Delete Recipe",
+    "recipeName": "Recipe Name",
+    "ingredients": "Ingredients"
+  },
+  "usageUnits": {
+    "title": "Usage Units",
+    "addUnit": "Add Unit",
+    "editUnit": "Edit Unit",
+    "deleteUnit": "Delete Unit",
+    "unitName": "Unit Name",
+    "abbreviation": "Abbreviation"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "profile": "Profile"
+  },
+  "errors": {
+    "invalidInventoryId": "Invalid inventory ID",
+    "invalidSupplierId": "Invalid supplier ID",
+    "invalidUsageUnit": "Invalid usage unit",
+    "recordNotFound": "Record not found",
+    "validationError": "Validation error",
+    "networkError": "Network error"
+  }
+}

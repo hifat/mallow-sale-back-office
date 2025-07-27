@@ -8,6 +8,7 @@ import { Plus, Search, Edit, Trash2, Eye, Package2 } from "lucide-react"
 import { StockForm } from "@/components/stock-form"
 import { StockDetails } from "@/components/stock-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { useTranslation } from "@/hooks/use-translation"
 import {
 	fetchStocks,
 	createStock,
@@ -22,6 +23,7 @@ import { ListCardTable } from "@/components/list-card-table"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 
 export default function StocksPage() {
+	const { t } = useTranslation()
 	const [stocks, setStocks] = useState<Stock[]>([])
 	const [searchTerm, setSearchTerm] = useState("")
 	const [showForm, setShowForm] = useState(false)
