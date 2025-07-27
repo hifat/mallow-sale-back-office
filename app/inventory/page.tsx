@@ -18,8 +18,10 @@ import {
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
+import { useTranslation } from "@/hooks/use-translation";
 
 export default function InventoryPage() {
+  const { t } = useTranslation()
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -99,22 +101,22 @@ export default function InventoryPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-            <p className="text-gray-600 mt-2">Manage your inventory items and stock levels</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t("inventory.management")}</h1>
+            <p className="text-gray-600 mt-2">{t("inventory.subtitle")}</p>
           </div>
           <Button onClick={handleOpenForm} className="bg-yellow-500 hover:bg-yellow-600 text-white">
             <Plus className="h-4 w-4 mr-2" />
-            Add Item
+            {t("inventory.addItem")}
           </Button>
         </div>
 
         <ListCardTable
-          title="Inventory Items"
+          title={t("inventory.title")}
           search={
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search inventory..."
+                placeholder={t("common.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-yellow-200 focus:border-yellow-500"
@@ -126,15 +128,15 @@ export default function InventoryPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Yield %</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actual Price</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Cost/Unit</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Quantity</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Unit</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Updated</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.name")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.price")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.yield")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.actualPrice")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.costPerUnit")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.quantity")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.unit")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("dashboard.updated")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>

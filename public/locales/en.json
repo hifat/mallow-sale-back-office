@@ -17,7 +17,10 @@
     "description": "Description",
     "status": "Status",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "logout": "Logout",
+    "management": "Management",
+    "searchPlaceholder": "Search..."
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -31,20 +34,39 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome to Mallow Sale Back Office",
-    "overview": "Overview"
+    "overview": "Overview",
+    "totalInventoryItems": "Total Inventory Items",
+    "activeRecipes": "Active Recipes",
+    "usageUnits": "Usage Units",
+    "monthlyGrowth": "Monthly Growth",
+    "recentInventoryUpdates": "Recent Inventory Updates",
+    "popularRecipes": "Popular Recipes",
+    "updated": "Updated",
+    "added": "Added",
+    "ingredients": "ingredients"
   },
   "inventory": {
     "title": "Inventory",
+    "management": "Inventory Management",
+    "subtitle": "Manage your inventory items and stock levels",
     "addItem": "Add Item",
     "editItem": "Edit Item",
     "deleteItem": "Delete Item",
     "itemName": "Item Name",
     "quantity": "Quantity",
     "unit": "Unit",
-    "price": "Price"
+    "price": "Price",
+    "supplier": "Supplier",
+    "description": "Description",
+    "yield": "Yield %",
+    "actualPrice": "Actual Price",
+    "costPerUnit": "Cost/Unit"
   },
   "stocks": {
     "title": "Stocks",
+    "management": "Stock Management",
+    "subtitle": "Manage your stock entries and purchase records",
+    "entries": "Stock Entries",
     "addStock": "Add Stock",
     "editStock": "Edit Stock",
     "deleteStock": "Delete Stock",
@@ -53,7 +75,11 @@
     "purchasePrice": "Purchase Price",
     "purchaseQuantity": "Purchase Quantity",
     "purchaseUnit": "Purchase Unit",
-    "remark": "Remark"
+    "remark": "Remark",
+    "inventory": "Inventory",
+    "supplier": "Supplier",
+    "quantity": "Quantity",
+    "created": "Created"
   },
   "suppliers": {
     "title": "Suppliers",

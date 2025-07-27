@@ -17,7 +17,10 @@
     "description": "คำอธิบาย",
     "status": "สถานะ",
     "createdAt": "สร้างเมื่อ",
-    "updatedAt": "อัปเดตเมื่อ"
+    "updatedAt": "อัปเดตเมื่อ",
+    "logout": "ออกจากระบบ",
+    "management": "การจัดการ",
+    "searchPlaceholder": "ค้นหา..."
   },
   "navigation": {
     "dashboard": "แดชบอร์ด",
@@ -31,20 +34,39 @@
   "dashboard": {
     "title": "แดชบอร์ด",
     "welcome": "ยินดีต้อนรับสู่ระบบจัดการหลังบ้าน Mallow Sale",
-    "overview": "ภาพรวม"
+    "overview": "ภาพรวม",
+    "totalInventoryItems": "รายการคลังสินค้าทั้งหมด",
+    "activeRecipes": "สูตรอาหารที่ใช้งาน",
+    "usageUnits": "หน่วยการใช้งาน",
+    "monthlyGrowth": "การเติบโตรายเดือน",
+    "recentInventoryUpdates": "การอัปเดตคลังสินค้าล่าสุด",
+    "popularRecipes": "สูตรอาหารยอดนิยม",
+    "updated": "อัปเดต",
+    "added": "เพิ่ม",
+    "ingredients": "ส่วนผสม"
   },
   "inventory": {
     "title": "คลังสินค้า",
+    "management": "การจัดการคลังสินค้า",
+    "subtitle": "จัดการรายการคลังสินค้าและระดับสต็อกของคุณ",
     "addItem": "เพิ่มรายการ",
     "editItem": "แก้ไขรายการ",
     "deleteItem": "ลบรายการ",
     "itemName": "ชื่อรายการ",
     "quantity": "จำนวน",
     "unit": "หน่วย",
-    "price": "ราคา"
+    "price": "ราคา",
+    "supplier": "ผู้จัดจำหน่าย",
+    "description": "คำอธิบาย",
+    "yield": "ผลผลิต %",
+    "actualPrice": "ราคาจริง",
+    "costPerUnit": "ต้นทุน/หน่วย"
   },
   "stocks": {
     "title": "สต็อก",
+    "management": "การจัดการสต็อก",
+    "subtitle": "จัดการรายการสต็อกและบันทึกการซื้อของคุณ",
+    "entries": "รายการสต็อก",
     "addStock": "เพิ่มสต็อก",
     "editStock": "แก้ไขสต็อก",
     "deleteStock": "ลบสต็อก",
@@ -53,7 +75,11 @@
     "purchasePrice": "ราคาซื้อ",
     "purchaseQuantity": "จำนวนที่ซื้อ",
     "purchaseUnit": "หน่วยซื้อ",
-    "remark": "หมายเหตุ"
+    "remark": "หมายเหตุ",
+    "inventory": "คลังสินค้า",
+    "supplier": "ผู้จัดจำหน่าย",
+    "quantity": "จำนวน",
+    "created": "สร้างเมื่อ"
   },
   "suppliers": {
     "title": "ผู้จัดจำหน่าย",

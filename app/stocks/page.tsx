@@ -139,17 +139,17 @@ export default function StocksPage() {
 				</div>
 				<Button onClick={handleOpenForm} className="bg-yellow-500 hover:bg-yellow-600 text-white">
 					<Plus className="h-4 w-4 mr-2" />
-					Add Stock
+					{t("stocks.addStock")}
 				</Button>
 			</div>
 
 			<ListCardTable
-				title="Stock Entries"
+				title={t("stocks.entries")}
 				search={
 					<div className="relative flex-1 max-w-sm">
 						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
 						<Input
-							placeholder="Search stocks..."
+							placeholder={t("common.searchPlaceholder")}
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
 							className="pl-10 border-yellow-200 focus:border-yellow-500"
@@ -161,14 +161,14 @@ export default function StocksPage() {
 						<table className="w-full">
 							<thead>
 								<tr className="border-b border-gray-200">
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Inventory</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Supplier</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Purchase Price</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Quantity</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Unit</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Remark</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Created</th>
-									<th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.inventory")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.supplier")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.purchasePrice")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.quantity")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.unit")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.remark")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("stocks.created")}</th>
+									<th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.actions")}</th>
 								</tr>
 							</thead>
 							<tbody>

@@ -92,7 +92,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-600">Management</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600">{t("common.management")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -117,9 +117,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="hover:bg-red-50 hover:text-red-700" tooltip="Logout">
+            <SidebarMenuButton className="hover:bg-red-50 hover:text-red-700" tooltip={t("common.logout")}>
               <LogOut className="size-4" />
-              <span>Logout</span>
+              <span>{t("common.logout")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

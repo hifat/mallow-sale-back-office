@@ -16,15 +16,36 @@ import { Button } from "@/components/ui/button"
 import { Bell } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LanguageToggle } from "@/components/language-toggle"
+import { useTranslation } from "@/hooks/use-translation"
 
 export function Header() {
   const pathname = usePathname()
+  const { t } = useTranslation()
 
   const getBreadcrumbs = () => {
     const segments = pathname.split("/").filter(Boolean)
     const breadcrumbs = segments.map((segment, index) => {
       const href = "/" + segments.slice(0, index + 1).join("/")
-      const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace("-", " ")
+      
+      // Translate navigation segments
+      let label = segment.charAt(0).toUpperCase() + segment.slice(1).replace("-", " ")
+      const navigationKey = `navigation.${segment.replace("-", "").toLowerCase()}`
+      
+      // Try to get translation, fallback to formatted segment name
+      const translatedLabel = t(navigationKey)
+      if (translatedLabel !== navigationKey) {
+        label = translatedLabel
+      } else {
+        // Handle special cases
+        switch (segment) {
+          case 'usage-units':
+            label = t('navigation.usageUnits')
+            break
+          default:
+            label = segment.charAt(0).toUpperCase() + segment.slice(1).replace("-", " ")
+        }
+      }
+      
       return { href, label, isLast: index === segments.length - 1 }
     })
     return breadcrumbs
