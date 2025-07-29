@@ -28,6 +28,7 @@
     "stocks": "Stocks",
     "suppliers": "Suppliers",
     "recipes": "Recipes",
+    "promotions": "Promotions",
     "usageUnits": "Usage Units",
     "settings": "Settings"
   },
@@ -44,6 +45,58 @@
     "updated": "Updated",
     "added": "Added",
     "ingredients": "ingredients"
+  },
+  "promotions": {
+    "noPromotions": "No promotions found",
+    "addTitle": "Add Promotion",
+    "getStarted": "Get started by creating a new promotion",
+    "title": "Promotions",
+    "subtitle": "Manage your promotions and special offers",
+    "management": "Promotion Management",
+    "addPromotion": "Add Promotion",
+    "addItem": "Add Promotion",
+    "editPromotion": "Edit Promotion",
+    "promotionDetails": "Promotion Details",
+    "type": "Type",
+    "name": "Name",
+    "detail": "Details",
+    "discount": "Discount",
+    "price": "Price",
+    "value": "Value",
+    "products": "Products",
+    "noProducts": "No products in this promotion",
+    "selectType": "Select promotion type",
+    "namePlaceholder": "Enter promotion name",
+    "detailPlaceholder": "Enter promotion details",
+    "discountPlaceholder": "Enter discount percentage",
+    "pricePlaceholder": "Enter fixed price",
+    "productsPlaceholder": "Select products",
+    "pairDeal": "Pair Deal",
+    "loadingProducts": "Loading products...",
+    "loadingForm": "Loading promotion form...",
+    "loadingDetails": "Loading promotion details...",
+    "notFound": "Promotion not found",
+    "types": {
+      "DISCOUNT": "Discount",
+      "PAIR": "Pair Deal",
+      "FORCE_PRICE": "Fixed Price",
+      "OTHER": "Other"
+    },
+    "deleteConfirm": {
+      "title": "Delete Promotion",
+      "description": "Are you sure you want to delete this promotion? This action cannot be undone.",
+      "success": "Promotion deleted successfully",
+      "error": "Failed to delete promotion"
+    },
+    "saveSuccess": "Promotion saved successfully",
+    "saveError": "Failed to save promotion",
+    "loadError": "Failed to load promotions",
+    "errors": {
+      "failedToLoadRecipes": "Failed to load recipes. Please try again.",
+      "invalidType": "Invalid promotion type",
+      "productsRequired": "Please select at least one product",
+      "saveFailed": "Failed to save promotion"
+    }
   },
   "inventory": {
     "title": "Inventory",
