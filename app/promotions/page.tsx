@@ -30,11 +30,15 @@ export default function PromotionsPage() {
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null)
   const [deletingPromotion, setDeletingPromotion] = useState<Promotion | null>(null)
   const [loading, setLoading] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
 
   useEffect(() => {
     setLoading(true)
     fetchPromotions()
-      .then((res) => setPromotions(res.items))
+      .then((res) => {
+        setPromotions(res.items)
+        setTotalCount(res.meta?.total || 0)
+      })
       .catch((e) => console.error("Failed to fetch promotions:", e))
       .finally(() => setLoading(false))
   }, [])
@@ -121,9 +125,16 @@ export default function PromotionsPage() {
         </div>
 
         <ListCardTable
-          title={t("promotions.title")}
+          title={
+            <div className="flex items-center">
+              <span>{t("promotions.title")}</span>
+              <span className="ml-2 text-sm text-gray-500">
+                ({totalCount} {t("common.list")})
+              </span>
+            </div>
+          }
           search={
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative flex-1 max-w-sm pt-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder={t("common.searchPlaceholder")}

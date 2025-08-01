@@ -1,5 +1,6 @@
 import { UsageUnit, InventoryItem } from './inventory-api'
 import { Supplier } from './supplier-api'
+import { ApiResponse } from './utils';
 
 export interface Stock {
   id: string
@@ -35,16 +36,10 @@ export interface StockListParams {
   fields?: string
 }
 
-export interface StockListResponse {
-  items: Stock[]
-  meta: {
-    total: number
-  }
-}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchStocks(params?: StockListParams): Promise<StockListResponse> {
+export async function fetchStocks(params?: StockListParams): Promise<ApiResponse<Stock>> {
   const url = new URL(`${API_BASE}/stocks`)
   
   if (params) {

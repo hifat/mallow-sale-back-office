@@ -13,8 +13,10 @@ import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById
 import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
 import { ReactSortable } from "react-sortablejs"
+import { useTranslation } from "@/hooks/use-translation";
 
 export default function RecipesPage() {
+  const { t } = useTranslation()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -26,11 +28,15 @@ export default function RecipesPage() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
   const [orderRecipes, setOrderRecipes] = useState<Recipe[]>([])
+  const [totalCount, setTotalCount] = useState(0)
 
   useEffect(() => {
     setLoading(true)
     fetchRecipes()
-      .then(setRecipes)
+      .then((response) => {
+        setRecipes(response.items)
+        setTotalCount(response.meta?.total || 0)
+      })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false))
   }, [])
@@ -48,8 +54,9 @@ export default function RecipesPage() {
     try {
       const orderList = orderRecipes.map((r, idx) => ({ id: r.id, orderNo: idx + 1 }))
       await updateRecipeOrderNo(orderList)
-      const newRecipes = await fetchRecipes()
-      setRecipes(newRecipes)
+      const res = await fetchRecipes()
+      setRecipes(res.items)
+      setTotalCount(res.meta?.total || 0)
       setIsOrdering(false)
       setOrderRecipes([])
     } catch (e) {
@@ -70,8 +77,9 @@ export default function RecipesPage() {
         await createRecipe(data)
       }
       // Always refresh the recipes list after create/update
-      const newRecipes = await fetchRecipes()
-      setRecipes(newRecipes)
+      const res = await fetchRecipes()
+      setRecipes(res.items)
+      setTotalCount(res.meta?.total || 0)
     } catch (e) {
       console.error(e)
     } finally {
@@ -172,10 +180,13 @@ export default function RecipesPage() {
 
         <Card className="border-yellow-200">
           <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center">
+            <div className="flex items-center">
               <ChefHat className="h-5 w-5 mr-2 text-yellow-600" />
-              Recipes
-            </CardTitle>
+              <h1 className="text-3xl font-bold text-gray-900">Recipes</h1>
+              <span className="ml-2 text-sm text-gray-500 self-end mb-1">
+                ({totalCount} {t("common.list")})
+              </span>
+            </div>
             <div className="flex items-center space-x-2">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />

@@ -1,3 +1,5 @@
+import { ApiResponse } from './utils';
+
 export interface UsageUnit {
   code: string
   name: string
@@ -28,7 +30,7 @@ export const DEFAULT_UNITS: UsageUnit[] = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchInventories(params?: { fields?: string; search?: string }) {
+export async function fetchInventories(params?: { fields?: string; search?: string }): Promise<ApiResponse<InventoryItem>> {
   let url = `${API_BASE}/inventories`;
   if (params && (params.fields || params.search)) {
     const searchParams = new URLSearchParams();
@@ -39,7 +41,10 @@ export async function fetchInventories(params?: { fields?: string; search?: stri
   const res = await fetch(url)
   if (!res.ok) throw new Error("Failed to fetch inventories")
   const data = await res.json()
-  return data.items || []
+  return {
+    items: data.items || [],
+    meta: data.meta
+  }
 }
 
 export async function createInventory(item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) {

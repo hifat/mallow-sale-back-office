@@ -125,7 +125,7 @@ export default function UsageUnitsPage() {
             <Scale className="h-5 w-5 mr-2 text-yellow-600" />
             Usage Units
           </CardTitle>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 pt-3">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input

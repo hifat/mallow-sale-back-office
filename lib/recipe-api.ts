@@ -1,5 +1,6 @@
 import { UsageUnit } from "./inventory-api"
 import { calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
+import { ApiResponse } from './utils'
 
 export interface InventoryItem {
   createdAt: string
@@ -79,11 +80,16 @@ export interface RecipePayload {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchRecipes(sort: string = "order_no", order: "asc" | "desc" = "asc"): Promise<Recipe[]> {
-  const res = await fetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
-  if (!res.ok) throw new Error("Failed to fetch recipes")
-  const data = await res.json()
-  return data.items || []
+export const fetchRecipes = async (sort: string = "order_no", order: "asc" | "desc" = "asc"): Promise<ApiResponse<Recipe>> => {
+  const response = await fetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch recipes')
+  }
+  const data = await response.json()
+  return {
+    items: data.items.map((r: any) => new Recipe(r)),
+    meta: data.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
+  }
 }
 
 export async function createRecipe(recipe: RecipePayload) {

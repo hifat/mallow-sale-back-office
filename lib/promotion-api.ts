@@ -1,3 +1,5 @@
+import { ApiResponse } from './utils';
+
 export interface Product {
   id: string
   name: string
@@ -57,7 +59,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v
 /**
  * Fetches a list of promotions with optional pagination and filtering
  */
-export async function fetchPromotions(params?: PromotionListParams): Promise<PromotionListResponse> {
+export async function fetchPromotions(params?: PromotionListParams): Promise<ApiResponse<Promotion>> {
   const url = new URL(`${API_BASE}/promotions`)
   
   if (params) {
@@ -74,7 +76,11 @@ export async function fetchPromotions(params?: PromotionListParams): Promise<Pro
     const errorData = await res.json().catch(() => ({}))
     throw new Error(errorData.message || "Failed to fetch promotions")
   }
-  return await res.json()
+  const data = await res.json() 
+  return {
+    items: data.items,
+    meta: data.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
+  }
 }
 
 /**

@@ -17,6 +17,7 @@ import { formatDate } from "@/lib/utils";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 import { FormActionRow } from "@/components/ui/FormActionRow";
+import { useTranslation } from "@/hooks/use-translation";
 
 function SupplierForm({ supplier, onSave, onCancel, loading }: {
   supplier?: Supplier | null;
@@ -91,6 +92,8 @@ function SupplierForm({ supplier, onSave, onCancel, loading }: {
 }
 
 function SupplierDetails({ supplier, onClose, onEdit }: { supplier: Supplier; onClose: () => void; onEdit: (supplier: Supplier) => void }) {
+  const { t } = useTranslation()
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -107,7 +110,7 @@ function SupplierDetails({ supplier, onClose, onEdit }: { supplier: Supplier; on
               className="border-yellow-500 text-yellow-600 hover:bg-yellow-50"
             >
               <Edit className="h-4 w-4 mr-2" />
-              Edit
+              {t('common.edit')}
             </Button>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -131,7 +134,7 @@ function SupplierDetails({ supplier, onClose, onEdit }: { supplier: Supplier; on
               />
             </div>
             <div className="text-xl font-bold text-gray-900">{supplier.name}</div>
-            <div className="text-xs text-gray-500">Updated: {formatDate(supplier.updatedAt)}</div>
+            <div className="text-xs text-gray-500">{t('suppliers.updatedAt')} {formatDate(supplier.updatedAt)}</div>
           </div>
         </CardContent>
       </Card>
@@ -140,6 +143,7 @@ function SupplierDetails({ supplier, onClose, onEdit }: { supplier: Supplier; on
 }
 
 export default function SuppliersPage() {
+  const { t } = useTranslation();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -147,12 +151,14 @@ export default function SuppliersPage() {
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState<Supplier | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchList = async (search = "") => {
     setLoading(true);
     try {
-      const data = await fetchSuppliers(search);
-      setSuppliers(data);
+      const response = await fetchSuppliers(search);
+      setSuppliers(response.items);
+      setTotalCount(response.meta?.total || 0);
     } catch (e) {
       console.error(e);
     } finally {
@@ -202,33 +208,33 @@ export default function SuppliersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Supplier Management</h1>
-            <p className="text-gray-600 mt-2">Manage your suppliers here</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('suppliers.supplierManagement')}</h1>
+            <p className="text-gray-600 mt-2">{t('suppliers.manageSuppliersHere')}</p>
           </div>
           <Button onClick={() => { setShowForm(true); setEditingSupplier(null); }} className="bg-yellow-500 hover:bg-yellow-600 text-white">
-            <Plus className="h-4 w-4 mr-2" /> Add Supplier
+            <Plus className="h-4 w-4 mr-2" /> {t('suppliers.addSupplier')}
           </Button>
         </div>
         <Card className="border-yellow-200">
           <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center">
+            <div className="flex items-center">
               <Package className="h-5 w-5 mr-2 text-yellow-600" />
-              Suppliers
-            </CardTitle>
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search suppliers..."
-                  value={searchTerm}
-                  onChange={e => {
-                    setSearchTerm(e.target.value);
-                    fetchList(e.target.value);
-                  }}
-                  className="pl-10 border-yellow-200 focus:border-yellow-500"
-                />
-              </div>
-              <div className="flex-1" />
+              <h1 className="text-3xl font-bold text-gray-900">{t('navigation.suppliers')}</h1>
+              <span className="ml-2 text-sm text-gray-500 self-end mb-1">
+                ({totalCount} {t('suppliers.title', { count: totalCount })})
+              </span>
+            </div>
+            <div className="relative flex-1 max-w-sm pt-3">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder={t('common.searchPlaceholder')}
+                value={searchTerm}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                  fetchList(e.target.value);
+                }}
+                className="pl-10 border-yellow-200 focus:border-yellow-500"
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -255,18 +261,21 @@ export default function SuppliersPage() {
                         <CardTitle className="text-lg text-gray-900 truncate max-w-[12rem] md:max-w-[16rem] lg:max-w-[24rem]">
                           {supplier.name}
                         </CardTitle>
-                        <div className="text-xs text-gray-500 mt-1">Updated: {formatDate(supplier.updatedAt)}</div>
+                        <div className="text-xs text-gray-500 mt-1">{t('suppliers.updatedAt')} {formatDate(supplier.updatedAt)}</div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Button variant="ghost" size="sm" onClick={() => setShowDetails(supplier)} className="hover:bg-yellow-50">
                         <Eye className="h-4 w-4" />
+                        <span className="sr-only">{t('common.view')}</span>
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => { setEditingSupplier(supplier); setShowForm(true); }} className="hover:bg-yellow-50">
                         <Edit className="h-4 w-4" />
+                        <span className="sr-only">{t('common.edit')}</span>
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => setDeletingSupplier(supplier)} className="hover:bg-red-50 hover:text-red-600">
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <span className="sr-only">{t('common.delete')}</span>
                       </Button>
                     </div>
                   </CardHeader>
@@ -277,8 +286,8 @@ export default function SuppliersPage() {
             {filteredSuppliers.length === 0 && (
               <CenteredEmptyState
                 icon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
-                title="No suppliers found"
-                subtitle="Create your first supplier to get started"
+                title={t('suppliers.noSuppliersFound')}
+                subtitle={t('suppliers.createFirstSupplier')}
               />
             )}
           </CardContent>

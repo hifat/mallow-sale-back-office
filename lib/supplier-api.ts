@@ -1,3 +1,5 @@
+import { ApiResponse } from './utils';
+
 export interface Supplier {
   createdAt: string;
   id: string;
@@ -13,13 +15,16 @@ export interface SupplierPayload {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
-export async function fetchSuppliers(search = ""): Promise<Supplier[]> {
+export async function fetchSuppliers(search = ""): Promise<ApiResponse<Supplier>> {
   const url = new URL(`${API_BASE}/suppliers`);
   if (search) url.searchParams.set("search", search);
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error("Failed to fetch suppliers");
   const data = await res.json();
-  return data.items || [];
+  return {
+    items: data.items || [],
+    meta: data.meta || { total: 0, page: 1, limit: 10, totalPages: 1 }
+  };
 }
 
 export async function createSupplier(payload: SupplierPayload): Promise<Supplier> {

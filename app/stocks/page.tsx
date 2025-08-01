@@ -185,7 +185,7 @@ export default function StocksPage() {
 			<ListCardTable
 				title={t("stocks.entries")}
 				search={
-					<div className="relative flex-1 max-w-sm">
+					<div className="relative flex-1 max-w-sm pt-3">
 						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
 						<Input
 							placeholder={t("common.searchPlaceholder")}

@@ -20,7 +20,8 @@
     "updatedAt": "Updated At",
     "logout": "Logout",
     "management": "Management",
-    "searchPlaceholder": "Search..."
+    "searchPlaceholder": "Search...",
+    "list": "List"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -141,7 +142,13 @@
     "deleteSupplier": "Delete Supplier",
     "supplierName": "Supplier Name",
     "contact": "Contact",
-    "address": "Address"
+    "address": "Address",
+    "supplier": "Supplier",
+    "supplierManagement": "Supplier Management",
+    "manageSuppliersHere": "Manage your suppliers here",
+    "noSuppliersFound": "No suppliers found",
+    "createFirstSupplier": "Create your first supplier to get started",
+    "updatedAt": "Updated:"
   },
   "recipes": {
     "title": "Recipes",

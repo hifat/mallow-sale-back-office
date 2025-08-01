@@ -20,7 +20,8 @@
     "updatedAt": "อัปเดตเมื่อ",
     "logout": "ออกจากระบบ",
     "management": "การจัดการ",
-    "searchPlaceholder": "ค้นหา..."
+    "searchPlaceholder": "ค้นหา...",
+    "list": "รายการ"
   },
   "navigation": {
     "dashboard": "แดชบอร์ด",
@@ -143,7 +144,13 @@
     "deleteSupplier": "ลบผู้จัดจำหน่าย",
     "supplierName": "ชื่อผู้จัดจำหน่าย",
     "contact": "ติดต่อ",
-    "address": "ที่อยู่"
+    "address": "ที่อยู่",
+    "supplier": "ผู้จัดจำหน่าย",
+    "supplierManagement": "การจัดการผู้จัดจำหน่าย",
+    "manageSuppliersHere": "จัดการผู้จัดจำหน่ายของคุณที่นี่",
+    "noSuppliersFound": "ไม่พบผู้จัดจำหน่าย",
+    "createFirstSupplier": "สร้างผู้จัดจำหน่ายรายแรกของคุณเพื่อเริ่มต้น",
+    "updatedAt": "อัปเดตล่าสุด:"
   },
   "recipes": {
     "title": "สูตรอาหาร",

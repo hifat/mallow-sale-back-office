@@ -30,11 +30,15 @@ export default function InventoryPage() {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
   const [deletingItem, setDeletingItem] = useState<InventoryItem | null>(null)
   const [loading, setLoading] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
 
   useEffect(() => {
     setLoading(true)
     fetchInventories()
-      .then(setInventory)
+      .then((response) => {
+        setInventory(response.items)
+        setTotalCount(response.meta?.total || 0)
+      })
       .catch((e) => console.error("Failed to fetch inventory:", e))
       .finally(() => setLoading(false))
   }, [])
@@ -62,8 +66,8 @@ export default function InventoryPage() {
       } else {
         await createInventory(data)
         // Refetch to ensure all data is up-to-date
-        const latestInventory = await fetchInventories()
-        setInventory(latestInventory)
+        const res = await fetchInventories()
+        setInventory(res.items)
       }
     } catch (error) {
       console.error("Error saving inventory:", error)
@@ -105,7 +109,9 @@ export default function InventoryPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t("inventory.management")}</h1>
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-gray-900">{t("inventory.management")}</h1>
+            </div>
             <p className="text-gray-600 mt-2">{t("inventory.subtitle")}</p>
           </div>
           <Button onClick={handleOpenForm} className="bg-yellow-500 hover:bg-yellow-600 text-white">
@@ -115,9 +121,16 @@ export default function InventoryPage() {
         </div>
 
         <ListCardTable
-          title={t("inventory.title")}
+          title={
+            <div className="flex items-center">
+              <span>{t("inventory.title")}</span>
+              <span className="ml-2 text-sm text-gray-500">
+                ({totalCount} {t("common.list")})
+              </span>
+            </div>
+          }
           search={
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative flex-1 max-w-sm pt-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder={t("common.searchPlaceholder")}
