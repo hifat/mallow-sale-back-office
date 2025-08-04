@@ -48,7 +48,7 @@ export default function StocksPage() {
           page: pagination.page,
           limit: pagination.limit,
           search: searchTerm,
-          sort: "createdAt",
+          sort: "created_at",
           order: "desc"
         })
         

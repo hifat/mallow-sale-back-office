@@ -42,8 +42,8 @@ export function StockForm({ stock, onSave, onCancel }: StockFormProps) {
                     fetchInventories(),
                     fetchSuppliers()
                 ])
-                setInventories(inventoryData)
-                setSuppliers(supplierData)
+                setInventories(inventoryData.items)
+                setSuppliers(supplierData.items)
             } catch (error) {
                 console.error("Failed to load form data:", error)
             } finally {

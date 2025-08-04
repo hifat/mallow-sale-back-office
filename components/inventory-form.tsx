@@ -48,12 +48,6 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
     if (!formData.name.trim()) {
       newErrors.name = "Name is required"
     }
-    if (formData.purchasePrice <= 0) {
-      newErrors.purchasePrice = "Purchase price must be greater than 0"
-    }
-    if (formData.purchaseQuantity <= 0) {
-      newErrors.purchaseQuantity = "Purchase quantity must be greater than 0"
-    }
     if (!formData.purchaseUnit) {
       newErrors.purchaseUnit = "Purchase unit is required"
     }
@@ -107,35 +101,6 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
                   placeholder="Enter item name"
                 />
                 {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="purchasePrice">Purchase Price ($) *</Label>
-                <Input
-                  id="purchasePrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.purchasePrice}
-                  onChange={(e) => handleChange("purchasePrice", Number.parseFloat(e.target.value) || 0)}
-                  className={errors.purchasePrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="0.00"
-                />
-                {errors.purchasePrice && <p className="text-sm text-red-600">{errors.purchasePrice}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="purchaseQuantity">Purchase Quantity *</Label>
-                <Input
-                  id="purchaseQuantity"
-                  type="number"
-                  min="0"
-                  value={formData.purchaseQuantity}
-                  onChange={(e) => handleChange("purchaseQuantity", Number.parseInt(e.target.value) || 0)}
-                  className={errors.purchaseQuantity ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="0"
-                />
-                {errors.purchaseQuantity && <p className="text-sm text-red-600">{errors.purchaseQuantity}</p>}
               </div>
 
               <div className="space-y-2">
