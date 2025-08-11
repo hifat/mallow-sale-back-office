@@ -55,7 +55,7 @@ const mockUsageUnits: UsageUnit[] = [
   },
   {
     id: "5",
-    code: "pieces",
+    code: "pcs",
     name: "Pieces",
     description: "Individual countable items",
     createdAt: "2024-01-01",
