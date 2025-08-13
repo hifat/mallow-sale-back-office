@@ -40,7 +40,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
               {recipe.name}
               {recipe.recipeType && (
                 <Badge variant="secondary" className="bg-amber-100 text-amber-800 border border-amber-200">
-                  {recipe.recipeType.name || recipe.recipeType.code}
+                  {recipe.recipeType.name || "-"}
                 </Badge>
               )}
             </h2>
