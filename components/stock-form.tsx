@@ -11,8 +11,9 @@ import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { Stock, StockPayload } from "@/lib/stock-api"
-import { fetchInventories, InventoryItem, DEFAULT_UNITS } from "@/lib/inventory-api"
+import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
 import { fetchSuppliers, Supplier } from "@/lib/supplier-api"
+import { USAGE_UNITS } from "@/types/usage-unit"
 
 interface StockFormProps {
     stock?: Stock | null
@@ -208,7 +209,7 @@ export function StockForm({ stock, onSave, onCancel }: StockFormProps) {
                                     <SelectValue placeholder="Select unit" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {DEFAULT_UNITS.map((unit) => (
+                                    {USAGE_UNITS.map((unit) => (
                                         <SelectItem key={unit.code} value={unit.code}>
                                             {unit.name}
                                         </SelectItem>

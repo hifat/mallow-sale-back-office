@@ -1,9 +1,5 @@
 import { ApiResponse } from './utils';
-
-export interface UsageUnit {
-  code: string
-  name: string
-}
+import { UsageUnit } from '@/types/usage-unit';
 
 export interface InventoryItem {
   id: string
@@ -16,17 +12,6 @@ export interface InventoryItem {
   createdAt: string
   updatedAt: string
 }
-
-export const DEFAULT_UNITS: UsageUnit[] = [
-  { code: "kg", name: "Kilogram (kg)" },
-  { code: "g", name: "Gram (g)" },
-  { code: "l", name: "Liter (l)" },
-  { code: "ml", name: "Milliliter (ml)" },
-  { code: "pcs", name: "Pieces" },
-  { code: "dozen", name: "Dozen" },
-  { code: "box", name: "Box" },
-  { code: "bag", name: "Bag" },
-];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 

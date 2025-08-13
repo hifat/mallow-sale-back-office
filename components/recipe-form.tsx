@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
-import { X, Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
-import { fetchInventories, InventoryItem, DEFAULT_UNITS } from "@/lib/inventory-api"
+import { Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
+import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
+import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
 import { Recipe, RecipePayload, RecipeTypeCode } from "@/lib/recipe-api"
 import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
@@ -29,7 +30,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     name: '',
     purchasePrice: 0,
     purchaseQuantity: 0,
-    purchaseUnit: { code: '', name: '' },
+    purchaseUnit: { code: '', name: '' } as UsageUnit,
     remark: '',
     updatedAt: '',
     yieldPercentage: 0,
@@ -39,8 +40,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     ingredients: recipe?.ingredients?.map(ing => ({
       inventory: ing.inventory,
       quantity: ing.quantity,
-      unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
-    })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } }],
+      unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' } as UsageUnit
+    })) || [{ inventory: blankInventory, quantity: 0, unit: { code: '' } as UsageUnit }],
     costPercentage: recipe?.costPercentage ?? 0,
     price: recipe?.price ?? 0,
     otherPercentage: recipe?.otherPercentage ?? 0,
@@ -63,7 +64,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
         ingredients: recipe.ingredients.map((ing) => ({
           inventory: ing.inventory || blankInventory,
           quantity: ing.quantity,
-          unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' }
+          unit: typeof ing.unit === 'string' ? { code: ing.unit } : ing.unit || { code: '' } as UsageUnit
         }))
       }))
       setSearchText(recipe.ingredients.map((ing) => ing.inventory?.name || ""))
@@ -442,7 +443,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                               <SelectValue placeholder="Select a unit" />
                             </SelectTrigger>
                             <SelectContent>
-                              {DEFAULT_UNITS.map((unit) => (
+                              {USAGE_UNITS.map((unit) => (
                                 <SelectItem key={unit.code} value={unit.code}>
                                   {unit.name}
                                 </SelectItem>

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
-import { UsageUnit, DEFAULT_UNITS } from "@/lib/inventory-api"
+import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
 
 interface InventoryItem {
   id: string
@@ -67,7 +67,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
     setIsLoading(true)
 
     // Find the selected unit object
-    const selectedUnit = DEFAULT_UNITS.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
+    const selectedUnit = USAGE_UNITS.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
     onSave({
       ...formData,
       purchaseUnit: selectedUnit,
@@ -112,7 +112,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
                     <SelectValue placeholder="Select unit" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEFAULT_UNITS.map((unit) => (
+                    {USAGE_UNITS.map((unit) => (
                       <SelectItem key={unit.code} value={unit.code}>
                         {unit.name}
                       </SelectItem>
