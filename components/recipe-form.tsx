@@ -12,10 +12,9 @@ import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { X, Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
 import { fetchInventories, InventoryItem, DEFAULT_UNITS } from "@/lib/inventory-api"
-import { Recipe, RecipePayload } from "@/lib/recipe-api"
+import { Recipe, RecipePayload, RecipeTypeCode } from "@/lib/recipe-api"
 import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
-import { IngredientCard } from "@/components/ingredient-card";
 
 interface RecipeFormProps {
   recipe?: Recipe | null
@@ -45,6 +44,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     costPercentage: recipe?.costPercentage ?? 0,
     price: recipe?.price ?? 0,
     otherPercentage: recipe?.otherPercentage ?? 0,
+    recipeTypeCode: (recipe?.recipeType && recipe.recipeType.code) ? recipe.recipeType.code as RecipeTypeCode : '' as '' | RecipeTypeCode,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -52,7 +52,6 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   // Add state for inventory search results and loading
   const [inventoryOptions, setInventoryOptions] = useState<InventoryItem[]>([])
   const [inventoryLoading, setInventoryLoading] = useState(false)
-  const [inventorySearch, setInventorySearch] = useState<string>("")
   const [activeIngredientIndex, setActiveIngredientIndex] = useState<number | null>(null)
   const [searchText, setSearchText] = useState<string[]>([])
 
@@ -108,6 +107,9 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     if (!formData.name.trim()) {
       newErrors.name = "Recipe name is required"
     }
+    if (!formData.recipeTypeCode) {
+      newErrors.recipeTypeCode = "Recipe type is required"
+    }
     if (isNaN(formData.costPercentage) || formData.costPercentage < 0 || formData.costPercentage > 100) {
       newErrors.costPercentage = "Cost percentage must be a number between 0 and 100"
     }
@@ -158,6 +160,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       costPercentage: formData.costPercentage,
       price: formData.price,
       otherPercentage: formData.otherPercentage,
+      recipeType: { code: formData.recipeTypeCode as RecipeTypeCode },
     })
     setIsLoading(false)
   }
@@ -239,6 +242,24 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="recipeType">Recipe Type *</Label>
+              <Select
+                value={formData.recipeTypeCode}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, recipeTypeCode: value as RecipeTypeCode }))}
+              >
+                <SelectTrigger className={errors.recipeTypeCode ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}>
+                  <SelectValue placeholder="Select recipe type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FOOD">Food</SelectItem>
+                  <SelectItem value="DESSERT">Dessert</SelectItem>
+                  <SelectItem value="DRINK">Drink</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.recipeTypeCode && <p className="text-sm text-red-600">{errors.recipeTypeCode}</p>}
+            </div>
+
             <div className="flex flex-col md:flex-row md:space-x-4">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
@@ -287,7 +308,6 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
             </div>
 
-            {/* Summary section matching recipe-details.tsx */}
             {(() => {
               const totalCost = getTotalCostFromIngredients(formData.ingredients);
               const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);

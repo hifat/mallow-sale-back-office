@@ -36,7 +36,14 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
       />
         <CardContent className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{recipe.name}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+              {recipe.name}
+              {recipe.recipeType && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800 border border-amber-200">
+                  {recipe.recipeType.name || recipe.recipeType.code}
+                </Badge>
+              )}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
               {typeof recipe.costPercentage === 'number' && (
                 <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">

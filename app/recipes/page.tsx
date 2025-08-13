@@ -147,6 +147,7 @@ export default function RecipesPage() {
         costPercentage: fullRecipe.costPercentage,
         price: fullRecipe.price,
         otherPercentage: fullRecipe.otherPercentage,
+        recipeType: fullRecipe.recipeType?.code ? { code: fullRecipe.recipeType.code } : { code: "FOOD" },
       }
       const newRecipe = new Recipe({
         ...fullRecipe,
@@ -154,6 +155,7 @@ export default function RecipesPage() {
         name: payload.name,
         createdAt: '',
         updatedAt: '',
+        recipeType: fullRecipe.recipeType,
       })
       setEditingRecipe(newRecipe)
       setShowForm(true)
@@ -238,7 +240,16 @@ export default function RecipesPage() {
                     </div>
                   )}
                   <ProductCard
-                    title={<span className="flex items-center">{recipe.name}</span>}
+                    title={
+                      <span className="flex items-center gap-2">
+                        {recipe.name}
+                        {recipe.recipeType && (
+                          <Badge variant="secondary" className="bg-amber-100 text-amber-800 border border-amber-200">
+                            {recipe.recipeType.name || "-"}
+                          </Badge>
+                        )}
+                      </span>
+                    }
                     badge={
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                         {recipe.ingredients.length} ingredients

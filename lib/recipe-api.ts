@@ -20,6 +20,18 @@ export interface RecipeIngredient {
   unit: string
 }
 
+// Recipe Type definitions
+export type RecipeTypeCode = "FOOD" | "DESSERT" | "DRINK"
+
+export interface RecipeTypePayload {
+  code: RecipeTypeCode
+}
+
+export interface RecipeTypeResponse {
+  code: RecipeTypeCode
+  name: string
+}
+
 export class Recipe {
   constructor(data: any) {
     this.id = data.id
@@ -31,6 +43,7 @@ export class Recipe {
     this.price = data.price
     this.otherPercentage = data.otherPercentage
     this.orderNo = data.orderNo
+    this.recipeType = data.recipeType
   }
 
   id: string
@@ -42,6 +55,7 @@ export class Recipe {
   price?: number
   otherPercentage?: number
   orderNo?: number
+  recipeType?: RecipeTypeResponse
 
   totalCost(): number {
     let total = 0
@@ -76,6 +90,7 @@ export interface RecipePayload {
   costPercentage?: number
   price?: number
   otherPercentage?: number
+  recipeType: RecipeTypePayload
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
@@ -85,6 +100,7 @@ export const fetchRecipes = async (sort: string = "order_no", order: "asc" | "de
   if (!response.ok) {
     throw new Error('Failed to fetch recipes')
   }
+
   const data = await response.json()
   return {
     items: data.items.map((r: any) => new Recipe(r)),
