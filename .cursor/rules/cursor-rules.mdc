@@ -133,6 +133,10 @@ const { t } = useTranslation()
 
 25. **Data Fetching**: Pages must use data-fetching through the respective API wrapper in `/lib`.
 
+## Navigation
+
+26. **Sidebar Entries**: When adding a feature page, add a nav item in `components/app-sidebar.tsx` with matching i18n keys (`navigation.*`) and an appropriate icon.
+
 ## Anti-Patterns (Do NOT Do)
 
 - ❌ Ad-hoc validation logic without Zod
