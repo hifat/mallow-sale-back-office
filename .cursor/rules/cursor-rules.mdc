@@ -78,9 +78,52 @@ export type FeatureInput = z.infer<typeof featureSchema>
 
 ## Internationalization
 
-21. **Translations**: When adding new locales or translations, update files in `/public/locales/` and use the translation hooks/context.
+21. **Translation Files**: All user-facing text must be externalized to `/locales/[lang].json` files (e.g., `/locales/en.json`, `/locales/th.json`).
 
-22. **Language**: Write all new code, comments, and documentation in English for cross-team contribution.
+22. **Translation Keys**:
+    - Use the `t('[word_name]')` function to access translations
+    - Before adding new keys, check if the word/phrase already exists in the locale file
+    - Never duplicate translation keys
+
+23. **Key Organization**: Organize translation keys by feature or category using dot notation:
+```json
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "staff": {
+    "title": "Staff Management",
+    "addNew": "Add New Staff",
+    "firstName": "First Name"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email format"
+  }
+}
+```
+
+24. **Translation Usage Pattern**:
+```tsx
+// Use the translation hook/context
+const { t } = useTranslation()
+
+// Access translations
+<button>{t('common.save')}</button>
+<h1>{t('staff.title')}</h1>
+<span>{t('validation.required')}</span>
+```
+
+25. **Naming Conventions for Keys**:
+    - Use camelCase for translation keys
+    - Group by feature/module (e.g., `inventory.`, `recipe.`, `staff.`)
+    - Use `common.` prefix for shared UI elements
+    - Use `validation.` prefix for validation messages
+    - Use `error.` prefix for error messages
+
+26. **Language**: Write all new code, comments, and documentation in English for cross-team contribution.
 
 ## Development Workflow
 
@@ -101,6 +144,9 @@ export type FeatureInput = z.infer<typeof featureSchema>
 - ❌ Swallowing errors without user feedback
 - ❌ Overfetching on every keystroke without debounce
 - ❌ Copying and pasting code instead of creating reusable components
+- ❌ Hardcoding user-facing text instead of using translation keys
+- ❌ Duplicating translation keys across locale files
+- ❌ Using raw strings in UI components instead of `t()` function
 
 ## Feature Development Checklist
 
@@ -113,6 +159,7 @@ When implementing a new feature, ensure:
 - [ ] Error handling and user feedback implemented
 - [ ] Loading states handled appropriately
 - [ ] Search/filters debounced if applicable
-- [ ] Documentation updated---
-alwaysApply: true
----
+- [ ] All user-facing text added to `/locales/[lang].json`
+- [ ] Translation keys organized by feature/category
+- [ ] No hardcoded text in UI components
+- [ ] Documentation updated

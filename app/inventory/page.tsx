@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, Edit, Trash2, Eye, Package } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, Package, ShoppingCart } from "lucide-react"
 import { InventoryForm } from "@/components/inventory-form"
 import { InventoryDetails } from "@/components/inventory-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
@@ -20,9 +20,12 @@ import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/ut
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 import { useTranslation } from "@/hooks/use-translation";
+import { createShoppingFromInventory } from "@/lib/shopping-api";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function InventoryPage() {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const [inventories, setInventory] = useState<Inventory[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -239,6 +242,22 @@ export default function InventoryPage() {
                               className="hover:bg-yellow-50"
                             >
                               <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              title="Add to Shopping"
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  await createShoppingFromInventory({ name: item.name, purchaseUnit: { code: item.purchaseUnit?.code } })
+                                  toast({ title: "Added", description: `Added \"${item.name}\" to shopping` })
+                                } catch (e: any) {
+                                  toast({ title: "Error", description: e?.message || "Failed to add to shopping" })
+                                }
+                              }}
+                              className="hover:bg-yellow-50"
+                            >
+                              <ShoppingCart className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
