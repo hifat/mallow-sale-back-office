@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { Plus, Trash2, Tag, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
-import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
+import { fetchInventories, Inventory } from "@/lib/inventory-api"
 import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
 import { Recipe, RecipePayload, RecipeTypeCode } from "@/lib/recipe-api"
 import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
@@ -24,7 +24,7 @@ interface RecipeFormProps {
 }
 
 export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
-  const blankInventory: InventoryItem = {
+  const blankInventory: Inventory = {
     createdAt: '',
     id: '',
     name: '',
@@ -51,7 +51,7 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   // Add state for inventory search results and loading
-  const [inventoryOptions, setInventoryOptions] = useState<InventoryItem[]>([])
+  const [inventoryOptions, setInventoryOptions] = useState<Inventory[]>([])
   const [inventoryLoading, setInventoryLoading] = useState(false)
   const [activeIngredientIndex, setActiveIngredientIndex] = useState<number | null>(null)
   const [searchText, setSearchText] = useState<string[]>([])

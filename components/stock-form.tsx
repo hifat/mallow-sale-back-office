@@ -11,7 +11,7 @@ import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { Stock, StockPayload } from "@/lib/stock-api"
-import { fetchInventories, InventoryItem } from "@/lib/inventory-api"
+import { fetchInventories, Inventory } from "@/lib/inventory-api"
 import { fetchSuppliers, Supplier } from "@/lib/supplier-api"
 import { USAGE_UNITS } from "@/types/usage-unit"
 
@@ -32,7 +32,7 @@ export function StockForm({ stock, onSave, onCancel }: StockFormProps) {
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isLoading, setIsLoading] = useState(false)
-    const [inventories, setInventories] = useState<InventoryItem[]>([])
+    const [inventories, setInventories] = useState<Inventory[]>([])
     const [suppliers, setSuppliers] = useState<Supplier[]>([])
     const [loadingData, setLoadingData] = useState(true)
 

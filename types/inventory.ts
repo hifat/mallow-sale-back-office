@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { UsageUnit } from "./usage-unit";
 
-export interface InventoryItem {
+export interface Inventory {
   id: string;
   name: string;
   purchasePrice: number;

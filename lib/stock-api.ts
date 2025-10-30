@@ -1,11 +1,11 @@
-import { UsageUnit, InventoryItem } from './inventory-api'
+import { UsageUnit, Inventory } from './inventory-api'
 import { Supplier } from './supplier-api'
 import { ApiResponse } from './utils';
 
 export interface Stock {
   id: string
   inventoryID: string
-  inventory?: InventoryItem
+  inventory?: Inventory
   supplierID: string
   supplier?: Supplier
   purchasePrice: number

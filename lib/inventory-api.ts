@@ -1,11 +1,11 @@
-import type { InventoryItem } from '@/types/inventory'
+import type { Inventory } from '@/types/inventory'
 import { ApiResponse } from './utils';
 import { UsageUnit } from '@/types/usage-unit';
 import { inventorySchema } from '@/types/inventory'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export async function fetchInventories(params?: { fields?: string; search?: string }): Promise<ApiResponse<InventoryItem>> {
+export async function fetchInventories(params?: { fields?: string; search?: string }): Promise<ApiResponse<Inventory>> {
   let url = `${API_BASE}/inventories`;
   if (params && (params.fields || params.search)) {
     const searchParams = new URLSearchParams();
@@ -22,7 +22,7 @@ export async function fetchInventories(params?: { fields?: string; search?: stri
   }
 }
 
-export async function createInventory(item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) {
+export async function createInventory(item: Omit<Inventory, "id" | "createdAt" | "updatedAt">) {
   const parsed = inventorySchema.safeParse(item)
   if (!parsed.success) {
     throw new Error(parsed.error.errors[0]?.message || "Invalid data")
@@ -36,7 +36,7 @@ export async function createInventory(item: Omit<InventoryItem, "id" | "createdA
   return res.json()
 }
 
-export async function updateInventory(id: string, item: Partial<InventoryItem>) {
+export async function updateInventory(id: string, item: Partial<Inventory>) {
   if (item.name || item.purchaseUnit || item.purchasePrice || item.purchaseQuantity || item.yieldPercentage) {
     const base = { ...item } as any
     const parsed = inventorySchema.safeParse({ ...base, name: base.name ?? '', purchaseUnit: base.purchaseUnit ?? {code: '', name: ''}, purchasePrice: base.purchasePrice ?? 0, purchaseQuantity: base.purchaseQuantity ?? 0, yieldPercentage: base.yieldPercentage ?? 0 })

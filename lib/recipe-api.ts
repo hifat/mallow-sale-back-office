@@ -1,9 +1,9 @@
-import type { InventoryItem } from '@/types/inventory'
+import type { Inventory } from '@/types/inventory'
 import { calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ApiResponse } from './utils'
 
 export interface RecipeIngredient {
-  inventory: InventoryItem
+  inventory: Inventory
   quantity: number
   unit: string
 }

@@ -6,12 +6,12 @@ import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { Badge } from "@/components/ui/badge"
 import { Edit, Calendar, DollarSign, Package, Percent } from "lucide-react"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
-import type { InventoryItem } from "@/types/inventory";
+import type { Inventory } from "@/types/inventory";
 
 interface InventoryDetailsProps {
-  item: InventoryItem
+  item: Inventory
   onClose: () => void
-  onEdit: (item: InventoryItem) => void
+  onEdit: (item: Inventory) => void
 }
 
 export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProps) {

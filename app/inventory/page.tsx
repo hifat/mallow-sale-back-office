@@ -15,7 +15,7 @@ import {
   updateInventory,
   deleteInventory,
 } from "@/lib/inventory-api"
-import { InventoryItem } from "@/types/inventory"
+import { Inventory } from "@/types/inventory"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
@@ -23,12 +23,12 @@ import { useTranslation } from "@/hooks/use-translation";
 
 export default function InventoryPage() {
   const { t } = useTranslation()
-  const [inventories, setInventory] = useState<InventoryItem[]>([])
+  const [inventories, setInventory] = useState<Inventory[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
-  const [deletingItem, setDeletingItem] = useState<InventoryItem | null>(null)
+  const [editingItem, setEditingItem] = useState<Inventory | null>(null)
+  const [deletingItem, setDeletingItem] = useState<Inventory | null>(null)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -47,7 +47,7 @@ export default function InventoryPage() {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
   
-  const handleSave = async (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => {
+  const handleSave = async (data: Omit<Inventory, "id" | "createdAt" | "updatedAt">) => {
     setLoading(true)
     try {
       if (editingItem) {
@@ -79,7 +79,7 @@ export default function InventoryPage() {
     }
   }
 
-  const handleDelete = async (item: InventoryItem) => {
+  const handleDelete = async (item: Inventory) => {
     if (!item) return
     
     setLoading(true)
@@ -95,7 +95,7 @@ export default function InventoryPage() {
     }
   }
 
-  const handleEdit = (item: InventoryItem) => {
+  const handleEdit = (item: Inventory) => {
     setEditingItem(item)
     setShowForm(true)
   }
