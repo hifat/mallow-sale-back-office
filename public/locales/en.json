@@ -26,6 +26,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "inventory": "Inventory",
+    "shopping": "Shopping",
     "stocks": "Stocks",
     "suppliers": "Suppliers",
     "recipes": "Recipes",
@@ -115,6 +116,31 @@
     "yield": "Yield %",
     "actualPrice": "Actual Price",
     "costPerUnit": "Cost/Unit"
+  },
+  "shopping": {
+    "title": "Shopping",
+    "management": "Shopping Management",
+    "subtitle": "Manage your shopping list",
+    "addItem": "Add Item",
+    "listTitle": "Shopping Items",
+    "emptyTitle": "No shopping items",
+    "emptySubtitle": "Add your first item to get started",
+    "complete": "Complete",
+    "toast": {
+      "added": "Shopping item added",
+      "deleted": "Shopping item deleted",
+      "deleteError": "Failed to delete",
+      "updateError": "Failed to update status",
+      "fetchError": "Failed to fetch shoppings",
+      "createError": "Failed to add shopping"
+    },
+    "form": {
+      "addTitle": "Add New Shopping Item",
+      "editTitle": "Edit Shopping Item",
+      "name": "Name",
+      "quantity": "Quantity",
+      "unit": "Unit"
+    }
   },
   "stocks": {
     "title": "Stocks",

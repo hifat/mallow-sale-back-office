@@ -13,9 +13,11 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import type { Shopping } from "@/types/shopping";
 import { fetchShoppings, createShopping, deleteShopping, updateShoppingIsComplete } from "@/lib/shopping-api";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function ShoppingList() {
   const { toast } = useToast()
+  const { t } = useTranslation()
   const [items, setItems] = useState<Shopping[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -30,9 +32,9 @@ export function ShoppingList() {
         setItems(res.items)
         setTotalCount(res.meta?.total || res.items.length || 0)
       })
-      .catch(() => toast({ title: "Error", description: "Failed to fetch shoppings" }))
+      .catch(() => toast({ title: t("common.error"), description: t("shopping.toast.fetchError") }))
       .finally(() => setLoading(false))
-  }, [toast])
+  }, [toast, t])
 
   const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -43,9 +45,9 @@ export function ShoppingList() {
       const res = await fetchShoppings()
       setItems(res.items)
       setTotalCount(res.meta?.total || res.items.length || 0)
-      toast({ title: "Success", description: "Shopping item added" })
+      toast({ title: t("common.success"), description: t("shopping.toast.added") })
     } catch (e: any) {
-      toast({ title: "Error", description: e?.message || "Failed to add shopping" })
+      toast({ title: t("common.error"), description: e?.message || t("shopping.toast.createError") })
       throw e
     } finally {
       setShowForm(false)
@@ -60,7 +62,7 @@ export function ShoppingList() {
       await updateShoppingIsComplete(item.id, newVal)
     } catch (e) {
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, isComplete: item.isComplete } : i))
-      toast({ title: "Error", description: "Failed to update status" })
+      toast({ title: t("common.error"), description: t("shopping.toast.updateError") })
     }
   }
 
@@ -71,9 +73,9 @@ export function ShoppingList() {
       await deleteShopping(item.id)
       setItems(prev => prev.filter(i => i.id !== item.id))
       setTotalCount(prev => Math.max(0, prev - 1))
-      toast({ title: "Deleted", description: `Removed "${item.name}"` })
+      toast({ title: t("common.success"), description: t("shopping.toast.deleted") })
     } catch (e: any) {
-      toast({ title: "Error", description: e?.message || "Failed to delete" })
+      toast({ title: t("common.error"), description: e?.message || t("shopping.toast.deleteError") })
       throw e
     } finally {
       setDeletingItem(null)
@@ -87,28 +89,28 @@ export function ShoppingList() {
         <div className="flex justify-between items-center">
           <div>
             <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-gray-900">Shopping</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{t("shopping.management")}</h1>
             </div>
-            <p className="text-gray-600 mt-2">Manage your shopping list</p>
+            <p className="text-gray-600 mt-2">{t("shopping.subtitle")}</p>
           </div>
           <Button onClick={() => setShowForm(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
             <Plus className="h-4 w-4 mr-2" />
-            Add Item
+            {t("shopping.addItem")}
           </Button>
         </div>
 
         <ListCardTable
           title={
             <div className="flex items-center">
-              <span>Shopping Items</span>
-              <span className="ml-2 text-sm text-gray-500">({totalCount} list)</span>
+              <span>{t("shopping.listTitle")}</span>
+              <span className="ml-2 text-sm text-gray-500">({totalCount} {t("common.list")})</span>
             </div>
           }
           search={
             <div className="relative flex-1 max-w-sm pt-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search..."
+                placeholder={t("common.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-yellow-200 focus:border-yellow-500"
@@ -120,11 +122,11 @@ export function ShoppingList() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Complete</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Quantity</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Unit</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("shopping.complete")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.name")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.quantity")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.unit")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,8 +145,8 @@ export function ShoppingList() {
                       <td colSpan={5}>
                         <CenteredEmptyState
                           icon={<Square className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
-                          title="No shopping items"
-                          subtitle="Add your first item to get started"
+                          title={t("shopping.emptyTitle")}
+                          subtitle={t("shopping.emptySubtitle")}
                         />
                       </td>
                     </tr>

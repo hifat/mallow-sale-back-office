@@ -11,6 +11,7 @@ import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { USAGE_UNITS } from "@/types/usage-unit"
 import { shoppingSchema, type ShoppingInput } from "@/types/shopping";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface ShoppingFormProps {
   item?: Partial<ShoppingInput> | null;
@@ -19,6 +20,7 @@ interface ShoppingFormProps {
 }
 
 export function ShoppingForm({ item, onSave, onCancel }: ShoppingFormProps) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<ShoppingInput>({
     isComplete: item?.isComplete ?? false,
     name: item?.name || "",
@@ -61,26 +63,26 @@ export function ShoppingForm({ item, onSave, onCancel }: ShoppingFormProps) {
   return (
     <ModalCard maxWidth="max-w-2xl">
       <ModalCardHeader
-        title={item ? "Edit Shopping Item" : "Add New Shopping Item"}
+        title={item ? t("shopping.form.editTitle") : t("shopping.form.addTitle")}
         onClose={onCancel}
       />
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">{t("shopping.form.name")} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 className={errors.name ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                placeholder="Enter shopping item name"
+                placeholder={t("shopping.form.name")}
               />
               {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="purchaseQuantity">Quantity *</Label>
+              <Label htmlFor="purchaseQuantity">{t("shopping.form.quantity")} *</Label>
               <Input
                 id="purchaseQuantity"
                 type="number"
@@ -94,10 +96,10 @@ export function ShoppingForm({ item, onSave, onCancel }: ShoppingFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="purchaseUnit">Unit *</Label>
+              <Label htmlFor="purchaseUnit">{t("shopping.form.unit")} *</Label>
               <Select value={formData.purchaseUnit.code} onValueChange={(value) => handleChange("purchaseUnit", { code: value })}>
                 <SelectTrigger className={errors.purchaseUnit ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}>
-                  <SelectValue placeholder="Select unit" />
+                  <SelectValue placeholder={t("inventory.unit")} />
                 </SelectTrigger>
                 <SelectContent>
                   {USAGE_UNITS.map((unit) => (
@@ -111,7 +113,7 @@ export function ShoppingForm({ item, onSave, onCancel }: ShoppingFormProps) {
             </div>
           </div>
 
-          <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!item} saveLabel="Save" addLabel="Add" />
+          <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!item} saveLabel={t("common.save")} addLabel={t("common.add")} />
         </form>
       </CardContent>
     </ModalCard>
