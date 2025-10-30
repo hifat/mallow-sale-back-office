@@ -1,17 +1,7 @@
+import type { InventoryItem } from '@/types/inventory'
 import { ApiResponse } from './utils';
 import { UsageUnit } from '@/types/usage-unit';
-
-export interface InventoryItem {
-  id: string
-  name: string
-  purchasePrice: number
-  purchaseQuantity: number
-  purchaseUnit: UsageUnit
-  yieldPercentage: number
-  remark?: string
-  createdAt: string
-  updatedAt: string
-}
+import { inventorySchema } from '@/types/inventory'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
@@ -33,6 +23,10 @@ export async function fetchInventories(params?: { fields?: string; search?: stri
 }
 
 export async function createInventory(item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) {
+  const parsed = inventorySchema.safeParse(item)
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0]?.message || "Invalid data")
+  }
   const res = await fetch(`${API_BASE}/inventories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -43,6 +37,13 @@ export async function createInventory(item: Omit<InventoryItem, "id" | "createdA
 }
 
 export async function updateInventory(id: string, item: Partial<InventoryItem>) {
+  if (item.name || item.purchaseUnit || item.purchasePrice || item.purchaseQuantity || item.yieldPercentage) {
+    const base = { ...item } as any
+    const parsed = inventorySchema.safeParse({ ...base, name: base.name ?? '', purchaseUnit: base.purchaseUnit ?? {code: '', name: ''}, purchasePrice: base.purchasePrice ?? 0, purchaseQuantity: base.purchaseQuantity ?? 0, yieldPercentage: base.yieldPercentage ?? 0 })
+    if (!parsed.success) {
+      throw new Error(parsed.error.errors[0]?.message || "Invalid data")
+    }
+  }
   const res = await fetch(`${API_BASE}/inventories/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

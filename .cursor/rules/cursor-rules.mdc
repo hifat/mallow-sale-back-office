@@ -1,0 +1,118 @@
+# Cursor Rules for Mallow-Sale-Backoffice
+
+## Project Structure & Organization
+
+1. **Imports**: Use absolute imports (e.g., `@/lib/feature-api`) for all top-level modules, not relative paths.
+
+2. **File Organization**:
+   - API integration code → `/lib/*-api.ts`
+   - Type definitions → `/types`
+   - Reusable UI components → `/components/ui`
+   - Feature-specific components → `/components/feature-name`
+
+3. **Type Management**: Define all shared types/interfaces in `/types`. Never re-declare types in multiple locations. Import and reuse centralized types.
+
+## API Integration
+
+4. **API Wrappers**: All network calls must go through `/lib/*-api.ts` wrappers. Never fetch data directly inside UI components or hooks.
+
+5. **API Configuration**: Keep `API_BASE` in environment variables. Never hardcode URLs in components.
+
+6. **Error Handling**: Handle all async operations with proper error/success feedback via toast or dialog. Never swallow errors silently.
+
+## Form Handling & Validation
+
+7. **Validation Framework**: Use `zod` schemas for all form and API payload validations. Co-locate schemas with forms or feature APIs.
+
+8. **Schema Pattern**:
+```ts
+import { z } from "zod"
+
+export const featureSchema = z.object({
+  field: z.string().min(1, "Field is required"),
+})
+export type FeatureInput = z.infer<typeof featureSchema>
+```
+
+9. **Client-Side Validation**: Provide immediate validation feedback with user-friendly error messages. Validate before API calls.
+
+10. **Form State**: Control forms with `useState` and reflect validation states visually in UI.
+
+## UI/UX Consistency
+
+11. **Input Styling**:
+    - Default: `border-yellow-200`
+    - Focus: `focus:border-yellow-500`
+    - Error: `border-red-500`
+
+12. **Error Display**: Show errors as `text-sm text-red-600` directly beneath the related input field.
+
+13. **Shared Components**: Use provided UI components for common patterns:
+    - Notifications → toast component
+    - Confirmations → dialog component
+    - Actions → `FormActionRow`, `ModalCard`, `DeleteConfirmDialog`
+
+14. **Loading States**: Show clear loading/disabled states during async operations.
+
+## Code Quality & Style
+
+15. **Naming Conventions**: Use explicit, domain-meaningful names for variables, props, and types (e.g., `purchaseQuantity`, `costPercentage`, not `qty`, `pct`).
+
+16. **Type Safety**: 
+    - Avoid `any` types; use precise types
+    - Use discriminated unions for variant states
+    - Infer types from Zod schemas to prevent drift
+
+17. **Code Clarity**:
+    - Prefer guard clauses over deep nesting
+    - Multi-line clarity over compact one-liners
+    - No 1-2 character variable names
+
+18. **Avoid Magic Values**: Extract constants, enums, or lookup tables. Never duplicate arrays of options across files.
+
+## Performance Optimization
+
+19. **Search & Filtering**: Debounce user input for live lookups and dynamic searches.
+
+20. **List Rendering**: Limit dropdown options and paginate server queries when applicable.
+
+## Internationalization
+
+21. **Translations**: When adding new locales or translations, update files in `/public/locales/` and use the translation hooks/context.
+
+22. **Language**: Write all new code, comments, and documentation in English for cross-team contribution.
+
+## Development Workflow
+
+23. **Linting & Formatting**: Always adhere to lint and formatting tools configured for the project.
+
+24. **Documentation**: Document new architectural patterns or significant changes in `README.md` or relevant documentation files.
+
+25. **Data Fetching**: Pages must use data-fetching through the respective API wrapper in `/lib`.
+
+## Anti-Patterns (Do NOT Do)
+
+- ❌ Ad-hoc validation logic without Zod
+- ❌ Duplicating types/interfaces inside components or APIs
+- ❌ Direct `fetch` inside components
+- ❌ Using `any` or unsafe type casts
+- ❌ Hardcoding API URLs or magic strings
+- ❌ Inconsistent input styles or error messaging
+- ❌ Swallowing errors without user feedback
+- ❌ Overfetching on every keystroke without debounce
+- ❌ Copying and pasting code instead of creating reusable components
+
+## Feature Development Checklist
+
+When implementing a new feature, ensure:
+
+- [ ] API wrapper created in `/lib/feature-api.ts`
+- [ ] Types defined in `/types/feature.ts`
+- [ ] Zod schema created for form validation
+- [ ] Form uses centralized UI components
+- [ ] Error handling and user feedback implemented
+- [ ] Loading states handled appropriately
+- [ ] Search/filters debounced if applicable
+- [ ] Documentation updated---
+alwaysApply: true
+---

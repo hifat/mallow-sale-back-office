@@ -11,53 +11,40 @@ import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
-
-interface InventoryItem {
-  id: string
-  name: string
-  purchasePrice: number
-  purchaseQuantity: number
-  purchaseUnit: UsageUnit
-  yieldPercentage: number
-  remark?: string
-  createdAt: string
-  updatedAt: string
-}
+import { inventorySchema, InventoryInput } from "@/types/inventory";
 
 interface InventoryFormProps {
-  item?: InventoryItem | null
-  onSave: (data: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => void
-  onCancel: () => void
+  item?: Partial<InventoryInput> | null;
+  onSave: (data: InventoryInput) => void;
+  onCancel: () => void;
 }
 
 export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InventoryInput>({
     name: item?.name || "",
-    purchasePrice: item?.purchasePrice || 0,
-    purchaseQuantity: item?.purchaseQuantity || 0,
-    purchaseUnit: item?.purchaseUnit?.code || "",
+    purchaseUnit: item?.purchaseUnit || { code: "", name: "" },
     yieldPercentage: item?.yieldPercentage || 0,
     remark: item?.remark || "",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required"
+    const parsed = inventorySchema.safeParse(formData);
+    if (!parsed.success) {
+      const newErrors: Record<string, string> = {};
+      parsed.error.errors.forEach((err) => {
+        const field = err.path[0];
+        if (typeof field === "string") {
+          newErrors[field] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
     }
-    if (!formData.purchaseUnit) {
-      newErrors.purchaseUnit = "Purchase unit is required"
-    }
-    if (formData.yieldPercentage < 0 || formData.yieldPercentage > 100) {
-      newErrors.yieldPercentage = "Yield percentage must be between 0 and 100"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors({});
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,7 +54,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
     setIsLoading(true)
 
     // Find the selected unit object
-    const selectedUnit = USAGE_UNITS.find((u) => u.code === formData.purchaseUnit) || { code: formData.purchaseUnit, name: formData.purchaseUnit }
+    const selectedUnit = USAGE_UNITS.find((u) => u.code === formData.purchaseUnit.code) || { code: formData.purchaseUnit.code, name: formData.purchaseUnit.name }
     onSave({
       ...formData,
       purchaseUnit: selectedUnit,
@@ -105,7 +92,7 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="purchaseUnit">Purchase Unit *</Label>
-                <Select value={formData.purchaseUnit} onValueChange={(value) => handleChange("purchaseUnit", value)}>
+                <Select value={formData.purchaseUnit.code} onValueChange={(value) => handleChange("purchaseUnit", { code: value, name: USAGE_UNITS.find(u => u.code === value)?.name || value })}>
                   <SelectTrigger
                     className={errors.purchaseUnit ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
                   >

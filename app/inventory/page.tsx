@@ -14,8 +14,8 @@ import {
   createInventory,
   updateInventory,
   deleteInventory,
-  InventoryItem,
 } from "@/lib/inventory-api"
+import { InventoryItem } from "@/types/inventory"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";

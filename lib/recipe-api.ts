@@ -1,18 +1,6 @@
-import { UsageUnit } from "./inventory-api"
+import type { InventoryItem } from '@/types/inventory'
 import { calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ApiResponse } from './utils'
-
-export interface InventoryItem {
-  createdAt: string
-  id: string
-  name: string
-  purchasePrice: number
-  purchaseQuantity: number
-  purchaseUnit: UsageUnit
-  remark?: string
-  updatedAt: string
-  yieldPercentage: number
-}
 
 export interface RecipeIngredient {
   inventory: InventoryItem
