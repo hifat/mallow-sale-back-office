@@ -1,4 +1,4 @@
-import type { Shopping, ShoppingInput } from "@/types/shopping";
+import type { Shopping, ShoppingInput, ReceiptResponse } from "@/types/shopping";
 import { shoppingSchema } from "@/types/shopping";
 import { ApiResponse } from "./utils";
 
@@ -76,6 +76,42 @@ export function createShoppingFromInventory(inventory: { name: string; purchaseU
     purchaseQuantity: 1,
     purchaseUnit: { code: inventory?.purchaseUnit?.code || "" },
   });
+}
+
+export async function readReceipt(imageFile: File): Promise<ReceiptResponse> {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  const res = await fetch(`${SHOPPING_BASE}/read-receipt`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    if (res.status === 400) {
+      const err = await res.json().catch(() => ({}));
+      if (err?.code === "MAX_FILE_SIZE") {
+        throw new Error("max file size");
+      }
+      if (err?.code === "NOT_ALLOWED_MIME_TYPE") {
+        throw new Error("not allowed mime type");
+      }
+      throw new Error(err?.message || "Failed to read receipt");
+    }
+    if (res.status === 500) {
+      const err = await res.json().catch(() => ({}));
+      if (err?.code === "INTERNAL_SERVER_ERROR") {
+        throw new Error("internal server error");
+      }
+    }
+    throw new Error("Failed to read receipt");
+  }
+
+  const data = await res.json();
+  return {
+    items: data.items || [],
+    meta: data.meta || { total: 0 },
+  };
 }
 
 

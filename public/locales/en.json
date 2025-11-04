@@ -140,6 +140,39 @@
       "name": "Name",
       "quantity": "Quantity",
       "unit": "Unit"
+    },
+    "readReceipt": "Read Receipt"
+  },
+  "receipt": {
+    "title": "Read Receipt",
+    "uploadImage": "Upload Receipt Image",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "clickToUpload": "Click to upload",
+    "orDragDrop": "or drag and drop",
+    "selectFile": "Select File",
+    "supportedFormats": "Supported formats: JPG, PNG, GIF",
+    "items": "Receipt Items",
+    "total": "Total",
+    "inventoryID": "Inventory ID",
+    "name": "Name",
+    "nameEdited": "Name (Edited)",
+    "purchasePrice": "Purchase Price",
+    "purchaseQuantity": "Purchase Quantity",
+    "remark": "Remark",
+    "searchInventory": "Search inventory...",
+    "searching": "Searching...",
+    "save": "Save Receipt",
+    "uploadSuccess": "Receipt uploaded successfully",
+    "uploadError": "Failed to upload receipt",
+    "saveSuccess": "Receipt saved successfully",
+    "saveError": "Failed to save receipt",
+    "errors": {
+      "noImage": "Please select an image",
+      "inventoryRequired": "Inventory ID is required",
+      "priceInvalid": "Price must be zero or greater",
+      "quantityInvalid": "Quantity must be zero or greater",
+      "validationFailed": "Please fix validation errors"
     }
   },
   "stocks": {

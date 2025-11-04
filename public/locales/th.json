@@ -142,6 +142,39 @@
       "name": "ชื่อ",
       "quantity": "จำนวน",
       "unit": "หน่วย"
+    },
+    "readReceipt": "อ่านใบเสร็จ"
+  },
+  "receipt": {
+    "title": "อ่านใบเสร็จ",
+    "uploadImage": "อัปโหลดรูปภาพใบเสร็จ",
+    "upload": "อัปโหลด",
+    "uploading": "กำลังอัปโหลด...",
+    "clickToUpload": "คลิกเพื่ออัปโหลด",
+    "orDragDrop": "หรือลากและวาง",
+    "selectFile": "เลือกไฟล์",
+    "supportedFormats": "รูปแบบที่รองรับ: JPG, PNG, GIF",
+    "items": "รายการใบเสร็จ",
+    "total": "รวม",
+    "inventoryID": "รหัสสินค้า",
+    "name": "ชื่อ",
+    "nameEdited": "ชื่อ (แก้ไข)",
+    "purchasePrice": "ราคาซื้อ",
+    "purchaseQuantity": "จำนวนที่ซื้อ",
+    "remark": "หมายเหตุ",
+    "searchInventory": "ค้นหาสินค้า...",
+    "searching": "กำลังค้นหา...",
+    "save": "บันทึกใบเสร็จ",
+    "uploadSuccess": "อัปโหลดใบเสร็จสำเร็จ",
+    "uploadError": "ไม่สามารถอัปโหลดใบเสร็จได้",
+    "saveSuccess": "บันทึกใบเสร็จสำเร็จ",
+    "saveError": "ไม่สามารถบันทึกใบเสร็จได้",
+    "errors": {
+      "noImage": "กรุณาเลือกรูปภาพ",
+      "inventoryRequired": "ต้องระบุรหัสสินค้า",
+      "priceInvalid": "ราคาต้องมากกว่าหรือเท่ากับศูนย์",
+      "quantityInvalid": "จำนวนต้องมากกว่าหรือเท่ากับศูนย์",
+      "validationFailed": "กรุณาแก้ไขข้อผิดพลาดในการตรวจสอบ"
     }
   },
   "stocks": {

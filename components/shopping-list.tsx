@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, Trash2, CheckSquare, Square } from "lucide-react"
+import { Plus, Search, Trash2, CheckSquare, Square, Receipt } from "lucide-react"
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 import { ShoppingForm } from "@/components/shopping-form";
+import { ReceiptForm } from "@/components/receipt-form";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import type { Shopping } from "@/types/shopping";
@@ -21,6 +22,7 @@ export function ShoppingList() {
   const [items, setItems] = useState<Shopping[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
+  const [showReceiptForm, setShowReceiptForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const [deletingItem, setDeletingItem] = useState<Shopping | null>(null)
@@ -93,10 +95,16 @@ export function ShoppingList() {
             </div>
             <p className="text-gray-600 mt-2">{t("shopping.subtitle")}</p>
           </div>
-          <Button onClick={() => setShowForm(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            {t("shopping.addItem")}
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button onClick={() => setShowReceiptForm(true)} variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50">
+              <Receipt className="h-4 w-4 mr-2" />
+              {t("shopping.readReceipt")}
+            </Button>
+            <Button onClick={() => setShowForm(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              {t("shopping.addItem")}
+            </Button>
+          </div>
         </div>
 
         <ListCardTable
@@ -195,6 +203,12 @@ export function ShoppingList() {
         <ShoppingForm
           onSave={handleCreate as any}
           onCancel={() => setShowForm(false)}
+        />
+      )}
+
+      {showReceiptForm && (
+        <ReceiptForm
+          onCancel={() => setShowReceiptForm(false)}
         />
       )}
 

@@ -20,4 +20,29 @@ export const shoppingSchema = z.object({
 
 export type ShoppingInput = z.infer<typeof shoppingSchema>;
 
+export interface ReceiptItem {
+  inventoryID: string;
+  name: string;
+  nameEdited: string;
+  purchasePrice: number;
+  purchaseQuantity: number;
+  remark: string;
+}
 
+export interface ReceiptResponse {
+  items: ReceiptItem[];
+  meta: {
+    total: number;
+  };
+}
+
+export const receiptItemSchema = z.object({
+  inventoryID: z.string().min(1, "Inventory ID is required"),
+  name: z.string(),
+  nameEdited: z.string(),
+  purchasePrice: z.number().nonnegative({ message: "Price must be zero or greater" }),
+  purchaseQuantity: z.number().nonnegative({ message: "Quantity must be zero or greater" }),
+  remark: z.string().optional(),
+});
+
+export type ReceiptItemInput = z.infer<typeof receiptItemSchema>;
