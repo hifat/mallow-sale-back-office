@@ -1,6 +1,8 @@
-import { UsageUnit, Inventory } from './inventory-api'
+import type { Inventory } from "@/types/inventory"
+import type { UsageUnit } from "@/types/usage-unit"
 import { Supplier } from './supplier-api'
 import { ApiResponse } from './utils';
+import { authorizedFetch } from "@/lib/api-client";
 
 export interface Stock {
   id: string
@@ -51,7 +53,7 @@ export async function fetchStocks(params?: StockListParams): Promise<ApiResponse
     if (params.fields) url.searchParams.set('fields', params.fields)
   }
 
-  const res = await fetch(url.toString())
+  const res = await authorizedFetch(url.toString())
   if (!res.ok) throw new Error("Failed to fetch stocks")
   const data = await res.json()
   return {
@@ -61,14 +63,14 @@ export async function fetchStocks(params?: StockListParams): Promise<ApiResponse
 }
 
 export async function fetchStockById(id: string): Promise<Stock> {
-  const res = await fetch(`${API_BASE}/stocks/${id}`)
+  const res = await authorizedFetch(`${API_BASE}/stocks/${id}`)
   if (!res.ok) throw new Error("Failed to fetch stock by id")
   const data = await res.json()
   return data.item
 }
 
 export async function createStock(payload: StockPayload): Promise<Stock> {
-  const res = await fetch(`${API_BASE}/stocks`, {
+  const res = await authorizedFetch(`${API_BASE}/stocks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -82,7 +84,7 @@ export async function createStock(payload: StockPayload): Promise<Stock> {
 }
 
 export async function updateStock(id: string, payload: Partial<StockPayload>): Promise<Stock> {
-  const res = await fetch(`${API_BASE}/stocks/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/stocks/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -96,7 +98,7 @@ export async function updateStock(id: string, payload: Partial<StockPayload>): P
 }
 
 export async function deleteStock(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/stocks/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/stocks/${id}`, {
     method: "DELETE",
   })
   if (!res.ok) {

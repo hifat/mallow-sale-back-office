@@ -1,12 +1,13 @@
 import type { Shopping, ShoppingInput, ReceiptResponse } from "@/types/shopping";
 import { shoppingSchema } from "@/types/shopping";
 import { ApiResponse } from "./utils";
+import { authorizedFetch } from "@/lib/api-client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 const SHOPPING_BASE = `${API_BASE}/shoppings`;
 
 export async function fetchShoppings(): Promise<ApiResponse<Shopping>> {
-  const res = await fetch(SHOPPING_BASE);
+  const res = await authorizedFetch(SHOPPING_BASE);
   if (!res.ok) throw new Error("Failed to fetch shoppings");
   const data = await res.json();
   return {
@@ -20,7 +21,7 @@ export async function createShopping(payload: ShoppingInput) {
   if (!parsed.success) {
     throw new Error(parsed.error.errors[0]?.message || "Invalid data");
   }
-  const res = await fetch(SHOPPING_BASE, {
+  const res = await authorizedFetch(SHOPPING_BASE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -38,7 +39,7 @@ export async function createShopping(payload: ShoppingInput) {
 }
 
 export async function updateShoppingIsComplete(id: string, isComplete: boolean) {
-  const res = await fetch(`${SHOPPING_BASE}/${id}/is-complete`, {
+  const res = await authorizedFetch(`${SHOPPING_BASE}/${id}/is-complete`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ isComplete }),
@@ -56,7 +57,7 @@ export async function updateShoppingIsComplete(id: string, isComplete: boolean) 
 }
 
 export async function deleteShopping(id: string) {
-  const res = await fetch(`${SHOPPING_BASE}/${id}`, { method: "DELETE" });
+  const res = await authorizedFetch(`${SHOPPING_BASE}/${id}`, { method: "DELETE" });
   if (!res.ok) {
     if (res.status === 404) {
       const err = await res.json().catch(() => ({}));
@@ -82,7 +83,7 @@ export async function readReceipt(imageFile: File): Promise<ReceiptResponse> {
   const formData = new FormData();
   formData.append("image", imageFile);
 
-  const res = await fetch(`${SHOPPING_BASE}/read-receipt`, {
+  const res = await authorizedFetch(`${SHOPPING_BASE}/read-receipt`, {
     method: "POST",
     body: formData,
   });

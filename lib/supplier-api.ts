@@ -1,4 +1,5 @@
 import { ApiResponse } from './utils';
+import { authorizedFetch } from "@/lib/api-client";
 
 export interface Supplier {
   createdAt: string;
@@ -18,7 +19,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v
 export async function fetchSuppliers(search = ""): Promise<ApiResponse<Supplier>> {
   const url = new URL(`${API_BASE}/suppliers`);
   if (search) url.searchParams.set("search", search);
-  const res = await fetch(url.toString());
+  const res = await authorizedFetch(url.toString());
   if (!res.ok) throw new Error("Failed to fetch suppliers");
   const data = await res.json();
   return {
@@ -28,7 +29,7 @@ export async function fetchSuppliers(search = ""): Promise<ApiResponse<Supplier>
 }
 
 export async function createSupplier(payload: SupplierPayload): Promise<Supplier> {
-  const res = await fetch(`${API_BASE}/suppliers`, {
+  const res = await authorizedFetch(`${API_BASE}/suppliers`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -39,14 +40,14 @@ export async function createSupplier(payload: SupplierPayload): Promise<Supplier
 }
 
 export async function fetchSupplierById(id: string): Promise<Supplier> {
-  const res = await fetch(`${API_BASE}/suppliers/${id}`);
+  const res = await authorizedFetch(`${API_BASE}/suppliers/${id}`);
   if (!res.ok) throw new Error("Failed to fetch supplier by id");
   const data = await res.json();
   return data.item;
 }
 
 export async function updateSupplier(id: string, payload: SupplierPayload): Promise<Supplier> {
-  const res = await fetch(`${API_BASE}/suppliers/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/suppliers/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -57,6 +58,6 @@ export async function updateSupplier(id: string, payload: SupplierPayload): Prom
 }
 
 export async function deleteSupplier(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/suppliers/${id}`, { method: "DELETE" });
+  const res = await authorizedFetch(`${API_BASE}/suppliers/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete supplier");
-} 
+}

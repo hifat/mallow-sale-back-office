@@ -1,4 +1,5 @@
 import { ApiResponse } from './utils';
+import { authorizedFetch } from "@/lib/api-client"
 
 export interface Product {
   id: string
@@ -71,7 +72,7 @@ export async function fetchPromotions(params?: PromotionListParams): Promise<Api
     if (params.fields) url.searchParams.set('fields', params.fields)
   }
 
-  const res = await fetch(url.toString())
+  const res = await authorizedFetch(url.toString())
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}))
     throw new Error(errorData.message || "Failed to fetch promotions")
@@ -87,7 +88,7 @@ export async function fetchPromotions(params?: PromotionListParams): Promise<Api
  * Fetches a single promotion by ID
  */
 export async function fetchPromotionById(id: string): Promise<{ item: Promotion }> {
-  const res = await fetch(`${API_BASE}/promotions/${id}`)
+  const res = await authorizedFetch(`${API_BASE}/promotions/${id}`)
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}))
     throw new Error(errorData.message || "Failed to fetch promotion")
@@ -99,7 +100,7 @@ export async function fetchPromotionById(id: string): Promise<{ item: Promotion 
  * Creates a new promotion
  */
 export async function createPromotion(payload: PromotionPayload): Promise<{ item: Promotion }> {
-  const res = await fetch(`${API_BASE}/promotions`, {
+  const res = await authorizedFetch(`${API_BASE}/promotions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -120,7 +121,7 @@ export async function updatePromotion(
   id: string, 
   payload: Partial<PromotionPayload>
 ): Promise<{ item: Promotion }> {
-  const res = await fetch(`${API_BASE}/promotions/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/promotions/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -138,7 +139,7 @@ export async function updatePromotion(
  * Deletes a promotion
  */
 export async function deletePromotion(id: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/promotions/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/promotions/${id}`, {
     method: 'DELETE',
   })
   

@@ -1,7 +1,7 @@
 import type { Inventory } from '@/types/inventory'
 import { ApiResponse } from './utils';
-import { UsageUnit } from '@/types/usage-unit';
 import { inventorySchema } from '@/types/inventory'
+import { authorizedFetch } from "@/lib/api-client"
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
@@ -13,7 +13,7 @@ export async function fetchInventories(params?: { fields?: string; search?: stri
     if (params.search) searchParams.set("search", params.search);
     url += `?${searchParams.toString()}`;
   }
-  const res = await fetch(url)
+  const res = await authorizedFetch(url)
   if (!res.ok) throw new Error("Failed to fetch inventories")
   const data = await res.json()
   return {
@@ -27,7 +27,7 @@ export async function createInventory(item: Omit<Inventory, "id" | "createdAt" |
   if (!parsed.success) {
     throw new Error(parsed.error.errors[0]?.message || "Invalid data")
   }
-  const res = await fetch(`${API_BASE}/inventories`, {
+  const res = await authorizedFetch(`${API_BASE}/inventories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item),
@@ -44,7 +44,7 @@ export async function updateInventory(id: string, item: Partial<Inventory>) {
       throw new Error(parsed.error.errors[0]?.message || "Invalid data")
     }
   }
-  const res = await fetch(`${API_BASE}/inventories/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/inventories/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item),
@@ -54,7 +54,7 @@ export async function updateInventory(id: string, item: Partial<Inventory>) {
 }
 
 export async function deleteInventory(id: string) {
-  const res = await fetch(`${API_BASE}/inventories/${id}`, { method: "DELETE" })
+  const res = await authorizedFetch(`${API_BASE}/inventories/${id}`, { method: "DELETE" })
   if (!res.ok) throw new Error("Failed to delete inventory")
   return res.json()
 } 

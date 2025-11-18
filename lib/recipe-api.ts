@@ -1,6 +1,7 @@
 import type { Inventory } from '@/types/inventory'
 import { calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
 import { ApiResponse } from './utils'
+import { authorizedFetch } from "@/lib/api-client"
 
 export interface RecipeIngredient {
   inventory: Inventory
@@ -84,7 +85,7 @@ export interface RecipePayload {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
 export const fetchRecipes = async (sort: string = "order_no", order: "asc" | "desc" = "asc"): Promise<ApiResponse<Recipe>> => {
-  const response = await fetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
+  const response = await authorizedFetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
   if (!response.ok) {
     throw new Error('Failed to fetch recipes')
   }
@@ -97,7 +98,7 @@ export const fetchRecipes = async (sort: string = "order_no", order: "asc" | "de
 }
 
 export async function createRecipe(recipe: RecipePayload) {
-  const res = await fetch(`${API_BASE}/recipes`, {
+  const res = await authorizedFetch(`${API_BASE}/recipes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(recipe),
@@ -107,7 +108,7 @@ export async function createRecipe(recipe: RecipePayload) {
 }
 
 export async function updateRecipe(id: string, recipe: RecipePayload) {
-  const res = await fetch(`${API_BASE}/recipes/${id}`, {
+  const res = await authorizedFetch(`${API_BASE}/recipes/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(recipe),
@@ -117,24 +118,24 @@ export async function updateRecipe(id: string, recipe: RecipePayload) {
 }
 
 export async function deleteRecipe(id: string) {
-  const res = await fetch(`${API_BASE}/recipes/${id}`, { method: "DELETE" })
+  const res = await authorizedFetch(`${API_BASE}/recipes/${id}`, { method: "DELETE" })
   if (!res.ok) throw new Error("Failed to delete recipe")
   return res.json()
 }
 
 export async function fetchRecipeById(id: string): Promise<Recipe> {
-  const res = await fetch(`${API_BASE}/recipes/${id}`)
+  const res = await authorizedFetch(`${API_BASE}/recipes/${id}`)
   if (!res.ok) throw new Error("Failed to fetch recipe by id")
   const data = await res.json()
   return data.item || data
 }
 
 export async function updateRecipeOrderNo(orderList: { id: string; orderNo: number }[]) {
-  const res = await fetch(`${API_BASE}/recipes/order-no`, {
+  const res = await authorizedFetch(`${API_BASE}/recipes/order-no`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(orderList),
   })
   if (!res.ok) throw new Error("Failed to update recipe order numbers")
   return res.json()
-} 
+}
