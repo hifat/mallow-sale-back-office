@@ -233,6 +233,19 @@
     "theme": "ธีม",
     "profile": "โปรไฟล์"
   },
+  "auth": {
+    "signInTitle": "เข้าสู่ระบบ",
+    "signInSubtitle": "เข้าสู่ระบบจัดการหลังบ้าน Mallow Sale",
+    "username": "ชื่อผู้ใช้",
+    "password": "รหัสผ่าน",
+    "signInButton": "เข้าสู่ระบบ",
+    "signingIn": "กำลังเข้าสู่ระบบ...",
+    "signInSuccess": "เข้าสู่ระบบสำเร็จ",
+    "signInFailed": "ไม่สามารถเข้าสู่ระบบได้"
+  },
+  "validation": {
+    "required": "จำเป็นต้องกรอกข้อมูลในช่องนี้"
+  },
   "errors": {
     "invalidInventoryId": "รหัสคลังสินค้าไม่ถูกต้อง",
     "invalidSupplierId": "รหัสผู้จัดจำหน่ายไม่ถูกต้อง",

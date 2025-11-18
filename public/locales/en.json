@@ -231,6 +231,19 @@
     "theme": "Theme",
     "profile": "Profile"
   },
+  "auth": {
+    "signInTitle": "Sign In",
+    "signInSubtitle": "Access your Mallow Sale back office",
+    "username": "Username",
+    "password": "Password",
+    "signInButton": "Sign In",
+    "signingIn": "Signing in...",
+    "signInSuccess": "Signed in successfully",
+    "signInFailed": "Failed to sign in"
+  },
+  "validation": {
+    "required": "This field is required"
+  },
   "errors": {
     "invalidInventoryId": "Invalid inventory ID",
     "invalidSupplierId": "Invalid supplier ID",

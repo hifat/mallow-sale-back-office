@@ -5,6 +5,7 @@ import { Package, ChefHat, Scale, BarChart3, Settings, LogOut, Warehouse, Tag, S
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useI18n } from "@/contexts/i18n-context"
+import { useAuth } from "@/contexts/auth-context"
 
 import {
   Sidebar,
@@ -80,6 +81,7 @@ const getNavItems = (t: (key: string) => string) => [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { t } = useI18n()
+  const { signOut } = useAuth()
   
   const navItems = getNavItems(t)
 
@@ -129,7 +131,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="hover:bg-red-50 hover:text-red-700" tooltip={t("common.logout")}>
+            <SidebarMenuButton
+              className="hover:bg-red-50 hover:text-red-700"
+              tooltip={t("common.logout")}
+              onClick={signOut}
+            >
               <LogOut className="size-4" />
               <span>{t("common.logout")}</span>
             </SidebarMenuButton>

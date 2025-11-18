@@ -13,14 +13,16 @@ import {
 import { usePathname } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Bell } from "lucide-react"
+import { Bell, LogOut } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useTranslation } from "@/hooks/use-translation"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Header() {
   const pathname = usePathname()
   const { t } = useTranslation()
+  const { signOut } = useAuth()
 
   const getBreadcrumbs = () => {
     const segments = pathname.split("/").filter(Boolean)
@@ -80,6 +82,14 @@ export function Header() {
         <LanguageToggle />
         <Button variant="ghost" size="icon" className="hover:bg-yellow-50">
           <Bell className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          className="hover:bg-red-50 text-red-600 hidden sm:inline-flex"
+          onClick={signOut}
+        >
+          <LogOut className="h-4 w-4 mr-1" />
+          {t("common.logout")}
         </Button>
         <Avatar className="h-8 w-8">
           <AvatarImage src="/placeholder.svg" alt="User" />

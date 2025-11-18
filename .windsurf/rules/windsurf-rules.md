@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Windsurf Rules for Mallow-Sale-Backoffice
 
 ## Project Structure & Organization
