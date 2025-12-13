@@ -44,18 +44,6 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()'
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https:",
-              "font-src 'self' data:",
-              "connect-src 'self'",
-              "frame-ancestors 'none'",
-            ].join('; ')
           }
         ],
       },
@@ -66,7 +54,7 @@ const nextConfig = {
   experimental: {
     // Enable strict mode for Server Components
     serverActions: {
-      bodySizeLimit: '2mb', // Limit Server Action payload size
+      bodySizeLimit: '20mb', // Limit Server Action payload size
     },
   },
 }
