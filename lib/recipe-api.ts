@@ -10,7 +10,7 @@ export interface RecipeIngredient {
 }
 
 // Recipe Type definitions
-export type RecipeTypeCode = "FOOD" | "DESSERT" | "DRINK"
+export type RecipeTypeCode = "FOOD" | "DESSERT" | "DRINK" | "SNACK" | "INGREDIENT"
 
 export interface RecipeTypePayload {
   code: RecipeTypeCode
@@ -84,8 +84,21 @@ export interface RecipePayload {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
 
-export const fetchRecipes = async (sort: string = "order_no", order: "asc" | "desc" = "asc"): Promise<ApiResponse<Recipe>> => {
-  const response = await authorizedFetch(`${API_BASE}/recipes?sort=${sort}&order=${order}`)
+export interface QueryRecipe {
+  sort?: string
+  order?: "asc" | "desc"
+  recipeTypeCode?: RecipeTypeCode
+}
+
+export const fetchRecipes = async (params?: QueryRecipe): Promise<ApiResponse<Recipe>> => {
+  const { sort = "order_no", order = "asc", recipeTypeCode } = params || {}
+  
+  let url = `${API_BASE}/recipes?sort=${sort}&order=${order}`
+  if (recipeTypeCode) {
+    url += `&recipeTypeCode=${recipeTypeCode}`
+  }
+  
+  const response = await authorizedFetch(url)
   if (!response.ok) {
     throw new Error('Failed to fetch recipes')
   }

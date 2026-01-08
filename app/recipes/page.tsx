@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,14 +10,24 @@ import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical,
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
-import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo } from "@/lib/recipe-api"
+import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo, RecipeTypeCode, QueryRecipe } from "@/lib/recipe-api"
 import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
 import { ReactSortable } from "react-sortablejs"
 import { useTranslation } from "@/hooks/use-translation";
 
+const RECIPE_TYPES: { code: RecipeTypeCode; name: string }[] = [
+  { code: "FOOD", name: "Food" },
+  { code: "DESSERT", name: "Dessert" },
+  { code: "DRINK", name: "Drink" },
+  { code: "SNACK", name: "Snack" },
+  { code: "INGREDIENT", name: "Ingredient" },
+]
+
 export default function RecipesPage() {
   const { t } = useTranslation()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -29,17 +40,28 @@ export default function RecipesPage() {
   const [isOrdering, setIsOrdering] = useState(false)
   const [orderRecipes, setOrderRecipes] = useState<Recipe[]>([])
   const [totalCount, setTotalCount] = useState(0)
+  const [recipeTypeCode, setRecipeTypeCode] = useState<RecipeTypeCode>(
+    (searchParams.get("recipeTypeCode") as RecipeTypeCode) || "FOOD"
+  )
 
+  // Update URL when recipeTypeCode changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("recipeTypeCode", recipeTypeCode)
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }, [recipeTypeCode, router])
+
+  // Fetch recipes when recipeTypeCode changes
   useEffect(() => {
     setLoading(true)
-    fetchRecipes()
+    fetchRecipes({ recipeTypeCode })
       .then((response) => {
         setRecipes(response.items)
         setTotalCount(response.meta?.total || 0)
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false))
-  }, [])
+  }, [recipeTypeCode])
 
   const startOrdering = () => {
     setOrderRecipes([...recipes])
@@ -54,7 +76,7 @@ export default function RecipesPage() {
     try {
       const orderList = orderRecipes.map((r, idx) => ({ id: r.id, orderNo: idx + 1 }))
       await updateRecipeOrderNo(orderList)
-      const res = await fetchRecipes()
+      const res = await fetchRecipes({ recipeTypeCode })
       setRecipes(res.items)
       setTotalCount(res.meta?.total || 0)
       setIsOrdering(false)
@@ -77,7 +99,7 @@ export default function RecipesPage() {
         await createRecipe(data)
       }
       // Always refresh the recipes list after create/update
-      const res = await fetchRecipes()
+      const res = await fetchRecipes({ recipeTypeCode })
       setRecipes(res.items)
       setTotalCount(res.meta?.total || 0)
     } catch (e) {
@@ -199,6 +221,20 @@ export default function RecipesPage() {
                   className="pl-10 border-yellow-200 focus:border-yellow-500"
                   disabled={isOrdering}
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={recipeTypeCode}
+                  onChange={(e) => setRecipeTypeCode(e.target.value as RecipeTypeCode)}
+                  className="px-4 py-2 border border-yellow-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white text-gray-700"
+                  disabled={isOrdering}
+                >
+                  {RECIPE_TYPES.map((type) => (
+                    <option key={type.code} value={type.code}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex-1" />
               {!isOrdering && (
