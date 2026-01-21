@@ -120,18 +120,16 @@ function SupplierDetails({ supplier, onClose, onEdit }: { supplier: Supplier; on
         <CardContent>
           <div className="flex flex-col items-center space-y-4 py-4">
             <div className="w-24 h-24 flex items-center justify-center bg-gray-100 overflow-hidden border">
-              <img
-                src={supplier.imgUrl}
-                alt={supplier.name}
-                className="max-w-full max-h-full"
-                style={{ aspectRatio: '1/1' }}
-                onLoad={e => {
-                  const img = e.currentTarget;
-                  img.className =
-                    "max-w-full max-h-full " +
-                    (img.naturalWidth >= img.naturalHeight ? "w-full h-auto" : "h-full w-auto");
-                }}
-              />
+              {supplier.imgUrl ? (
+                <img
+                  src={supplier.imgUrl}
+                  alt={supplier.name}
+                  className="max-w-full max-h-full"
+                  style={{ aspectRatio: '1/1' }}
+                />
+              ) : (
+                <Package className="h-5 w-5 text-yellow-600" />
+              )}
             </div>
             <div className="text-xl font-bold text-gray-900">{supplier.name}</div>
             <div className="text-xs text-gray-500">{t('suppliers.updatedAt')} {formatDate(supplier.updatedAt)}</div>
