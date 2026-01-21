@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -8,20 +9,19 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Search, Trash2, CheckSquare, Square, Receipt } from "lucide-react"
 import { ListCardTable } from "@/components/list-card-table"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
-import { ShoppingForm } from "@/components/shopping-form"
 import { ReceiptForm } from "@/components/receipt-form"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import type { Shopping } from "@/types/shopping"
-import { fetchShoppings, createShopping, deleteShopping, updateShoppingIsComplete } from "@/lib/shopping-api"
+import { fetchShoppings, deleteShopping, updateShoppingIsComplete } from "@/lib/shopping-api"
 import { useTranslation } from "@/hooks/use-translation"
 
 export default function ShoppingPage() {
+  const router = useRouter()
   const { toast } = useToast()
   const { t } = useTranslation()
   const [items, setItems] = useState<Shopping[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [showForm, setShowForm] = useState(false)
   const [showReceiptForm, setShowReceiptForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
@@ -40,22 +40,7 @@ export default function ShoppingPage() {
 
   const filteredItems = items.filter(item => item.name ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : false)
 
-  const handleCreate = async (data: Omit<Shopping, "id">) => {
-    setLoading(true)
-    try {
-      await createShopping(data as any)
-      const res = await fetchShoppings()
-      setItems(res.items)
-      setTotalCount(res.meta?.total || res.items.length || 0)
-      toast({ title: t("common.success"), description: t("shopping.toast.added") })
-    } catch (e: any) {
-      toast({ title: t("common.error"), description: e?.message || t("shopping.toast.createError") })
-      throw e
-    } finally {
-      setShowForm(false)
-      setLoading(false)
-    }
-  }
+
 
   const handleToggleComplete = async (item: Shopping) => {
     const newVal = !item.isComplete
@@ -100,7 +85,7 @@ export default function ShoppingPage() {
               <Receipt className="h-4 w-4 mr-2" />
               {t("shopping.readReceipt")}
             </Button>
-            <Button onClick={() => setShowForm(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+            <Button onClick={() => router.push("/shopping/create")} className="bg-yellow-500 hover:bg-yellow-600 text-white">
               <Plus className="h-4 w-4 mr-2" />
               {t("shopping.addItem")}
             </Button>
@@ -199,12 +184,7 @@ export default function ShoppingPage() {
         />
       </div>
 
-      {showForm && (
-        <ShoppingForm
-          onSave={handleCreate as any}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
+
 
       {showReceiptForm && (
         <ReceiptForm

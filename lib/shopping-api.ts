@@ -1,4 +1,4 @@
-import type { Shopping, ShoppingInput, ReceiptResponse } from "@/types/shopping";
+import type { Shopping, ShoppingInput, ReceiptResponse, ShoppingInventoryResponse } from "@/types/shopping";
 import { shoppingSchema } from "@/types/shopping";
 import { ApiResponse } from "./utils";
 import { authorizedFetch } from "@/lib/api-client";
@@ -124,6 +124,16 @@ export async function readReceipt(imageFile: File): Promise<ReceiptResponse> {
     throw new Error("Failed to read receipt");
   }
 
+  const data = await res.json();
+  return {
+    items: data.items || [],
+    meta: data.meta || { total: 0 },
+  };
+}
+
+export async function getShoppingInventories(): Promise<ShoppingInventoryResponse> {
+  const res = await authorizedFetch(`${API_BASE}/shopping-inventories`);
+  if (!res.ok) throw new Error("Failed to fetch shopping inventories");
   const data = await res.json();
   return {
     items: data.items || [],

@@ -21,7 +21,9 @@
     "logout": "ออกจากระบบ",
     "management": "การจัดการ",
     "searchPlaceholder": "ค้นหา...",
-    "list": "รายการ"
+    "list": "รายการ",
+    "back": "ย้อนกลับ",
+    "reset": "รีเซ็ต"
   },
   "navigation": {
     "dashboard": "แดชบอร์ด",
@@ -127,6 +129,8 @@
     "title": "รายการซื้อ",
     "management": "การจัดการรายการซื้อ",
     "subtitle": "จัดการรายการซื้อของคุณ",
+    "createTitle": "สร้างรายการซื้อ",
+    "createOrder": "สร้างคำสั่งซื้อ",
     "addItem": "เพิ่มรายการ",
     "listTitle": "รายการซื้อ",
     "emptyTitle": "ยังไม่มีรายการซื้อ",
