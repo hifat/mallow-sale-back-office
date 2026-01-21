@@ -117,7 +117,7 @@ export default function CreateShoppingPage() {
                             </CardTitle>
                         </div>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
+                    <CardContent className="grid">
                         {supplier.inventories.map((inventory) => {
                             const isSelected = !!selectedItems[inventory.inventoryID]
                             return (
