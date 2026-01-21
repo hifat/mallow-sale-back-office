@@ -20,18 +20,17 @@ import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/ut
 import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 import { useTranslation } from "@/hooks/use-translation";
-import { createShoppingFromInventory } from "@/lib/shopping-api";
-import { useToast } from "@/components/ui/use-toast";
+import { ShoppingInventoryModal } from "@/components/shopping-inventory-modal"
 
 export default function InventoryPage() {
   const { t } = useTranslation()
-  const { toast } = useToast()
   const [inventories, setInventory] = useState<Inventory[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<Inventory | null>(null)
   const [deletingItem, setDeletingItem] = useState<Inventory | null>(null)
+  const [shoppingInventoryId, setShoppingInventoryId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -46,10 +45,10 @@ export default function InventoryPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filteredInventory = inventories.filter(item => 
+  const filteredInventory = inventories.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
-  
+
   const handleSave = async (data: Omit<Inventory, "id" | "createdAt" | "updatedAt">) => {
     setLoading(true)
     try {
@@ -57,12 +56,12 @@ export default function InventoryPage() {
         await updateInventory(editingItem.id, data)
         setInventory(prev =>
           prev.map(item =>
-            item.id === editingItem.id 
-              ? { 
-                  ...item, 
-                  ...data, 
-                  updatedAt: new Date().toISOString().split("T")[0] 
-                } 
+            item.id === editingItem.id
+              ? {
+                ...item,
+                ...data,
+                updatedAt: new Date().toISOString().split("T")[0]
+              }
               : item
           )
         )
@@ -84,7 +83,7 @@ export default function InventoryPage() {
 
   const handleDelete = async (item: Inventory) => {
     if (!item) return
-    
+
     setLoading(true)
     try {
       await deleteInventory(item.id)
@@ -247,14 +246,7 @@ export default function InventoryPage() {
                               title="Add to Shopping"
                               variant="ghost"
                               size="sm"
-                              onClick={async () => {
-                                try {
-                                  await createShoppingFromInventory({ name: item.name, purchaseUnit: { code: item.purchaseUnit?.code } })
-                                  toast({ title: "Added", description: `Added \"${item.name}\" to shopping` })
-                                } catch (e: any) {
-                                  toast({ title: "Error", description: e?.message || "Failed to add to shopping" })
-                                }
-                              }}
+                              onClick={() => setShoppingInventoryId(item.id)}
                               className="hover:bg-yellow-50"
                             >
                               <ShoppingCart className="h-4 w-4" />
@@ -311,12 +303,18 @@ export default function InventoryPage() {
 
       {deletingItem && (
         <DeleteConfirmDialog
-          title="Delete Inventory Item"
-          description={`Are you sure you want to delete "${deletingItem.name}"? This action cannot be undone.`}
+          title={t("inventory.deleteConfirm.title")}
+          description={t("inventory.deleteConfirm.description", { name: deletingItem.name })}
           onConfirm={() => handleDelete(deletingItem)}
           onCancel={() => setDeletingItem(null)}
         />
       )}
+
+      <ShoppingInventoryModal
+        inventoryId={shoppingInventoryId}
+        open={!!shoppingInventoryId}
+        onOpenChange={(open) => !open && setShoppingInventoryId(null)}
+      />
     </>
   )
 }

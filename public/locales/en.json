@@ -115,7 +115,11 @@
     "description": "Description",
     "yield": "Yield %",
     "actualPrice": "Actual Price",
-    "costPerUnit": "Cost/Unit"
+    "costPerUnit": "Cost/Unit",
+    "deleteConfirm": {
+      "title": "Delete Inventory Item",
+      "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    }
   },
   "shopping": {
     "title": "Shopping",

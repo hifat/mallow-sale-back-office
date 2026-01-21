@@ -70,6 +70,22 @@ export async function deleteShopping(id: string) {
   return res.json();
 }
 
+
+export async function createShoppingInventory(payload: { inventoryID: string; supplierID: string }) {
+  const res = await authorizedFetch(`${API_BASE}/shopping-inventories`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+     const err = await res.json().catch(() => ({}));
+     throw new Error(err?.message || "Failed to add to shopping list");
+  }
+  
+  return res.json();
+}
+
 export function createShoppingFromInventory(inventory: { name: string; purchaseUnit?: { code?: string } }) {
   return createShopping({
     isComplete: false,
