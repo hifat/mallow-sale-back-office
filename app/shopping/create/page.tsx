@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, Square } from "lucide-react"
 import type { ShoppingInventorySupplier, ShoppingInventoryItem } from "@/types/shopping"
 import { getShoppingInventories } from "@/lib/shopping-api"
+import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 
 interface SelectedItem {
     quantity: number
@@ -102,7 +103,13 @@ export default function CreateShoppingPage() {
                 <h1 className="text-2xl font-bold text-gray-900">{t("shopping.createTitle")}</h1>
             </div>
 
-            {suppliers.map((supplier) => (
+            {!loading && suppliers.length === 0 ? (
+                <CenteredEmptyState
+                    icon={<Square className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+                    title={t("shopping.emptyTitle")}
+                    subtitle={t("shopping.emptySubtitle")}
+                />
+            ) : suppliers.map((supplier) => (
                 <Card key={supplier.id} className="border-l-4 border-l-yellow-500 shadow-sm">
                     <CardHeader className="p-2 pt-3 bg-gray-50/50">
                         <div className="flex items-center space-x-3">

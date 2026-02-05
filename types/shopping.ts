@@ -48,6 +48,7 @@ export const receiptItemSchema = z.object({
 export type ReceiptItemInput = z.infer<typeof receiptItemSchema>;
 
 export interface ShoppingInventoryItem {
+  id: string;
   inventoryID: string;
   inventoryName: string;
 }
