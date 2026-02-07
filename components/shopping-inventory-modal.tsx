@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { USAGE_UNITS } from "@/types/usage-unit"
 import { fetchSuppliers, Supplier } from "@/lib/supplier-api"
 import { createShoppingInventory } from "@/lib/shopping-api"
 import { useToast } from "@/components/ui/use-toast"
@@ -11,20 +12,24 @@ import { useTranslation } from "@/hooks/use-translation"
 
 interface ShoppingInventoryModalProps {
     inventoryId: string | null
+    inventoryName: string
+    defaultUsageUnitCode: string
     open: boolean
     onOpenChange: (open: boolean) => void
 }
 
-export function ShoppingInventoryModal({ inventoryId, open, onOpenChange }: ShoppingInventoryModalProps) {
+export function ShoppingInventoryModal({ inventoryId, inventoryName, defaultUsageUnitCode, open, onOpenChange }: ShoppingInventoryModalProps) {
     const { t } = useTranslation()
     const { toast } = useToast()
     const [suppliers, setSuppliers] = useState<Supplier[]>([])
     const [selectedSupplierId, setSelectedSupplierId] = useState<string>("")
+    const [usageUnitCode, setUsageUnitCode] = useState<string>("")
     const [loading, setLoading] = useState(false)
     const [submitting, setSubmitting] = useState(false)
 
     useEffect(() => {
         if (open) {
+            setUsageUnitCode(defaultUsageUnitCode)
             setLoading(true)
             fetchSuppliers()
                 .then((res) => setSuppliers(res.items))
@@ -33,8 +38,9 @@ export function ShoppingInventoryModal({ inventoryId, open, onOpenChange }: Shop
         } else {
             // Reset state when closed
             setSelectedSupplierId("")
+            setUsageUnitCode("")
         }
-    }, [open])
+    }, [open, defaultUsageUnitCode])
 
     const handleSubmit = async () => {
         if (!inventoryId || !selectedSupplierId) return
@@ -44,6 +50,7 @@ export function ShoppingInventoryModal({ inventoryId, open, onOpenChange }: Shop
             await createShoppingInventory({
                 inventoryID: inventoryId,
                 supplierID: selectedSupplierId,
+                usageUnitCode: usageUnitCode,
             })
             toast({
                 title: "Success",
@@ -66,6 +73,7 @@ export function ShoppingInventoryModal({ inventoryId, open, onOpenChange }: Shop
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Select Supplier</DialogTitle>
+                    <p className="text-sm text-gray-500">{inventoryName}</p>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
@@ -84,6 +92,23 @@ export function ShoppingInventoryModal({ inventoryId, open, onOpenChange }: Shop
                                 {suppliers.map((supplier) => (
                                     <SelectItem key={supplier.id} value={supplier.id}>
                                         {supplier.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Usage Unit Code
+                        </label>
+                        <Select value={usageUnitCode} onValueChange={setUsageUnitCode}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select usage unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {USAGE_UNITS.map((unit) => (
+                                    <SelectItem key={unit.code} value={unit.code}>
+                                        {unit.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

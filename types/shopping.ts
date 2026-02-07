@@ -51,6 +51,7 @@ export interface ShoppingInventoryItem {
   id: string;
   inventoryID: string;
   inventoryName: string;
+  usageUnitCode: string;
 }
 
 export interface ShoppingInventorySupplier {

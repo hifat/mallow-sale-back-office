@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
@@ -12,6 +13,7 @@ import { ChevronLeft, Square } from "lucide-react"
 import type { ShoppingInventorySupplier, ShoppingInventoryItem } from "@/types/shopping"
 import { getShoppingInventories } from "@/lib/shopping-api"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
+import { USAGE_UNITS } from "@/types/usage-unit"
 
 interface SelectedItem {
     quantity: number
@@ -45,7 +47,7 @@ export default function CreateShoppingPage() {
             if (checked) {
                 supplier.inventories.forEach(inv => {
                     if (!next[inv.inventoryID]) {
-                        next[inv.inventoryID] = { quantity: 0, unit: "" }
+                        next[inv.inventoryID] = { quantity: 0, unit: inv.usageUnitCode }
                     }
                 })
             } else {
@@ -61,7 +63,8 @@ export default function CreateShoppingPage() {
         setSelectedItems(prev => {
             const next = { ...prev }
             if (checked) {
-                next[inventoryId] = { quantity: 0, unit: "" }
+                const inventory = suppliers.flatMap(s => s.inventories).find(inv => inv.inventoryID === inventoryId)
+                next[inventoryId] = { quantity: 0, unit: inventory?.usageUnitCode || "" }
             } else {
                 delete next[inventoryId]
             }
@@ -155,12 +158,21 @@ export default function CreateShoppingPage() {
                                                     />
                                                 </div>
                                                 <div className="flex-1 max-w-[150px]">
-                                                    <Input
-                                                        placeholder={t("inventory.unit")} // Reusing existing translation
+                                                    <Select
                                                         value={selectedItems[inventory.inventoryID]?.unit || ""}
-                                                        onChange={(e) => updateItem(inventory.inventoryID, "unit", e.target.value)}
-                                                        className="h-9 text-sm border-gray-200 focus:border-yellow-500 focus:ring-yellow-500"
-                                                    />
+                                                        onValueChange={(value) => updateItem(inventory.inventoryID, "unit", value)}
+                                                    >
+                                                        <SelectTrigger className="h-9 text-sm border-gray-200 focus:border-yellow-500 focus:ring-yellow-500">
+                                                            <SelectValue placeholder={t("inventory.unit")} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {USAGE_UNITS.map((unit) => (
+                                                                <SelectItem key={unit.code} value={unit.code}>
+                                                                    {unit.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
                                             </div>
                                         )}

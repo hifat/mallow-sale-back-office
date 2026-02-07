@@ -30,7 +30,7 @@ export default function InventoryPage() {
   const [showDetails, setShowDetails] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<Inventory | null>(null)
   const [deletingItem, setDeletingItem] = useState<Inventory | null>(null)
-  const [shoppingInventoryId, setShoppingInventoryId] = useState<string | null>(null)
+  const [shoppingItem, setShoppingItem] = useState<Inventory | null>(null)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -246,7 +246,7 @@ export default function InventoryPage() {
                               title="Add to Shopping"
                               variant="ghost"
                               size="sm"
-                              onClick={() => setShoppingInventoryId(item.id)}
+                              onClick={() => setShoppingItem(item)}
                               className="hover:bg-yellow-50"
                             >
                               <ShoppingCart className="h-4 w-4" />
@@ -311,9 +311,11 @@ export default function InventoryPage() {
       )}
 
       <ShoppingInventoryModal
-        inventoryId={shoppingInventoryId}
-        open={!!shoppingInventoryId}
-        onOpenChange={(open) => !open && setShoppingInventoryId(null)}
+        inventoryId={shoppingItem?.id || null}
+        inventoryName={shoppingItem?.name || ""}
+        defaultUsageUnitCode={shoppingItem?.purchaseUnit?.code || ""}
+        open={!!shoppingItem}
+        onOpenChange={(open) => !open && setShoppingItem(null)}
       />
     </>
   )

@@ -71,7 +71,7 @@ export async function deleteShopping(id: string) {
 }
 
 
-export async function createShoppingInventory(payload: { inventoryID: string; supplierID: string }) {
+export async function createShoppingInventory(payload: { inventoryID: string; supplierID: string; usageUnitCode: string }) {
   const res = await authorizedFetch(`${API_BASE}/shopping-inventories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
