@@ -39,6 +39,9 @@ export default function CreateShoppingPage() {
             .finally(() => setLoading(false))
     }, [toast, t])
 
+    // Helper function to create composite key for supplier+inventory
+    const getItemKey = (supplierId: string, inventoryId: string) => `${supplierId}:${inventoryId}`
+
     const handleSupplierCheck = (supplierId: string, checked: boolean) => {
         const supplier = suppliers.find(s => s.supplierID === supplierId)
         if (!supplier) return
@@ -47,37 +50,40 @@ export default function CreateShoppingPage() {
             const next = { ...prev }
             if (checked) {
                 supplier.inventories.forEach(inv => {
-                    if (!next[inv.inventoryID]) {
-                        next[inv.inventoryID] = { quantity: 0, unit: inv.usageUnitCode }
+                    const key = getItemKey(supplierId, inv.inventoryID)
+                    if (!next[key]) {
+                        next[key] = { quantity: 0, unit: inv.usageUnitCode }
                     }
                 })
             } else {
                 supplier.inventories.forEach(inv => {
-                    delete next[inv.inventoryID]
+                    const key = getItemKey(supplierId, inv.inventoryID)
+                    delete next[key]
                 })
             }
             return next
         })
     }
 
-    const handleInventoryCheck = (inventoryId: string, checked: boolean) => {
+    const handleInventoryCheck = (supplierId: string, inventoryId: string, checked: boolean) => {
+        const key = getItemKey(supplierId, inventoryId)
         setSelectedItems(prev => {
             const next = { ...prev }
             if (checked) {
-                const inventory = suppliers.flatMap(s => s.inventories).find(inv => inv.inventoryID === inventoryId)
-                next[inventoryId] = { quantity: 0, unit: inventory?.usageUnitCode || "" }
+                const inventory = suppliers.find(s => s.supplierID === supplierId)?.inventories.find(inv => inv.inventoryID === inventoryId)
+                next[key] = { quantity: 0, unit: inventory?.usageUnitCode || "" }
             } else {
-                delete next[inventoryId]
+                delete next[key]
             }
             return next
         })
     }
 
-    const updateItem = (inventoryId: string, field: "quantity" | "unit", value: string | number) => {
+    const updateItem = (key: string, field: "quantity" | "unit", value: string | number) => {
         setSelectedItems(prev => ({
             ...prev,
-            [inventoryId]: {
-                ...prev[inventoryId],
+            [key]: {
+                ...prev[key],
                 [field]: value
             }
         }))
@@ -93,15 +99,16 @@ export default function CreateShoppingPage() {
 
         let orderNo = 0
         for (const supplier of suppliers) {
-            const supplierInventories = supplier.inventories.filter(inv => selectedItems[inv.inventoryID])
+            const supplierInventories = supplier.inventories.filter(inv => selectedItems[getItemKey(supplier.supplierID, inv.inventoryID)])
             if (supplierInventories.length > 0) {
                 ordersBySupplier[supplier.supplierID] = supplierInventories.map(inv => {
+                    const key = getItemKey(supplier.supplierID, inv.inventoryID)
                     orderNo++
                     return {
                         inventoryID: inv.inventoryID,
                         orderNo,
-                        purchaseQuantity: selectedItems[inv.inventoryID].quantity,
-                        purchaseUnit: { code: selectedItems[inv.inventoryID].unit }
+                        purchaseQuantity: selectedItems[key].quantity,
+                        purchaseUnit: { code: selectedItems[key].unit }
                     }
                 })
             }
@@ -118,7 +125,7 @@ export default function CreateShoppingPage() {
             await createShoppingBatch(batchPayload)
 
             toast({ title: t("common.success"), description: t("shopping.toast.createSuccess") })
-            router.push("/shopping")
+            handleReset()
         } catch (error: any) {
             toast({
                 variant: "destructive",
@@ -131,7 +138,7 @@ export default function CreateShoppingPage() {
     }
 
     const isSupplierChecked = (supplier: ShoppingInventorySupplier) => {
-        return supplier.inventories.every(inv => !!selectedItems[inv.inventoryID])
+        return supplier.inventories.every(inv => !!selectedItems[getItemKey(supplier.supplierID, inv.inventoryID)])
     }
 
     return (
@@ -167,18 +174,19 @@ export default function CreateShoppingPage() {
                     </CardHeader>
                     <CardContent className="grid">
                         {supplier.inventories.map((inventory) => {
-                            const isSelected = !!selectedItems[inventory.inventoryID]
+                            const itemKey = getItemKey(supplier.supplierID, inventory.inventoryID)
+                            const isSelected = !!selectedItems[itemKey]
                             return (
-                                <div key={inventory.inventoryID} className={`flex items-start space-x-4 p-3 rounded-lg transition-colors ${isSelected ? "bg-yellow-50/50" : "hover:bg-gray-50"}`}>
+                                <div key={itemKey} className={`flex items-start space-x-4 p-3 rounded-lg transition-colors ${isSelected ? "bg-yellow-50/50" : "hover:bg-gray-50"}`}>
                                     <Checkbox
-                                        id={`inv-${inventory.inventoryID}`}
+                                        id={`inv-${itemKey}`}
                                         checked={isSelected}
-                                        onCheckedChange={(checked) => handleInventoryCheck(inventory.inventoryID, checked as boolean)}
+                                        onCheckedChange={(checked) => handleInventoryCheck(supplier.supplierID, inventory.inventoryID, checked as boolean)}
                                         className="data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
                                     />
                                     <div className="flex-1 space-y-3">
                                         <label
-                                            htmlFor={`inv-${inventory.inventoryID}`}
+                                            htmlFor={`inv-${itemKey}`}
                                             className="text-sm font-medium text-gray-900 block cursor-pointer"
                                         >
                                             {inventory.inventoryName}
@@ -190,15 +198,15 @@ export default function CreateShoppingPage() {
                                                     <Input
                                                         type="number"
                                                         placeholder={t("inventory.quantity")} // Reusing existing translation
-                                                        value={selectedItems[inventory.inventoryID]?.quantity || ""}
-                                                        onChange={(e) => updateItem(inventory.inventoryID, "quantity", parseFloat(e.target.value) || 0)}
+                                                        value={selectedItems[itemKey]?.quantity || ""}
+                                                        onChange={(e) => updateItem(itemKey, "quantity", parseFloat(e.target.value) || 0)}
                                                         className="h-9 text-sm border-gray-200 focus:border-yellow-500 focus:ring-yellow-500"
                                                     />
                                                 </div>
                                                 <div className="flex-1 max-w-[150px]">
                                                     <Select
-                                                        value={selectedItems[inventory.inventoryID]?.unit || ""}
-                                                        onValueChange={(value) => updateItem(inventory.inventoryID, "unit", value)}
+                                                        value={selectedItems[itemKey]?.unit || ""}
+                                                        onValueChange={(value) => updateItem(itemKey, "unit", value)}
                                                     >
                                                         <SelectTrigger className="h-9 text-sm border-gray-200 focus:border-yellow-500 focus:ring-yellow-500">
                                                             <SelectValue placeholder={t("inventory.unit")} />
