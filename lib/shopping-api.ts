@@ -1,4 +1,4 @@
-import type { Shopping, ShoppingInput, ReceiptResponse, ShoppingInventoryResponse } from "@/types/shopping";
+import type { Shopping, ShoppingInput, ReceiptResponse, ShoppingInventoryResponse, ShoppingOrderInput } from "@/types/shopping";
 import { shoppingSchema } from "@/types/shopping";
 import { ApiResponse } from "./utils";
 import { authorizedFetch } from "@/lib/api-client";
@@ -142,3 +142,17 @@ export async function getShoppingInventories(): Promise<ShoppingInventoryRespons
 }
 
 
+export async function createShoppingBatch(payload: ShoppingOrderInput[]) {
+  const res = await authorizedFetch(`${SHOPPING_BASE}/batch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || "Failed to create shopping order");
+  }
+
+  return res.json();
+}

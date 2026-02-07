@@ -67,3 +67,17 @@ export interface ShoppingInventoryResponse {
     total: number;
   };
 }
+
+export interface ShoppingOrderInventory {
+  inventoryID: string;
+  orderNo: number;
+  purchaseQuantity: number;
+  purchaseUnit: {
+    code: string;
+  };
+}
+
+export interface ShoppingOrderInput {
+  inventories: ShoppingOrderInventory[];
+  supplierID: string;
+}

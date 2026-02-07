@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
 import { ChevronLeft, Square } from "lucide-react"
-import type { ShoppingInventorySupplier, ShoppingInventoryItem } from "@/types/shopping"
-import { getShoppingInventories } from "@/lib/shopping-api"
+import type { ShoppingInventorySupplier, ShoppingInventoryItem, ShoppingOrderInventory } from "@/types/shopping"
+import { getShoppingInventories, createShoppingBatch } from "@/lib/shopping-api"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 import { USAGE_UNITS } from "@/types/usage-unit"
 
@@ -25,6 +25,7 @@ export default function CreateShoppingPage() {
     const { toast } = useToast()
     const { t } = useTranslation()
     const [loading, setLoading] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
     const [suppliers, setSuppliers] = useState<ShoppingInventorySupplier[]>([])
     const [selectedItems, setSelectedItems] = useState<Record<string, SelectedItem>>({})
 
@@ -86,10 +87,47 @@ export default function CreateShoppingPage() {
         setSelectedItems({})
     }
 
-    const handleCreateOrder = () => {
-        // Placeholder for create order logic
-        console.log("Create Order:", selectedItems)
-        toast({ title: "Info", description: "Create Order logic pending implementation" })
+    const handleCreateOrder = async () => {
+        // Group selected items by supplier
+        const ordersBySupplier: Record<string, ShoppingOrderInventory[]> = {}
+
+        let orderNo = 0
+        for (const supplier of suppliers) {
+            const supplierInventories = supplier.inventories.filter(inv => selectedItems[inv.inventoryID])
+            if (supplierInventories.length > 0) {
+                ordersBySupplier[supplier.supplierID] = supplierInventories.map(inv => {
+                    orderNo++
+                    return {
+                        inventoryID: inv.inventoryID,
+                        orderNo,
+                        purchaseQuantity: selectedItems[inv.inventoryID].quantity,
+                        purchaseUnit: { code: selectedItems[inv.inventoryID].unit }
+                    }
+                })
+            }
+        }
+
+        setSubmitting(true)
+        try {
+            // Build batch payload array
+            const batchPayload = Object.entries(ordersBySupplier).map(([supplierID, inventories]) => ({
+                inventories,
+                supplierID
+            }))
+
+            await createShoppingBatch(batchPayload)
+
+            toast({ title: t("common.success"), description: t("shopping.toast.createSuccess") })
+            router.push("/shopping")
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: t("common.error"),
+                description: error.message || t("shopping.toast.createError")
+            })
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     const isSupplierChecked = (supplier: ShoppingInventorySupplier) => {
@@ -196,9 +234,9 @@ export default function CreateShoppingPage() {
                     <Button
                         onClick={handleCreateOrder}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white min-w-[150px]"
-                        disabled={Object.keys(selectedItems).length === 0}
+                        disabled={Object.keys(selectedItems).length === 0 || submitting}
                     >
-                        {t("shopping.createOrder")}
+                        {submitting ? t("common.loading") : t("shopping.createOrder")}
                     </Button>
                 </div>
             </div>
