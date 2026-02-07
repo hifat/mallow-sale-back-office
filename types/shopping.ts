@@ -81,3 +81,40 @@ export interface ShoppingOrderInput {
   inventories: ShoppingOrderInventory[];
   supplierID: string;
 }
+
+// Shopping Status Codes
+export type ShoppingStatusCode = "PENDING" | "IN_PROGRESS" | "SUCCESS" | "CANCEL";
+
+export interface ShoppingStatus {
+  code: ShoppingStatusCode;
+  name: string;
+}
+
+export interface ShoppingDetailInventory {
+  inventoryID: string;
+  inventoryName: string;
+  orderNo: number;
+  purchaseQuantity: number;
+  purchaseUnit: {
+    code: string;
+    name: string;
+  };
+  status: ShoppingStatus;
+}
+
+export interface ShoppingOrder {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  status: ShoppingStatus;
+  supplierID: string;
+  supplierName: string;
+  inventories?: ShoppingDetailInventory[];
+}
+
+export interface ShoppingOrderResponse {
+  items: ShoppingOrder[];
+  meta: {
+    total: number;
+  };
+}

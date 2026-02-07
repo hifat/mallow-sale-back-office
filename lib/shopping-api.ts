@@ -1,4 +1,4 @@
-import type { Shopping, ShoppingInput, ReceiptResponse, ShoppingInventoryResponse, ShoppingOrderInput } from "@/types/shopping";
+import type { Shopping, ShoppingInput, ReceiptResponse, ShoppingInventoryResponse, ShoppingOrderInput, ShoppingOrder, ShoppingOrderResponse, ShoppingStatusCode } from "@/types/shopping";
 import { shoppingSchema } from "@/types/shopping";
 import { ApiResponse } from "./utils";
 import { authorizedFetch } from "@/lib/api-client";
@@ -6,14 +6,47 @@ import { authorizedFetch } from "@/lib/api-client";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 const SHOPPING_BASE = `${API_BASE}/shoppings`;
 
-export async function fetchShoppings(): Promise<ApiResponse<Shopping>> {
+export async function fetchShoppings(): Promise<ShoppingOrderResponse> {
   const res = await authorizedFetch(SHOPPING_BASE);
   if (!res.ok) throw new Error("Failed to fetch shoppings");
   const data = await res.json();
   return {
     items: data.items || [],
-    meta: data.meta || { total: 0, page: 1, limit: 10, totalPages: 1 },
+    meta: data.meta || { total: 0 },
   };
+}
+
+export async function getShoppingDetail(id: string): Promise<ShoppingOrder> {
+  const res = await authorizedFetch(`${SHOPPING_BASE}/${id}`);
+  if (!res.ok) {
+    if (res.status === 404) {
+      const err = await res.json().catch(() => ({}));
+      if (err?.code === "RECORD_NOT_FOUND") {
+        throw new Error("record not found");
+      }
+    }
+    throw new Error("Failed to fetch shopping detail");
+  }
+  const data = await res.json();
+  return data.item;
+}
+
+export async function updateShoppingStatus(id: string, statusCode: ShoppingStatusCode) {
+  const res = await authorizedFetch(`${SHOPPING_BASE}/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ statusCode }),
+  });
+  if (!res.ok) {
+    if (res.status === 404) {
+      const err = await res.json().catch(() => ({}));
+      if (err?.code === "RECORD_NOT_FOUND") {
+        throw new Error("record not found");
+      }
+    }
+    throw new Error("Failed to update shopping status");
+  }
+  return res.json();
 }
 
 export async function createShopping(payload: ShoppingInput) {

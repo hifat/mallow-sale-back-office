@@ -130,22 +130,23 @@
     "emptyTitle": "No shopping items",
     "emptySubtitle": "Add your first item to get started",
     "complete": "Complete",
+    "readReceipt": "Read Receipt",
+    "orderDetail": "Order Detail",
+    "orderId": "Order ID",
+    "supplierInfo": "Supplier Information",
+    "orderItems": "Items",
+    "notFound": "Shopping Order not found",
+    "backToShopping": "Back to Shopping List",
     "toast": {
       "added": "Shopping item added",
       "deleted": "Shopping item deleted",
       "deleteError": "Failed to delete",
       "updateError": "Failed to update status",
       "fetchError": "Failed to fetch shoppings",
-      "createError": "Failed to add shopping"
-    },
-    "form": {
-      "addTitle": "Add New Shopping Item",
-      "editTitle": "Edit Shopping Item",
-      "name": "Name",
-      "quantity": "Quantity",
-      "unit": "Unit"
-    },
-    "readReceipt": "Read Receipt"
+      "fetchDetailError": "Failed to fetch shopping order details",
+      "createError": "Failed to add shopping",
+      "createSuccess": "Shopping order created successfully"
+    }
   },
   "receipt": {
     "title": "Read Receipt",
