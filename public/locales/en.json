@@ -137,6 +137,12 @@
     "orderItems": "Items",
     "notFound": "Shopping Order not found",
     "backToShopping": "Back to Shopping List",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "success": "Success",
+      "cancel": "Cancelled"
+    },
     "toast": {
       "added": "Shopping item added",
       "deleted": "Shopping item deleted",

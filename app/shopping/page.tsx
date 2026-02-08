@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Plus, Search, Trash2, CheckSquare, Square, Receipt } from "lucide-react"
 import { ListCardTable } from "@/components/list-card-table"
@@ -12,8 +11,10 @@ import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 import { ReceiptForm } from "@/components/receipt-form"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { ShoppingStatusSelect } from "@/components/shopping-status-select"
+import { ShoppingStatusCode } from "@/types/shopping"
 import type { ShoppingOrder } from "@/types/shopping"
-import { fetchShoppings, deleteShopping } from "@/lib/shopping-api"
+import { fetchShoppings, deleteShopping, updateShoppingStatus } from "@/lib/shopping-api"
 import { useTranslation } from "@/hooks/use-translation"
 
 export default function ShoppingPage() {
@@ -44,6 +45,25 @@ export default function ShoppingPage() {
     return supplierName.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
+  const handleStatusChange = async (item: ShoppingOrder, newStatus: ShoppingStatusCode) => {
+    // Optimistic update
+    const oldItems = [...items]
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: { ...i.status, code: newStatus } } : i))
+
+    try {
+      await updateShoppingStatus(item.id, newStatus)
+      toast({ title: t("common.success"), description: t("shopping.toast.updateSuccess") })
+    } catch (error) {
+      // Revert on error
+      setItems(oldItems)
+      toast({
+        variant: "destructive",
+        title: t("common.error"),
+        description: t("shopping.toast.updateError")
+      })
+    }
+  }
+
   const handleDelete = async (item: ShoppingOrder) => {
     if (!item) return
     setLoading(true)
@@ -58,21 +78,6 @@ export default function ShoppingPage() {
     } finally {
       setDeletingItem(null)
       setLoading(false)
-    }
-  }
-
-  const getStatusBadgeClass = (statusCode: string) => {
-    switch (statusCode) {
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-800"
-      case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-800"
-      case "SUCCESS":
-        return "bg-green-100 text-green-800"
-      case "CANCEL":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
     }
   }
 
@@ -121,9 +126,9 @@ export default function ShoppingPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("shopping.supplier")}</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("shopping.status")}</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("shopping.createdAt")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("suppliers.supplier")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.status")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.createdAt")}</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.actions")}</th>
                   </tr>
                 </thead>
@@ -156,9 +161,12 @@ export default function ShoppingPage() {
                       >
                         <td className="py-3 px-4 text-gray-900 font-medium">{item.supplierName || "-"}</td>
                         <td className="py-3 px-4">
-                          <Badge variant="secondary" className={getStatusBadgeClass(item.status.code)}>
-                            {item.status.name}
-                          </Badge>
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <ShoppingStatusSelect
+                              currentStatus={item.status.code}
+                              onStatusChange={(status) => handleStatusChange(item, status)}
+                            />
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-gray-600">
                           {new Date(item.createdAt).toLocaleDateString("th-TH", {
@@ -193,8 +201,6 @@ export default function ShoppingPage() {
           }
         />
       </div>
-
-
 
       {showReceiptForm && (
         <ReceiptForm

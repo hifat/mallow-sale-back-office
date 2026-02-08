@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ChevronLeft } from "lucide-react"
 import type { ShoppingOrder } from "@/types/shopping"
-import { getShoppingDetail } from "@/lib/shopping-api"
+import { getShoppingDetail, updateShoppingStatus } from "@/lib/shopping-api"
+import { ShoppingStatusSelect } from "@/components/shopping-status-select"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
 
@@ -105,9 +106,22 @@ export default function ShoppingDetailPage() {
                         })}</span>
                     </div>
                 </div>
-                <Badge variant="secondary" className={`text-sm px-3 py-1 ${getStatusBadgeClass(order.status.code)}`}>
-                    {order.status.name}
-                </Badge>
+                <ShoppingStatusSelect
+                    currentStatus={order.status.code}
+                    onStatusChange={async (status) => {
+                        try {
+                            await updateShoppingStatus(order.id, status)
+                            setOrder({ ...order, status: { ...order.status, code: status } })
+                            toast({ title: t("common.success"), description: t("shopping.toast.updateSuccess") })
+                        } catch (error) {
+                            toast({
+                                variant: "destructive",
+                                title: t("common.error"),
+                                description: t("shopping.toast.updateError")
+                            })
+                        }
+                    }}
+                />
             </div>
 
             <Card>
@@ -117,7 +131,7 @@ export default function ShoppingDetailPage() {
                 <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-sm font-medium text-gray-500">{t("shopping.supplier")}</p>
+                            <p className="text-sm font-medium text-gray-500">{t("suppliers.supplier")}</p>
                             <p className="text-lg font-medium">{order.supplierName || "-"}</p>
                         </div>
                     </div>
@@ -137,7 +151,7 @@ export default function ShoppingDetailPage() {
                                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.name")}</th>
                                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.quantity")}</th>
                                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.unit")}</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("shopping.status")}</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.status")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -153,7 +167,7 @@ export default function ShoppingDetailPage() {
                                         </td>
                                         <td className="py-3 px-4">
                                             <Badge variant="outline" className={getStatusBadgeClass(item.status.code)}>
-                                                {item.status.name}
+                                                {t(`shopping.status.${item.status.code === "IN_PROGRESS" ? "inProgress" : item.status.code.toLowerCase()}`)}
                                             </Badge>
                                         </td>
                                     </tr>
