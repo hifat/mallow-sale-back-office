@@ -148,10 +148,32 @@
       "deleted": "Shopping item deleted",
       "deleteError": "Failed to delete",
       "updateError": "Failed to update status",
+      "createError": "Failed to create shopping order",
+      "createSuccess": "Shopping order created successfully",
       "fetchError": "Failed to fetch shoppings",
-      "fetchDetailError": "Failed to fetch shopping order details",
-      "createError": "Failed to add shopping",
-      "createSuccess": "Shopping order created successfully"
+      "fetchDetailError": "Failed to fetch shopping detail",
+      "updateSuccess": "Status updated successfully"
+    }
+  },
+  "shoppingUsageUnit": {
+    "title": "Shopping Usage Units",
+    "subtitle": "Manage measurement units for shopping orders",
+    "listTitle": "Usage Units",
+    "add": "Add Unit",
+    "emptyTitle": "No usage units found",
+    "emptySubtitle": "Add your first usage unit to get started",
+    "deleteConfirm": {
+      "title": "Delete Usage Unit",
+      "description": "Are you sure you want to delete \"{name}\" ({code})? This action cannot be undone."
+    },
+    "toast": {
+      "fetchError": "Failed to fetch usage units",
+      "createSuccess": "Usage unit created successfully",
+      "updateSuccess": "Usage unit updated successfully",
+      "deleteSuccess": "Usage unit deleted successfully",
+      "deleteError": "Failed to delete usage unit",
+      "saveError": "Failed to save usage unit",
+      "duplicateError": "Unit code already exists"
     }
   },
   "receipt": {

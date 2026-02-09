@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Plus, Search, Trash2, CheckSquare, Square, Receipt } from "lucide-react"
+import { Plus, Search, Trash2, CheckSquare, Square, Receipt, Scale } from "lucide-react"
 import { ListCardTable } from "@/components/list-card-table"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
 import { ReceiptForm } from "@/components/receipt-form"
@@ -95,6 +95,10 @@ export default function ShoppingPage() {
             <Button onClick={() => setShowReceiptForm(true)} variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50">
               <Receipt className="h-4 w-4 mr-2" />
               {t("shopping.readReceipt")}
+            </Button>
+            <Button onClick={() => router.push("/shopping/usage-units")} variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50">
+              <Scale className="h-4 w-4 mr-2" />
+              {t("shoppingUsageUnit.title")}
             </Button>
             <Button onClick={() => router.push("/shopping/create")} className="bg-yellow-500 hover:bg-yellow-600 text-white">
               <Plus className="h-4 w-4 mr-2" />
