@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshToken: null,
   })
   const [isInitializing, setIsInitializing] = useState(true)
-  const [lastActivityAt, setLastActivityAt] = useState<number | null>(null)
 
   useEffect(() => {
     try {
@@ -42,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(stored) as AuthState
         if (parsed && parsed.accessToken && parsed.refreshToken) {
           setState(parsed)
-          setLastActivityAt(Date.now())
         }
       }
     } catch (_) {
@@ -51,25 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  useEffect(() => {
-    const handleActivity = () => {
-      setLastActivityAt(Date.now())
-    }
-
-    if (typeof window !== "undefined") {
-      window.addEventListener("click", handleActivity)
-      window.addEventListener("keydown", handleActivity)
-      window.addEventListener("mousemove", handleActivity)
-    }
-
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("click", handleActivity)
-        window.removeEventListener("keydown", handleActivity)
-        window.removeEventListener("mousemove", handleActivity)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     if (isInitializing) return
@@ -84,40 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isInitializing, state.accessToken, state.refreshToken, pathname, router])
 
-  useEffect(() => {
-    if (!state.refreshToken) return
-
-    const interval = setInterval(async () => {
-      if (!state.refreshToken) return
-      if (!lastActivityAt) return
-      const now = Date.now()
-      const FIVE_MINUTES = 5 * 60 * 1000
-      if (now - lastActivityAt > FIVE_MINUTES) {
-        return
-      }
-
-      try {
-        const tokens = await apiRefreshToken({ refreshToken: state.refreshToken })
-        setState((prev) => ({
-          ...prev,
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-        }))
-        if (typeof window !== "undefined") {
-          const payload: AuthState = {
-            user: state.user,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-          }
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-        }
-      } catch (_) {
-        handleSignOut()
-      }
-    }, 4 * 60 * 1000)
-
-    return () => clearInterval(interval)
-  }, [state.refreshToken, state.user, lastActivityAt])
 
   const persistState = useCallback((next: AuthState) => {
     setState(next)
@@ -153,7 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshToken: user.refreshToken,
       }
       persistState(next)
-      setLastActivityAt(Date.now())
       router.replace("/dashboard")
     },
     [persistState, router]
