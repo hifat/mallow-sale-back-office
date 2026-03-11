@@ -1,18 +1,26 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical, Copy } from "lucide-react"
+import { ArrowUpDown, Download, LayoutGrid, List, Plus, Search, Edit, Trash2, Eye, ChefHat, GripHorizontal, GripVertical, Copy } from "lucide-react"
 import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo, RecipeTypeCode, QueryRecipe } from "@/lib/recipe-api"
 import { formatDate } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { ReactSortable } from "react-sortablejs"
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -43,6 +51,9 @@ export default function RecipesPage() {
   const [recipeTypeCode, setRecipeTypeCode] = useState<RecipeTypeCode>(
     (searchParams.get("recipeTypeCode") as RecipeTypeCode) || "FOOD"
   )
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
+  const [sortField, setSortField] = useState<'orderNo' | 'costWithOther' | 'price' | 'profit' | null>(null)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   // Update URL when recipeTypeCode changes
   useEffect(() => {
@@ -89,6 +100,71 @@ export default function RecipesPage() {
   }
 
   const filteredRecipes = recipes.filter((recipe) => recipe.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  const processedRecipes = useMemo(() => {
+    return filteredRecipes.map((r, idx) => {
+      const cost = r.totalCost()
+      const otherPercent = 10 // From requirements
+      const costWithOther = cost * (1 + otherPercent / 100)
+      const price = typeof r.price === 'number' ? r.price : 0
+      const profit = price - costWithOther
+      const linemanPrice = price / 0.679
+      const linemanProfit = (linemanPrice * 0.679) - costWithOther
+
+      return {
+        recipe: r,
+        orderNo: r.orderNo ?? (idx + 1),
+        costWithOther,
+        price,
+        profit,
+        linemanPrice,
+        linemanProfit
+      }
+    }).sort((a, b) => {
+      if (!sortField) return 0
+      const multiplier = sortOrder === 'asc' ? 1 : -1
+      return (a[sortField] - b[sortField]) * multiplier
+    })
+  }, [filteredRecipes, sortField, sortOrder])
+
+  const handleSort = (field: 'orderNo' | 'costWithOther' | 'price' | 'profit') => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') setSortOrder('desc')
+      else {
+        setSortField(null)
+        setSortOrder('asc')
+      }
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
+    }
+  }
+
+  const exportCSV = () => {
+    const headers = ['ลำดับ', 'ชื่อเมนู', 'ต้นทุน(รวม 10%)', 'ราคาขาย', 'กำไร', 'ราคา Lineman', 'กำไร Lineman']
+    const rows = processedRecipes.map((item) => {
+      return [
+        item.orderNo,
+        `"${item.recipe.name.replace(/"/g, '""')}"`,
+        item.costWithOther.toFixed(2),
+        item.price.toFixed(2),
+        item.profit.toFixed(2),
+        item.linemanPrice.toFixed(2),
+        item.linemanProfit.toFixed(2)
+      ].join(',')
+    })
+
+    const csvContent = headers.join(',') + "\n" + rows.join('\n')
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `recipes_${recipeTypeCode}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   const handleSave = async (data: RecipePayload) => {
     setLoading(true)
@@ -237,14 +313,41 @@ export default function RecipesPage() {
                 </select>
               </div>
               <div className="flex-1" />
+              <div className="flex items-center bg-gray-100 rounded-md p-1 mr-2">
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  className={viewMode === 'table' ? 'bg-white text-yellow-600 shadow-sm' : 'text-gray-500'}
+                  disabled={isOrdering}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-white text-yellow-600 shadow-sm' : 'text-gray-500'}
+                  disabled={isOrdering}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button onClick={exportCSV} variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50 mr-2" disabled={isOrdering}>
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+              </Button>
               {!isOrdering && (
                 <Button
                   variant="outline"
-                  onClick={startOrdering}
+                  onClick={() => {
+                    if (viewMode !== 'grid') setViewMode('grid');
+                    startOrdering();
+                  }}
                   className="ml-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-semibold rounded-lg transition-colors duration-200 px-6 py-2"
                   style={{ minWidth: 120, borderWidth: 2 }}
                 >
-                  <GripVertical className="inline-block text-yellow-500" />
+                  <GripVertical className="inline-block mr-2 text-yellow-500" />
                   Reorder
                 </Button>
               )}
@@ -261,93 +364,158 @@ export default function RecipesPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <ReactSortable
-              list={isOrdering ? orderRecipes : filteredRecipes}
-              setList={isOrdering ? setOrderRecipes : () => { }}
-              animation={200}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-              disabled={!isOrdering}
-            >
-              {(isOrdering ? orderRecipes : filteredRecipes).map((recipe) => (
-                <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90 relative" : "relative"}>
-                  {isOrdering && (
-                    <div className="absolute left-1/2 -translate-x-1/2 z-10 p-1">
-                      <GripHorizontal className="text-gray-400 w-6 h-6" />
-                    </div>
-                  )}
-                  <ProductCard
-                    title={
-                      <span className="flex items-center gap-2">
-                        {recipe.name}
-                        {recipe.recipeType && (
-                          <Badge variant="secondary" className="bg-amber-100 text-amber-800 border border-amber-200">
-                            {recipe.recipeType.name || "-"}
-                          </Badge>
-                        )}
-                      </span>
-                    }
-                    badge={
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        {recipe.ingredients.length} ingredients
-                      </Badge>
-                    }
-                    price={typeof recipe.price === 'number' ? recipe.price : 0}
-                    actions={
-                      !isOrdering && (
-                        <ProductCardActions>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleShowDetails(recipe.id)}
-                            className="hover:bg-yellow-50"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(recipe)}
-                            className="hover:bg-yellow-50"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDuplicate(recipe)}
-                            className="hover:bg-yellow-50"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeletingRecipe(recipe)}
-                            className="hover:bg-red-50 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </ProductCardActions>
-                      )
-                    }
-                    className=""
-                  >
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
-                      {typeof recipe.orderNo === 'number' && (
-                        <span className="text-xs text-gray-400">Order: {recipe.orderNo}</span>
-                      )}
-                    </div>
-                  </ProductCard>
-                </div>
-              ))}
-            </ReactSortable>
-
-            {filteredRecipes.length === 0 && (
+            {filteredRecipes.length === 0 ? (
               <div className="text-center py-8">
                 <ChefHat className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No recipes found</p>
                 <p className="text-sm text-gray-500">Create your first recipe to get started</p>
+              </div>
+            ) : viewMode === 'grid' ? (
+              <ReactSortable
+                list={isOrdering ? orderRecipes : filteredRecipes}
+                setList={isOrdering ? setOrderRecipes : () => { }}
+                animation={200}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                disabled={!isOrdering}
+              >
+                {(isOrdering ? orderRecipes : filteredRecipes).map((recipe) => (
+                  <div key={recipe.id} className={isOrdering ? "cursor-move opacity-90 relative" : "relative"}>
+                    {isOrdering && (
+                      <div className="absolute left-1/2 -translate-x-1/2 z-10 p-1">
+                        <GripHorizontal className="text-gray-400 w-6 h-6" />
+                      </div>
+                    )}
+                    <ProductCard
+                      title={
+                        <span className="flex items-center gap-2">
+                          {recipe.name}
+                          {recipe.recipeType && (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-800 border border-amber-200">
+                              {recipe.recipeType.name || "-"}
+                            </Badge>
+                          )}
+                        </span>
+                      }
+                      badge={
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          {recipe.ingredients.length} ingredients
+                        </Badge>
+                      }
+                      price={typeof recipe.price === 'number' ? recipe.price : 0}
+                      actions={
+                        !isOrdering && (
+                          <ProductCardActions>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleShowDetails(recipe.id)}
+                              className="hover:bg-yellow-50"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(recipe)}
+                              className="hover:bg-yellow-50"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDuplicate(recipe)}
+                              className="hover:bg-yellow-50"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeletingRecipe(recipe)}
+                              className="hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </ProductCardActions>
+                        )
+                      }
+                      className=""
+                    >
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs text-gray-500">Updated: {formatDate(recipe.updatedAt)}</span>
+                        {typeof recipe.orderNo === 'number' && (
+                          <span className="text-xs text-gray-400">Order: {recipe.orderNo}</span>
+                        )}
+                      </div>
+                    </ProductCard>
+                  </div>
+                ))}
+              </ReactSortable>
+            ) : (
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 hover:bg-gray-50">
+                      <TableHead className="cursor-pointer font-semibold whitespace-nowrap w-24 align-middle" onClick={() => handleSort('orderNo')}>
+                        <div className="flex items-center text-gray-700">
+                          ลำดับ {sortField === 'orderNo' && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap align-middle text-gray-700">ชื่อเมนู</TableHead>
+                      <TableHead className="cursor-pointer font-semibold whitespace-nowrap text-right align-middle" onClick={() => handleSort('costWithOther')}>
+                        <div className="flex items-center justify-end text-gray-700">
+                          ต้นทุน(รวม 10%) {sortField === 'costWithOther' && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer font-semibold whitespace-nowrap text-right align-middle" onClick={() => handleSort('price')}>
+                        <div className="flex items-center justify-end text-gray-700">
+                          ราคาขาย {sortField === 'price' && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer font-semibold whitespace-nowrap text-right align-middle" onClick={() => handleSort('profit')}>
+                        <div className="flex items-center justify-end text-gray-700">
+                          กำไร {sortField === 'profit' && <ArrowUpDown className="ml-2 h-4 w-4" />}
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">ราคา Lineman</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">กำไร Lineman</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap text-center align-middle text-gray-700">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {processedRecipes.map((item) => (
+                      <TableRow key={item.recipe.id}>
+                        <TableCell className="font-medium align-middle">{item.orderNo}</TableCell>
+                        <TableCell className="align-middle">
+                          <div className="font-medium">{item.recipe.name}</div>
+                          {item.recipe.recipeType && (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200 mt-1">
+                              {item.recipe.recipeType.name}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right align-middle">฿{item.costWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right align-middle">฿{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className={`text-right align-middle ${item.profit > 0 ? 'text-green-600 font-medium' : item.profit < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                          ฿{item.profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-right text-purple-600 font-medium align-middle">฿{item.linemanPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className={`text-right align-middle ${item.linemanProfit > 0 ? 'text-green-600 font-medium' : item.linemanProfit < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                          ฿{item.linemanProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-center p-2 align-middle">
+                          <div className="flex items-center justify-center">
+                            <Button variant="ghost" size="sm" onClick={() => handleShowDetails(item.recipe.id)} className="hover:bg-yellow-50 px-2 text-gray-600"><Eye className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleEdit(item.recipe)} className="hover:bg-yellow-50 px-2 text-gray-600"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDuplicate(item.recipe)} className="hover:bg-yellow-50 px-2 text-gray-600"><Copy className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => setDeletingRecipe(item.recipe)} className="hover:bg-red-50 hover:text-red-600 px-2 text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </CardContent>
