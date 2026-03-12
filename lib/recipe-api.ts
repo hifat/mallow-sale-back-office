@@ -33,6 +33,7 @@ export class Recipe {
     this.otherPercentage = data.otherPercentage
     this.orderNo = data.orderNo
     this.recipeType = data.recipeType
+    this.cost = data.cost
   }
 
   id: string
@@ -41,10 +42,11 @@ export class Recipe {
   createdAt: string
   updatedAt: string
   costPercentage?: number
-  price?: number
+  price?: number  
   otherPercentage?: number
   orderNo?: number
   recipeType?: RecipeTypeResponse
+  cost?: number
 
   totalCost(): number {
     let total = 0

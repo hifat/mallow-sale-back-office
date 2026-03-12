@@ -103,7 +103,7 @@ export default function RecipesPage() {
 
   const processedRecipes = useMemo(() => {
     return filteredRecipes.map((r, idx) => {
-      const cost = r.totalCost()
+      const cost = r.cost ?? 0
       const otherPercent = 10 // From requirements
       const costWithOther = cost * (1 + otherPercent / 100)
       const price = typeof r.price === 'number' ? r.price : 0
