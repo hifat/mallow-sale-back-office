@@ -25,7 +25,6 @@ export function ReceiptForm({ onCancel }: ReceiptFormProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
   const [items, setItems] = useState<ReceiptItemInput[]>([])
-  const [originalItems, setOriginalItems] = useState<ReceiptItem[]>([])
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -60,7 +59,6 @@ export function ReceiptForm({ onCancel }: ReceiptFormProps) {
 
     try {
       const response = await readReceipt(selectedImage)
-      setOriginalItems(response.items)
       setItems(response.items.map(item => ({
         inventoryID: item.inventoryID,
         name: item.name,
@@ -93,7 +91,7 @@ export function ReceiptForm({ onCancel }: ReceiptFormProps) {
   }
 
   const updateItem = (index: number, field: keyof ReceiptItemInput, value: any) => {
-    setItems(prev => prev.map((item, i) => 
+    setItems(prev => prev.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     ))
     if (errors[`item_${index}_${field}`]) {
