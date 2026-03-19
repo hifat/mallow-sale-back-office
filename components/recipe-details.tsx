@@ -85,7 +85,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   <DollarSign className="h-5 w-5 text-purple-600" />
                   <div>
                     <p className="text-sm text-gray-600">Selling Price</p>
-                    <p className="text-lg font-semibold text-gray-900">฿{recipe.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{recipe.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               )}
@@ -99,7 +99,7 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                     <ArrowUpRight className="h-5 w-5 text-cyan-600" />
                     <div>
                       <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                   </div>
                 );
@@ -112,17 +112,46 @@ export function RecipeDetails({ recipe, onClose, onEdit }: RecipeDetailsProps) {
                   const other = typeof recipe.otherPercentage === 'number' ? recipe.otherPercentage : 0;
                   const totalWithOther = totalCost * (1 + other / 100);
                   const profitWithOther = recipe.price - totalWithOther;
+                  
+                  const linemanPrice = typeof recipe.linemanPrice === 'number' && recipe.linemanPrice > 0 ? recipe.linemanPrice : (recipe.price / 0.679);
+                  const linemanProfit = (linemanPrice * 0.679) - totalWithOther;
+                  
+                  const grabPrice = typeof recipe.grabPrice === 'number' && recipe.grabPrice > 0 ? recipe.grabPrice : (recipe.price / 0.679);
+                  const grabProfit = (grabPrice * 0.679) - totalWithOther;
+                  
                   return (
+                    <>
                     <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
                       <TrendingUp className="h-5 w-5 text-pink-600" />
                       <div>
                         <p className="text-sm text-gray-600">Profit</p>
                         <div className="text-lg font-semibold text-gray-900">
-                          ฿{profitWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          <div className="text-sm text-gray-500">(no other %: ฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                          ฿{profitWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className="text-sm text-gray-500">(no other %: ฿{profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
                         </div>
                       </div>
                     </div>
+                    <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">LineMan Profit</p>
+                        <div className="text-lg font-semibold text-gray-900">
+                          ฿{linemanProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className="text-sm text-gray-500">(Price: ฿{linemanPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="text-sm text-gray-600">Grab Profit</p>
+                        <div className="text-lg font-semibold text-gray-900">
+                          ฿{grabProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className="text-sm text-gray-500">(Price: ฿{grabPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</div>
+                        </div>
+                      </div>
+                    </div>
+                    </>
                   );
                 })()
               )}
