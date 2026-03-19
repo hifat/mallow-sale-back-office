@@ -2,6 +2,8 @@ import { authorizedFetch } from "@/lib/api-client"
 
 export type Settings = {
   costPercentage: number
+  linemanGP?: number
+  grabGP?: number
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"
@@ -9,7 +11,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v
 export async function fetchSettings(): Promise<Settings> {
   const res = await authorizedFetch(`${API_BASE}/settings`)
   if (!res.ok) throw new Error("Failed to fetch settings")
-  return res.json()
+  const data = await res.json()
+  return data.item || data
 }
 
 export async function updateSettings(settings: Settings): Promise<Settings> {
@@ -19,5 +22,6 @@ export async function updateSettings(settings: Settings): Promise<Settings> {
     body: JSON.stringify(settings),
   })
   if (!res.ok) throw new Error("Failed to update settings")
-  return res.json()
+  const data = await res.json()
+  return data.item || data
 }

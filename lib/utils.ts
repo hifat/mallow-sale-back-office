@@ -83,3 +83,25 @@ export function getIngredientCostUsed(inventory: any, quantity: number): number 
   const costPerUnit = getIngredientCostPerUnit(inventory);
   return costPerUnit * quantity;
 }
+
+/**
+ * Calculate the suggested delivery price, actual price, and profit
+ * based on the delivery platform's GP percentage.
+ */
+export function calculateDeliveryMetrics(
+  baseSellingPrice: number,
+  totalCostWithOther: number,
+  gpPercentage?: number | null,
+  customDeliveryPrice?: number | null
+) {
+  const gp = typeof gpPercentage === 'number' ? gpPercentage : 0;
+  const multiplier = 1 - (gp / 100);
+  
+  const suggestedPrice = multiplier > 0 ? baseSellingPrice / multiplier : baseSellingPrice;
+  const price = (typeof customDeliveryPrice === 'number' && customDeliveryPrice > 0) 
+    ? customDeliveryPrice 
+    : suggestedPrice;
+  const profit = (price * multiplier) - totalCostWithOther;
+  
+  return { suggestedPrice, price, profit, multiplier };
+}

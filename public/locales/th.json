@@ -270,7 +270,21 @@
     "title": "การตั้งค่า",
     "language": "ภาษา",
     "theme": "ธีม",
-    "profile": "โปรไฟล์"
+    "profile": "โปรไฟล์",
+    "description": "ตั้งค่าระบบหลังบ้าน Mallow Sale ของคุณ",
+    "systemSettings": "การตั้งค่าระบบ",
+    "defaultCostPercentage": "เปอร์เซ็นต์ต้นทุนเริ่มต้น (%)",
+    "defaultCostPercentagePlaceholder": "ระบุเปอร์เซ็นต์ต้นทุนเริ่มต้น",
+    "linemanGP": "LineMan GP (%)",
+    "grabGP": "Grab GP (%)",
+    "gpPlaceholder": "เช่น 32.1",
+    "userPreferences": "การตั้งค่าผู้ใช้",
+    "userPreferencesDesc": "การตั้งค่าความพึงพอใจของผู้ใช้จะแสดงที่นี่",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก...",
+    "saved": "บันทึกสำเร็จ!",
+    "failedLoad": "ไม่สามารถโหลดการตั้งค่าได้",
+    "failedSave": "ไม่สามารถบันทึกการตั้งค่าได้"
   },
   "auth": {
     "signInTitle": "เข้าสู่ระบบ",

@@ -15,16 +15,18 @@ import { fetchInventories } from "@/lib/inventory-api"
 import { Inventory } from "@/types/inventory"
 import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
 import { Recipe, RecipePayload, RecipeTypeCode } from "@/lib/recipe-api"
-import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed } from "@/lib/utils"
+import { getTotalCostFromIngredients, getReasonablePrice, getIngredientCostPerUnit, getIngredientCostUsed, calculateDeliveryMetrics } from "@/lib/utils"
 import { fetchSettings } from "@/lib/setting-api"
+import type { Settings } from "@/lib/setting-api"
 
 interface RecipeFormProps {
   recipe?: Recipe | null
+  settings?: Settings | null
   onSave: (data: RecipePayload) => void
   onCancel: () => void
 }
 
-export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
+export function RecipeForm({ recipe, settings, onSave, onCancel }: RecipeFormProps) {
   const blankInventory: Inventory = {
     createdAt: '',
     id: '',
@@ -242,313 +244,310 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       />
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Recipe Name *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="name">Recipe Name *</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              className={errors.name ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+              placeholder="Enter recipe name"
+            />
+            {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="recipeType">Recipe Type *</Label>
+            <Select
+              value={formData.recipeTypeCode}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, recipeTypeCode: value as RecipeTypeCode }))}
+            >
+              <SelectTrigger className={errors.recipeTypeCode ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}>
+                <SelectValue placeholder="Select recipe type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="FOOD">Food</SelectItem>
+                <SelectItem value="DESSERT">Dessert</SelectItem>
+                <SelectItem value="DRINK">Drink</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.recipeTypeCode && <p className="text-sm text-red-600">{errors.recipeTypeCode}</p>}
+          </div>
+
+          <div className="flex flex-col md:flex-row md:space-x-4">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                className={errors.name ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                placeholder="Enter recipe name"
-              />
-              {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="recipeType">Recipe Type *</Label>
-              <Select
-                value={formData.recipeTypeCode}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, recipeTypeCode: value as RecipeTypeCode }))}
-              >
-                <SelectTrigger className={errors.recipeTypeCode ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}>
-                  <SelectValue placeholder="Select recipe type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FOOD">Food</SelectItem>
-                  <SelectItem value="DESSERT">Dessert</SelectItem>
-                  <SelectItem value="DRINK">Drink</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.recipeTypeCode && <p className="text-sm text-red-600">{errors.recipeTypeCode}</p>}
-            </div>
-
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="costPercentage">Cost Percentage (%)</Label>
-                <Input
-                  id="costPercentage"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.01}
-                  value={isNaN(formData.costPercentage) ? '' : formData.costPercentage}
-                  onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
-                  className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="Enter cost percentage"
-                />
-                {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
-              </div>
-              <div className="flex-1 space-y-2 mt-2 md:mt-0">
-                <Label htmlFor="price">Selling Price</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={isNaN(formData.price) ? '' : formData.price}
-                  onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
-                  className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="Enter selling price"
-                />
-                {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="otherPercentage">Other Percentage</Label>
-              <Input
-                id="otherPercentage"
+                id="costPercentage"
                 type="number"
                 min={0}
                 max={100}
                 step={0.01}
-                value={isNaN(formData.otherPercentage) ? '' : formData.otherPercentage}
-                onChange={e => setFormData(prev => ({ ...prev, otherPercentage: parseFloat(e.target.value) }))}
-                className={errors.otherPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                placeholder="Enter other percentage (optional)"
+                value={isNaN(formData.costPercentage) ? '' : formData.costPercentage}
+                onChange={e => setFormData(prev => ({ ...prev, costPercentage: parseFloat(e.target.value) }))}
+                className={errors.costPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter cost percentage"
               />
-              {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
+              {errors.costPercentage && <p className="text-sm text-red-600">{errors.costPercentage}</p>}
             </div>
-
-            <div className="flex flex-col md:flex-row md:space-x-4">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="linemanPrice">Lineman Price</Label>
-                <Input
-                  id="linemanPrice"
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={isNaN(formData.linemanPrice) ? '' : formData.linemanPrice}
-                  onChange={e => setFormData(prev => ({ ...prev, linemanPrice: parseFloat(e.target.value) }))}
-                  className={errors.linemanPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="Enter LineMan price"
-                />
-                {errors.linemanPrice && <p className="text-sm text-red-600">{errors.linemanPrice}</p>}
-              </div>
-              <div className="flex-1 space-y-2 mt-2 md:mt-0">
-                <Label htmlFor="grabPrice">Grab Price</Label>
-                <Input
-                  id="grabPrice"
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={isNaN(formData.grabPrice) ? '' : formData.grabPrice}
-                  onChange={e => setFormData(prev => ({ ...prev, grabPrice: parseFloat(e.target.value) }))}
-                  className={errors.grabPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                  placeholder="Enter Grab price"
-                />
-                {errors.grabPrice && <p className="text-sm text-red-600">{errors.grabPrice}</p>}
-              </div>
+            <div className="flex-1 space-y-2 mt-2 md:mt-0">
+              <Label htmlFor="price">Selling Price</Label>
+              <Input
+                id="price"
+                type="number"
+                min={0}
+                step={0.01}
+                value={isNaN(formData.price) ? '' : formData.price}
+                onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                className={errors.price ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter selling price"
+              />
+              {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
             </div>
+          </div>
 
-            {(() => {
-              const totalCost = getTotalCostFromIngredients(formData.ingredients);
-              const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);
-              const other = typeof formData.otherPercentage === 'number' ? formData.otherPercentage : 0;
-              const totalWithOther = totalCost * (1 + other / 100);
-              const price = typeof formData.price === 'number' ? formData.price : 0;
-              const profit = price - totalCost;
-              const profitWithOther = price - totalWithOther;
-              
-              const linemanPrice = typeof formData.linemanPrice === 'number' && formData.linemanPrice > 0 ? formData.linemanPrice : price / 0.679;
-              const linemanProfit = (linemanPrice * 0.679) - totalWithOther;
-              
-              const grabPrice = typeof formData.grabPrice === 'number' && formData.grabPrice > 0 ? formData.grabPrice : price / 0.679;
-              const grabProfit = (grabPrice * 0.679) - totalWithOther;
-              return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
-                  <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                    <Tag className="h-5 w-5 text-orange-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-pink-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Profit</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        ฿{profitWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span className="text-sm text-gray-500 ml-2">(no other %: ฿{profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Total Cost</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-cyan-100 rounded-lg">
-                    <ArrowUpRight className="h-5 w-5 text-cyan-600" />
-                    <div>
-                      <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-purple-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">LineMan Profit</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        ฿{linemanProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span className="text-sm text-gray-500 ml-2">(Price: ฿{linemanPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Grab Profit</p>
-                      <p className="text-lg font-semibold text-gray-900">
-                        ฿{grabProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span className="text-sm text-gray-500 ml-2">(Price: ฿{grabPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
-                      </p>
-                    </div>
+          <div className="space-y-2">
+            <Label htmlFor="otherPercentage">Other Percentage</Label>
+            <Input
+              id="otherPercentage"
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              value={isNaN(formData.otherPercentage) ? '' : formData.otherPercentage}
+              onChange={e => setFormData(prev => ({ ...prev, otherPercentage: parseFloat(e.target.value) }))}
+              className={errors.otherPercentage ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+              placeholder="Enter other percentage (optional)"
+            />
+            {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
+          </div>
+
+          <div className="flex flex-col md:flex-row md:space-x-4">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="linemanPrice">Lineman Price</Label>
+              <Input
+                id="linemanPrice"
+                type="number"
+                min={0}
+                step={0.01}
+                value={isNaN(formData.linemanPrice) ? '' : formData.linemanPrice}
+                onChange={e => setFormData(prev => ({ ...prev, linemanPrice: parseFloat(e.target.value) }))}
+                className={errors.linemanPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter LineMan price"
+              />
+              {errors.linemanPrice && <p className="text-sm text-red-600">{errors.linemanPrice}</p>}
+            </div>
+            <div className="flex-1 space-y-2 mt-2 md:mt-0">
+              <Label htmlFor="grabPrice">Grab Price</Label>
+              <Input
+                id="grabPrice"
+                type="number"
+                min={0}
+                step={0.01}
+                value={isNaN(formData.grabPrice) ? '' : formData.grabPrice}
+                onChange={e => setFormData(prev => ({ ...prev, grabPrice: parseFloat(e.target.value) }))}
+                className={errors.grabPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                placeholder="Enter Grab price"
+              />
+              {errors.grabPrice && <p className="text-sm text-red-600">{errors.grabPrice}</p>}
+            </div>
+          </div>
+
+          {(() => {
+            const totalCost = getTotalCostFromIngredients(formData.ingredients);
+            const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);
+            const other = typeof formData.otherPercentage === 'number' ? formData.otherPercentage : 0;
+            const totalWithOther = totalCost * (1 + other / 100);
+            const price = typeof formData.price === 'number' ? formData.price : 0;
+            const profit = price - totalCost;
+            const profitWithOther = price - totalWithOther;
+
+            const lineman = calculateDeliveryMetrics(price, totalWithOther, settings?.linemanGP, formData.linemanPrice);
+            const grab = calculateDeliveryMetrics(price, totalWithOther, settings?.grabGP, formData.grabPrice);
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4">
+                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                  <Tag className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Reasonable Price for Sale</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{reasonablePrice.toFixed(2)}</p>
                   </div>
                 </div>
-              );
-            })()}
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-lg font-medium">Ingredients</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addIngredient}
-                  className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 bg-transparent"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Ingredient
-                </Button>
+                <div className="flex items-center space-x-3 p-3 bg-pink-50 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-pink-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Profit</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      ฿{profitWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-sm text-gray-500 ml-2">(no other %: ฿{profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Total Cost</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-cyan-100 rounded-lg">
+                  <ArrowUpRight className="h-5 w-5 text-cyan-600" />
+                  <div>
+                    <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
+                    <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">LineMan Profit</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      ฿{lineman.profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-sm text-gray-500 ml-2">(Price: ฿{lineman.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Grab Profit</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      ฿{grab.profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-sm text-gray-500 ml-2">(Price: ฿{grab.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                    </p>
+                  </div>
+                </div>
               </div>
+            );
+          })()}
 
-              {formData.ingredients.map((ingredient, index) => {
-                const costPerUnit = getIngredientCostPerUnit(ingredient.inventory);
-                const costUsed = getIngredientCostUsed(ingredient.inventory, ingredient.quantity);
-                return (
-                  <Card key={index} className="border-gray-200">
-                    <CardContent className="pt-4">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                          <Label>Inventory Item *</Label>
-                          <Input
-                            placeholder="Search inventory..."
-                            value={searchText[index] || ""}
-                            onFocus={() => setActiveIngredientIndex(index)}
-                            onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
-                            onChange={async (e) => {
-                              const value = e.target.value
-                              updateIngredient(index, "inventoryName", value)
-                              await handleInventorySearch(value, index)
-                            }}
-                            className={
-                              errors[`ingredient_${index}_inventory`]
-                                ? "border-red-500"
-                                : "border-yellow-200 focus:border-yellow-500"
-                            }
-                          />
-                          <div className="relative">
-                            {inventoryLoading && activeIngredientIndex === index && (
-                              <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>
-                            )}
-                            {!inventoryLoading && activeIngredientIndex === index && inventoryOptions.length > 0 && (
-                              <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
-                                {inventoryOptions.map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className="px-3 py-2 hover:bg-yellow-50 cursor-pointer text-sm"
-                                    onClick={() => {
-                                      updateIngredient(index, "inventory", item.id)
-                                      updateIngredient(index, "inventoryName", item.name)
-                                      updateIngredient(index, "unit", item.purchaseUnit?.code || "")
-                                      setInventoryOptions([])
-                                      setActiveIngredientIndex(null)
-                                    }}
-                                  >
-                                    {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {errors[`ingredient_${index}_inventory`] && (
-                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
-                          )}
-                        </div>
-                        <div>
-                          <Label>Quantity *</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            step={0.01}
-                            value={isNaN(ingredient.quantity) ? '' : ingredient.quantity}
-                            onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
-                            className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
-                          />
-                          {errors[`ingredient_${index}_quantity`] && (
-                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
-                          )}
-                        </div>
-                        <div>
-                          <Label>Unit *</Label>
-                          <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
-                            <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
-                              <SelectValue placeholder="Select a unit" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {USAGE_UNITS.map((unit) => (
-                                <SelectItem key={unit.code} value={unit.code}>
-                                  {unit.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {errors[`ingredient_${index}_unit`] && (
-                            <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 mt-auto">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeIngredient(index)}
-                            className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="text-xs text-gray-600 col-span-2">
-                          <span>Cost per unit: ฿{costPerUnit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                        <div className="text-xs text-gray-600 text-right">
-                          <span>Cost used: ฿{costUsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-lg font-medium">Ingredients</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addIngredient}
+                className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 bg-transparent"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Ingredient
+              </Button>
             </div>
 
-            <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!recipe} saveLabel="Save Recipe" addLabel="Add Recipe" />
-          </form>
-        </CardContent>
-      </ModalCard>
+            {formData.ingredients.map((ingredient, index) => {
+              const costPerUnit = getIngredientCostPerUnit(ingredient.inventory);
+              const costUsed = getIngredientCostUsed(ingredient.inventory, ingredient.quantity);
+              return (
+                <Card key={index} className="border-gray-200">
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label>Inventory Item *</Label>
+                        <Input
+                          placeholder="Search inventory..."
+                          value={searchText[index] || ""}
+                          onFocus={() => setActiveIngredientIndex(index)}
+                          onBlur={() => setTimeout(() => setActiveIngredientIndex(null), 200)}
+                          onChange={async (e) => {
+                            const value = e.target.value
+                            updateIngredient(index, "inventoryName", value)
+                            await handleInventorySearch(value, index)
+                          }}
+                          className={
+                            errors[`ingredient_${index}_inventory`]
+                              ? "border-red-500"
+                              : "border-yellow-200 focus:border-yellow-500"
+                          }
+                        />
+                        <div className="relative">
+                          {inventoryLoading && activeIngredientIndex === index && (
+                            <div className="absolute left-0 top-0 text-xs text-gray-400">Searching...</div>
+                          )}
+                          {!inventoryLoading && activeIngredientIndex === index && inventoryOptions.length > 0 && (
+                            <div className="absolute z-10 bg-white border border-gray-200 rounded shadow w-full max-h-40 overflow-y-auto">
+                              {inventoryOptions.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="px-3 py-2 hover:bg-yellow-50 cursor-pointer text-sm"
+                                  onClick={() => {
+                                    updateIngredient(index, "inventory", item.id)
+                                    updateIngredient(index, "inventoryName", item.name)
+                                    updateIngredient(index, "unit", item.purchaseUnit?.code || "")
+                                    setInventoryOptions([])
+                                    setActiveIngredientIndex(null)
+                                  }}
+                                >
+                                  {item.name} {item.purchaseUnit?.name ? `(${item.purchaseUnit.name})` : ""}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {errors[`ingredient_${index}_inventory`] && (
+                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_inventory`]}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Quantity *</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={0.01}
+                          value={isNaN(ingredient.quantity) ? '' : ingredient.quantity}
+                          onChange={e => setFormData(prev => ({ ...prev, ingredients: prev.ingredients.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(e.target.value) } : ing) }))}
+                          className={errors[`ingredient_${index}_quantity`] ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                        />
+                        {errors[`ingredient_${index}_quantity`] && (
+                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_quantity`]}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Unit *</Label>
+                        <Select onValueChange={(value) => updateIngredient(index, "unit", value)} value={ingredient.unit.code}>
+                          <SelectTrigger className="border-yellow-200 focus:border-yellow-500">
+                            <SelectValue placeholder="Select a unit" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {USAGE_UNITS.map((unit) => (
+                              <SelectItem key={unit.code} value={unit.code}>
+                                {unit.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors[`ingredient_${index}_unit`] && (
+                          <p className="text-sm text-red-600">{errors[`ingredient_${index}_unit`]}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 mt-auto">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeIngredient(index)}
+                          className="border-red-500 text-red-600 hover:bg-red-50 bg-transparent"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="text-xs text-gray-600 col-span-2">
+                        <span>Cost per unit: ฿{costPerUnit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="text-xs text-gray-600 text-right">
+                        <span>Cost used: ฿{costUsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <FormActionRow onCancel={onCancel} loading={isLoading} isEdit={!!recipe} saveLabel="Save Recipe" addLabel="Add Recipe" />
+        </form>
+      </CardContent>
+    </ModalCard>
   )
 }

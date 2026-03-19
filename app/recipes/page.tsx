@@ -11,7 +11,8 @@ import { RecipeForm } from "@/components/recipe-form"
 import { RecipeDetails } from "@/components/recipe-details"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { fetchRecipes, createRecipe, updateRecipe, deleteRecipe, fetchRecipeById, Recipe, RecipePayload, updateRecipeOrderNo, RecipeTypeCode, QueryRecipe } from "@/lib/recipe-api"
-import { formatDate } from "@/lib/utils"
+import { fetchSettings, Settings } from "@/lib/setting-api"
+import { formatDate, calculateDeliveryMetrics } from "@/lib/utils"
 import { ProductCard, ProductCardActions } from "@/components/product-card";
 import {
   Table,
@@ -38,6 +39,11 @@ export default function RecipesPage() {
   const searchParams = useSearchParams()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [settings, setSettings] = useState<Settings | null>(null)
+
+  useEffect(() => {
+    fetchSettings().then(setSettings).catch(console.error)
+  }, [])
   const [showForm, setShowForm] = useState(false)
   const [showDetails, setShowDetails] = useState<string | null>(null)
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
@@ -108,12 +114,9 @@ export default function RecipesPage() {
       const costWithOther = cost * (1 + otherPercent / 100)
       const price = typeof r.price === 'number' ? r.price : 0
       const profit = price - costWithOther
-      const suggestedLinemanPrice = price / 0.679
-      const suggestedGrabPrice = price / 0.679
-      const linemanPrice = r.linemanPrice || suggestedLinemanPrice
-      const linemanProfit = (linemanPrice * 0.679) - costWithOther
-      const grabPrice = r.grabPrice || suggestedGrabPrice
-      const grabProfit = (grabPrice * 0.679) - costWithOther
+      
+      const lineman = calculateDeliveryMetrics(price, costWithOther, settings?.linemanGP, r.linemanPrice);
+      const grab = calculateDeliveryMetrics(price, costWithOther, settings?.grabGP, r.grabPrice);
 
       return {
         recipe: r,
@@ -121,19 +124,19 @@ export default function RecipesPage() {
         costWithOther,
         price,
         profit,
-        suggestedLinemanPrice,
-        suggestedGrabPrice,
-        linemanPrice,
-        linemanProfit,
-        grabPrice,
-        grabProfit
+        suggestedLinemanPrice: lineman.suggestedPrice,
+        suggestedGrabPrice: grab.suggestedPrice,
+        linemanPrice: lineman.price,
+        linemanProfit: lineman.profit,
+        grabPrice: grab.price,
+        grabProfit: grab.profit
       }
     }).sort((a, b) => {
       if (!sortField) return 0
       const multiplier = sortOrder === 'asc' ? 1 : -1
       return (a[sortField] - b[sortField]) * multiplier
     })
-  }, [filteredRecipes, sortField, sortOrder])
+  }, [filteredRecipes, sortField, sortOrder, settings])
 
   const handleSort = (field: 'orderNo' | 'costWithOther' | 'price' | 'profit') => {
     if (sortField === field) {
@@ -547,6 +550,7 @@ export default function RecipesPage() {
       {(showForm || editingRecipe) && (
         <RecipeForm
           recipe={editingRecipe}
+          settings={settings}
           onSave={handleSave}
           onCancel={() => {
             setShowForm(false)
@@ -563,6 +567,7 @@ export default function RecipesPage() {
         ) : detailRecipe && !editingRecipe && (
           <RecipeDetails
             recipe={detailRecipe}
+            settings={settings}
             onClose={() => {
               setShowDetails(null)
               setDetailRecipe(null)

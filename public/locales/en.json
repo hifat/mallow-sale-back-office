@@ -264,7 +264,21 @@
     "title": "Settings",
     "language": "Language",
     "theme": "Theme",
-    "profile": "Profile"
+    "profile": "Profile",
+    "description": "Configure your Mallow Sale back office settings",
+    "systemSettings": "System Settings",
+    "defaultCostPercentage": "Default Cost Percentage (%)",
+    "defaultCostPercentagePlaceholder": "Enter default cost percentage",
+    "linemanGP": "LineMan GP (%)",
+    "grabGP": "Grab GP (%)",
+    "gpPlaceholder": "e.g. 32.1",
+    "userPreferences": "User Preferences",
+    "userPreferencesDesc": "User preference settings will be available here.",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "failedLoad": "Failed to load settings",
+    "failedSave": "Failed to save settings"
   },
   "auth": {
     "signInTitle": "Sign In",
