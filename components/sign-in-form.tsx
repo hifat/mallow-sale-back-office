@@ -65,7 +65,7 @@ export function SignInForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+    <form onSubmit={handleSubmit} className="w-full space-y-4">
       <div>
         <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
           {t("auth.username")}

@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,24 +13,24 @@ import { useI18n, type Locale } from '@/contexts/i18n-context'
 // Flag icon components
 const USFlag = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 16" fill="none">
-    <rect width="24" height="16" fill="#B22234" rx="2"/>
-    <rect width="24" height="1.23" fill="white" y="1.23"/>
-    <rect width="24" height="1.23" fill="white" y="3.69"/>
-    <rect width="24" height="1.23" fill="white" y="6.15"/>
-    <rect width="24" height="1.23" fill="white" y="8.62"/>
-    <rect width="24" height="1.23" fill="white" y="11.08"/>
-    <rect width="24" height="1.23" fill="white" y="13.54"/>
-    <rect width="9.6" height="8.62" fill="#3C3B6E"/>
+    <rect width="24" height="16" fill="#B22234" rx="2" />
+    <rect width="24" height="1.23" fill="white" y="1.23" />
+    <rect width="24" height="1.23" fill="white" y="3.69" />
+    <rect width="24" height="1.23" fill="white" y="6.15" />
+    <rect width="24" height="1.23" fill="white" y="8.62" />
+    <rect width="24" height="1.23" fill="white" y="11.08" />
+    <rect width="24" height="1.23" fill="white" y="13.54" />
+    <rect width="9.6" height="8.62" fill="#3C3B6E" />
   </svg>
 )
 
 const ThaiFlag = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 16" fill="none">
-    <rect width="24" height="16" fill="#ED1C24" rx="2"/>
-    <rect width="24" height="2.67" fill="white" y="2.67"/>
-    <rect width="24" height="2.67" fill="#241D4F" y="5.33"/>
-    <rect width="24" height="2.67" fill="#241D4F" y="8"/>
-    <rect width="24" height="2.67" fill="white" y="10.67"/>
+    <rect width="24" height="16" fill="#ED1C24" rx="2" />
+    <rect width="24" height="2.67" fill="white" y="2.67" />
+    <rect width="24" height="2.67" fill="#241D4F" y="5.33" />
+    <rect width="24" height="2.67" fill="#241D4F" y="8" />
+    <rect width="24" height="2.67" fill="white" y="10.67" />
   </svg>
 )
 
