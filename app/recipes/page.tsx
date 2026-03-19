@@ -108,8 +108,12 @@ export default function RecipesPage() {
       const costWithOther = cost * (1 + otherPercent / 100)
       const price = typeof r.price === 'number' ? r.price : 0
       const profit = price - costWithOther
-      const linemanPrice = price / 0.679
+      const suggestedLinemanPrice = price / 0.679
+      const suggestedGrabPrice = price / 0.679
+      const linemanPrice = r.linemanPrice || suggestedLinemanPrice
       const linemanProfit = (linemanPrice * 0.679) - costWithOther
+      const grabPrice = r.grabPrice || suggestedGrabPrice
+      const grabProfit = (grabPrice * 0.679) - costWithOther
 
       return {
         recipe: r,
@@ -117,8 +121,12 @@ export default function RecipesPage() {
         costWithOther,
         price,
         profit,
+        suggestedLinemanPrice,
+        suggestedGrabPrice,
         linemanPrice,
-        linemanProfit
+        linemanProfit,
+        grabPrice,
+        grabProfit
       }
     }).sort((a, b) => {
       if (!sortField) return 0
@@ -141,7 +149,7 @@ export default function RecipesPage() {
   }
 
   const exportCSV = () => {
-    const headers = ['ลำดับ', 'ชื่อเมนู', 'ต้นทุน(รวม 10%)', 'ราคาขาย', 'กำไร', 'ราคา Lineman', 'กำไร Lineman']
+    const headers = ['ลำดับ', 'ชื่อเมนู', 'ต้นทุน(รวม 10%)', 'ราคาขาย', 'กำไร', 'ราคา Lineman', 'กำไร Lineman', 'ราคา Grab', 'กำไร Grab']
     const rows = processedRecipes.map((item) => {
       return [
         item.orderNo,
@@ -150,7 +158,9 @@ export default function RecipesPage() {
         item.price.toFixed(2),
         item.profit.toFixed(2),
         item.linemanPrice.toFixed(2),
-        item.linemanProfit.toFixed(2)
+        item.linemanProfit.toFixed(2),
+        item.grabPrice.toFixed(2),
+        item.grabProfit.toFixed(2)
       ].join(',')
     })
 
@@ -480,6 +490,8 @@ export default function RecipesPage() {
                       </TableHead>
                       <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">ราคา Lineman</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">กำไร Lineman</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">ราคา Grab</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap text-right align-middle text-gray-700">กำไร Grab</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap text-center align-middle text-gray-700">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -495,14 +507,24 @@ export default function RecipesPage() {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-right align-middle">฿{item.costWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                        <TableCell className="text-right align-middle">฿{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right align-middle">฿{item.costWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right align-middle">฿{item.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                         <TableCell className={`text-right align-middle ${item.profit > 0 ? 'text-green-600 font-medium' : item.profit < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-                          ฿{item.profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ฿{item.profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-right text-purple-600 font-medium align-middle">฿{item.linemanPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right align-middle">
+                          <div className="text-purple-600 font-medium">฿{item.linemanPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">{t("common.minimum")}: ฿{item.suggestedLinemanPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        </TableCell>
                         <TableCell className={`text-right align-middle ${item.linemanProfit > 0 ? 'text-green-600 font-medium' : item.linemanProfit < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-                          ฿{item.linemanProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ฿{item.linemanProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-right align-middle">
+                          <div className="text-green-600 font-medium">฿{item.grabPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">{t("common.minimum")}: ฿{item.suggestedGrabPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        </TableCell>
+                        <TableCell className={`text-right align-middle ${item.grabProfit > 0 ? 'text-green-600 font-medium' : item.grabProfit < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                          ฿{item.grabProfit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="text-center p-2 align-middle">
                           <div className="flex items-center justify-center">

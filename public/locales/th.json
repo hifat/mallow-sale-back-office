@@ -23,7 +23,8 @@
     "searchPlaceholder": "ค้นหา...",
     "list": "รายการ",
     "back": "ย้อนกลับ",
-    "reset": "รีเซ็ต"
+    "reset": "รีเซ็ต",
+    "minimum": "ขั้นต่ำ"
   },
   "navigation": {
     "dashboard": "แดชบอร์ด",
@@ -254,7 +255,8 @@
     "editRecipe": "แก้ไขสูตรอาหาร",
     "deleteRecipe": "ลบสูตรอาหาร",
     "recipeName": "ชื่อสูตรอาหาร",
-    "ingredients": "ส่วนผสม"
+    "ingredients": "ส่วนผสม",
+    "suggestedPrice": "ราคาแนะนำ"
   },
   "usageUnits": {
     "title": "หน่วยการใช้งาน",

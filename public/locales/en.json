@@ -21,7 +21,8 @@
     "logout": "Logout",
     "management": "Management",
     "searchPlaceholder": "Search...",
-    "list": "List"
+    "list": "List",
+    "minimum": "Minimum"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -248,7 +249,8 @@
     "editRecipe": "Edit Recipe",
     "deleteRecipe": "Delete Recipe",
     "recipeName": "Recipe Name",
-    "ingredients": "Ingredients"
+    "ingredients": "Ingredients",
+    "suggestedPrice": "suggested Price"
   },
   "usageUnits": {
     "title": "Usage Units",

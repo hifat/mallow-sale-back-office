@@ -47,6 +47,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     price: recipe?.price ?? 0,
     otherPercentage: recipe?.otherPercentage ?? 0,
     recipeTypeCode: (recipe?.recipeType && recipe.recipeType.code) ? recipe.recipeType.code as RecipeTypeCode : '' as '' | RecipeTypeCode,
+    linemanPrice: recipe?.linemanPrice ?? 0,
+    grabPrice: recipe?.grabPrice ?? 0,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -121,6 +123,12 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
     if (isNaN(formData.otherPercentage) || formData.otherPercentage < 0 || formData.otherPercentage > 100) {
       newErrors.otherPercentage = "Other percentage must be a number between 0 and 100"
     }
+    if (isNaN(formData.linemanPrice) || formData.linemanPrice < 0) {
+      newErrors.linemanPrice = "Lineman price must be a number greater than or equal to 0"
+    }
+    if (isNaN(formData.grabPrice) || formData.grabPrice < 0) {
+      newErrors.grabPrice = "Grab price must be a number greater than or equal to 0"
+    }
 
     if (formData.ingredients.length === 0) {
       newErrors.ingredients = "At least one ingredient is required"
@@ -163,6 +171,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
       price: formData.price,
       otherPercentage: formData.otherPercentage,
       recipeType: { code: formData.recipeTypeCode as RecipeTypeCode },
+      linemanPrice: formData.linemanPrice,
+      grabPrice: formData.grabPrice,
     })
     setIsLoading(false)
   }
@@ -310,6 +320,37 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
               {errors.otherPercentage && <p className="text-sm text-red-600">{errors.otherPercentage}</p>}
             </div>
 
+            <div className="flex flex-col md:flex-row md:space-x-4">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="linemanPrice">Lineman Price</Label>
+                <Input
+                  id="linemanPrice"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={isNaN(formData.linemanPrice) ? '' : formData.linemanPrice}
+                  onChange={e => setFormData(prev => ({ ...prev, linemanPrice: parseFloat(e.target.value) }))}
+                  className={errors.linemanPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                  placeholder="Enter LineMan price"
+                />
+                {errors.linemanPrice && <p className="text-sm text-red-600">{errors.linemanPrice}</p>}
+              </div>
+              <div className="flex-1 space-y-2 mt-2 md:mt-0">
+                <Label htmlFor="grabPrice">Grab Price</Label>
+                <Input
+                  id="grabPrice"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={isNaN(formData.grabPrice) ? '' : formData.grabPrice}
+                  onChange={e => setFormData(prev => ({ ...prev, grabPrice: parseFloat(e.target.value) }))}
+                  className={errors.grabPrice ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                  placeholder="Enter Grab price"
+                />
+                {errors.grabPrice && <p className="text-sm text-red-600">{errors.grabPrice}</p>}
+              </div>
+            </div>
+
             {(() => {
               const totalCost = getTotalCostFromIngredients(formData.ingredients);
               const reasonablePrice = getReasonablePrice(totalCost, formData.costPercentage);
@@ -332,8 +373,8 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                     <div>
                       <p className="text-sm text-gray-600">Profit</p>
                       <p className="text-lg font-semibold text-gray-900">
-                        ฿{profitWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        <span className="text-sm text-gray-500 ml-2">(no other %: ฿{profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                        ฿{profitWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <span className="text-sm text-gray-500 ml-2">(no other %: ฿{profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
                       </p>
                     </div>
                   </div>
@@ -341,14 +382,14 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                     <DollarSign className="h-5 w-5 text-blue-600" />
                     <div>
                       <p className="text-sm text-gray-600">Total Cost</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3 p-3 bg-cyan-100 rounded-lg">
                     <ArrowUpRight className="h-5 w-5 text-cyan-600" />
                     <div>
                       <p className="text-sm text-gray-600 flex items-center">Total Cost (with Other %)</p>
-                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      <p className="text-lg font-semibold text-gray-900">฿{totalWithOther.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                   </div>
                 </div>
@@ -467,10 +508,10 @@ export function RecipeForm({ recipe, onSave, onCancel }: RecipeFormProps) {
                           </Button>
                         </div>
                         <div className="text-xs text-gray-600 col-span-2">
-                          <span>Cost per unit: ฿{costPerUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span>Cost per unit: ฿{costPerUnit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         <div className="text-xs text-gray-600 text-right">
-                          <span>Cost used: ฿{costUsed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span>Cost used: ฿{costUsed.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     </CardContent>

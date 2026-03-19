@@ -34,6 +34,8 @@ export class Recipe {
     this.orderNo = data.orderNo
     this.recipeType = data.recipeType
     this.cost = data.cost
+    this.linemanPrice = data.linemanPrice
+    this.grabPrice = data.grabPrice
   }
 
   id: string
@@ -47,6 +49,8 @@ export class Recipe {
   orderNo?: number
   recipeType?: RecipeTypeResponse
   cost?: number
+  linemanPrice?: number
+  grabPrice?: number
 
   totalCost(): number {
     let total = 0
@@ -82,6 +86,8 @@ export interface RecipePayload {
   price?: number
   otherPercentage?: number
   recipeType: RecipeTypePayload
+  linemanPrice?: number
+  grabPrice?: number
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"

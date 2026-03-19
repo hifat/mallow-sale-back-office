@@ -37,7 +37,7 @@ export async function authorizedFetch(input: RequestInfo | URL, init: RequestIni
     return response
   }
 
-  if (errorBody?.code !== "TOKEN_EXPIRES") {
+  if (errorBody?.code !== "TOKEN_EXPIRED") {
     return response
   }
 
@@ -71,7 +71,7 @@ export async function authorizedFetch(input: RequestInfo | URL, init: RequestIni
       retryBody = (await clonedRetry.json()) as ApiErrorBody
     } catch {
     }
-    if (retryBody?.code === "TOKEN_EXPIRES") {
+    if (retryBody?.code === "TOKEN_EXPIRED") {
       forceSignOut(retryBody.message)
     }
   }
