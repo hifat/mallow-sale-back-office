@@ -9,14 +9,20 @@ interface ApiErrorBody {
 
 async function handleAuthError(response: Response): Promise<never> {
   let errorMessage = "Authentication error"
+  let errorCode = ""
   try {
     const data: ApiErrorBody = await response.json()
     if (data && data.message) {
       errorMessage = data.message
     }
+    if (data && data.code) {
+      errorCode = data.code
+    }
   } catch (_) {
   }
-  throw new Error(errorMessage)
+  const error = new Error(errorMessage) as any
+  error.code = errorCode
+  throw error
 }
 
 export async function signIn(payload: SignInInput): Promise<SignInResponse> {

@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
 import { useAuth } from "@/contexts/auth-context"
-import { signInSchema, type SignInInput } from "@/types/sign-in"
+import { signInSchema, type SignInInput, LoginTypeEnum, AuthErrorCode } from "@/types/sign-in"
+import { GoogleLogin } from "@react-oauth/google"
 
 export function SignInForm() {
   const { t } = useTranslation()
   const { signIn } = useAuth()
   const { toast } = useToast()
 
-  const [form, setForm] = useState<SignInInput>({ username: "", password: "" })
+  const [form, setForm] = useState<SignInInput>({ loginType: LoginTypeEnum.INTERNAL, username: "", password: "" })
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -49,9 +50,13 @@ export function SignInForm() {
         description: t("auth.signInSuccess"),
       })
     } catch (error: any) {
+      let desc = error?.message || t("auth.signInFailed")
+      if (error?.code === AuthErrorCode.INVALID_CREDENTIALS) {
+        desc = t("auth.invalidCredentials")
+      }
       toast({
         title: t("common.error"),
-        description: error?.message || t("auth.signInFailed"),
+        description: desc,
         variant: "destructive",
       })
     } finally {
@@ -99,6 +104,52 @@ export function SignInForm() {
         >
           {isSubmitting ? t("auth.signingIn") : t("auth.signInButton")}
         </Button>
+      </div>
+
+      <div className="relative mt-6 mb-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            try {
+              setIsSubmitting(true)
+              await signIn({
+                loginType: LoginTypeEnum.GOOGLE,
+                token: credentialResponse.credential
+              })
+              toast({
+                title: t("common.success"),
+                description: t("auth.signInSuccess"),
+              })
+            } catch (error: any) {
+              let desc = error?.message || t("auth.signInFailed")
+              if (error?.code === AuthErrorCode.INVALID_CREDENTIALS) {
+                desc = t("auth.invalidCredentials")
+              }
+              toast({
+                title: t("common.error"),
+                description: desc,
+                variant: "destructive",
+              })
+            } finally {
+              setIsSubmitting(false)
+            }
+          }}
+          onError={() => {
+            toast({
+              title: t("common.error"),
+              description: "Google verification failed",
+              variant: "destructive",
+            })
+          }}
+        />
       </div>
     </form>
   )

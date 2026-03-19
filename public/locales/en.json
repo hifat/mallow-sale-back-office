@@ -288,7 +288,8 @@
     "signInButton": "Sign In",
     "signingIn": "Signing in...",
     "signInSuccess": "Signed in successfully",
-    "signInFailed": "Failed to sign in"
+    "signInFailed": "Failed to sign in",
+    "invalidCredentials": "Invalid username or password"
   },
   "validation": {
     "required": "This field is required"

@@ -294,7 +294,8 @@
     "signInButton": "เข้าสู่ระบบ",
     "signingIn": "กำลังเข้าสู่ระบบ...",
     "signInSuccess": "เข้าสู่ระบบสำเร็จ",
-    "signInFailed": "ไม่สามารถเข้าสู่ระบบได้"
+    "signInFailed": "ไม่สามารถเข้าสู่ระบบได้",
+    "invalidCredentials": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
   },
   "validation": {
     "required": "จำเป็นต้องกรอกข้อมูลในช่องนี้"

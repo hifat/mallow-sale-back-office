@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Mallow Sale - Back Office",
   description: "Professional back office management system for Mallow Sale",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
