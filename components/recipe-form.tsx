@@ -269,6 +269,8 @@ export function RecipeForm({ recipe, settings, onSave, onCancel }: RecipeFormPro
                 <SelectItem value="FOOD">Food</SelectItem>
                 <SelectItem value="DESSERT">Dessert</SelectItem>
                 <SelectItem value="DRINK">Drink</SelectItem>
+                <SelectItem value="INGREDIENT">Ingredient</SelectItem>
+                <SelectItem value="SNACK">Snack</SelectItem>
               </SelectContent>
             </Select>
             {errors.recipeTypeCode && <p className="text-sm text-red-600">{errors.recipeTypeCode}</p>}
