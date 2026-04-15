@@ -57,4 +57,17 @@ export async function deleteInventory(id: string) {
   const res = await authorizedFetch(`${API_BASE}/inventories/${id}`, { method: "DELETE" })
   if (!res.ok) throw new Error("Failed to delete inventory")
   return res.json()
+}
+
+export async function updateInventoryPresetPrice(inventoryId: string, presetPriceID: string) {
+  const res = await authorizedFetch(`${API_BASE}/inventories/${inventoryId}/preset-price`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ presetPriceID }),
+  })
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null)
+    throw new Error(errorBody?.message || "Failed to update inventory preset price")
+  }
+  return res.json()
 } 

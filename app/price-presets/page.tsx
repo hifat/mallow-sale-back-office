@@ -8,13 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Search, CircleDollarSign } from "lucide-react"
 import { useTranslation } from "@/hooks/use-translation"
 import { fetchPricePresets } from "@/lib/price-preset-api"
-import type { PricePreset } from "@/types/price-preset"
+import { updateInventoryPresetPrice } from "@/lib/inventory-api"
+import type { PricePreset, Price } from "@/types/price-preset"
 import { formatDate } from "@/lib/utils"
 import { ListCardTable } from "@/components/list-card-table"
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState"
+import { useToast } from "@/hooks/use-toast"
 
 export default function PricePresetsPage() {
   const { t } = useTranslation()
+  const { toast } = useToast()
   const [pricePresets, setPricePresets] = useState<PricePreset[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
@@ -62,6 +65,28 @@ export default function PricePresetsPage() {
 
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }))
+  }
+
+  const handleUpdatePrice = async (presetId: string, inventoryId: string, price: Price) => {
+    if (window.confirm("Are you sure you want to update the inventory price to ฿" + price.price.toFixed(2) + "?")) {
+      setLoading(true);
+      try {
+        await updateInventoryPresetPrice(inventoryId, price.id);
+        toast({
+          title: t("common.success"),
+          description: t("pricePresets.toast.updateSuccess"),
+          className: "bg-green-50 text-green-900 border-green-200",
+        });
+      } catch (e: any) {
+        toast({
+          variant: "destructive",
+          title: t("common.error"),
+          description: e.message || t("pricePresets.toast.updateError"),
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
   }
 
   const totalPages = Math.ceil(pagination.total / pagination.limit)
@@ -129,10 +154,16 @@ export default function PricePresetsPage() {
 											</td>
 											<td className="py-3 px-4">
 												<div className="flex flex-wrap gap-2">
-													{preset.prices?.map(p => (
-                            <Badge key={p.id} variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                              ฿{p.price.toFixed(2)}
-                            </Badge>
+													{preset.prices?.map((p: Price) => (
+                            <button
+                              key={p.id}
+                              onClick={() => handleUpdatePrice(preset.id, preset.inventoryID, p)}
+                              className="focus:outline-none focus:ring-2 focus:ring-yellow-500 rounded-full transition-transform hover:scale-105"
+                            >
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 cursor-pointer">
+                                ฿{p.price.toFixed(2)}
+                              </Badge>
+                            </button>
                           ))}
                           {(!preset.prices || preset.prices.length === 0) && (
                             <span className="text-gray-400">-</span>
