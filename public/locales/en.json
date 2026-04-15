@@ -33,6 +33,7 @@
     "recipes": "Recipes",
     "promotions": "Promotions",
     "usageUnits": "Usage Units",
+    "pricePresets": "Price Presets",
     "settings": "Settings"
   },
   "dashboard": {
@@ -259,6 +260,17 @@
     "deleteUnit": "Delete Unit",
     "unitName": "Unit Name",
     "abbreviation": "Abbreviation"
+  },
+  "pricePresets": {
+    "title": "Price Presets",
+    "subtitle": "View automatically generated price presets based on stock purchases",
+    "management": "Price Presets",
+    "inventory": "Inventory",
+    "prices": "Available Prices",
+    "created": "Created",
+    "updated": "Updated",
+    "emptyTitle": "No price presets found",
+    "emptySubtitle": "Price presets will appear here when stocks are added"
   },
   "settings": {
     "title": "Settings",

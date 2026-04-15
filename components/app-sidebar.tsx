@@ -1,7 +1,7 @@
 "use client"
 
 import type * as React from "react"
-import { Package, ChefHat, Scale, BarChart3, Settings, LogOut, Warehouse, Tag, ShoppingCart } from "lucide-react"
+import { Package, ChefHat, Scale, BarChart3, Settings, LogOut, Warehouse, Tag, ShoppingCart, CircleDollarSign } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useI18n } from "@/contexts/i18n-context"
@@ -69,6 +69,12 @@ const getNavItems = (t: (key: string) => string) => [
     title: t("navigation.usageUnits"),
     url: "/usage-units",
     icon: Scale,
+  },
+  {
+    titleKey: "navigation.pricePresets",
+    title: t("navigation.pricePresets"),
+    url: "/price-presets",
+    icon: CircleDollarSign,
   },
   {
     titleKey: "navigation.settings",
