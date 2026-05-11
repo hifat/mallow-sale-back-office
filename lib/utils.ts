@@ -21,7 +21,7 @@ export function cn(...inputs: ClassValue[]) {
   }
 
 export function calculateActualPrice(purchasePrice: number, yieldPercentage: number): number {
-  return (purchasePrice + (purchasePrice * (100 - yieldPercentage)) / 100) || 0
+  return purchasePrice / (yieldPercentage / 100) || 0
 }
 
 export function calculateCostPerUnit(purchasePrice: number, purchaseQuantity: number): number {
