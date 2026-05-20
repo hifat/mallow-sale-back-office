@@ -22,11 +22,17 @@
     "management": "Management",
     "searchPlaceholder": "Search...",
     "list": "List",
-    "minimum": "Minimum"
+    "minimum": "Minimum",
+    "back": "Back",
+    "reset": "Reset",
+    "update": "Update",
+    "previous": "Previous",
+    "next": "Next"
   },
   "navigation": {
     "dashboard": "Dashboard",
     "inventory": "Inventory",
+    "purchases": "Purchases",
     "shopping": "Shopping",
     "stocks": "Stocks",
     "suppliers": "Suppliers",
@@ -155,6 +161,67 @@
       "fetchError": "Failed to fetch shoppings",
       "fetchDetailError": "Failed to fetch shopping detail",
       "updateSuccess": "Status updated successfully"
+    }
+  },
+  "purchase": {
+    "title": "Purchases",
+    "management": "Purchase Management",
+    "subtitle": "Manage purchase records with suppliers and orders",
+    "listTitle": "Purchase Records",
+    "addPurchase": "New Purchase",
+    "createTitle": "Create Purchase",
+    "createSubtitle": "Add suppliers and order line items, then save",
+    "editTitle": "Edit Purchase",
+    "purchaseId": "Purchase ID",
+    "orders": "Orders",
+    "addOrder": "Add Order",
+    "addSupplier": "Add Supplier",
+    "removeSupplier": "Remove Supplier",
+    "supplierSection": "Supplier #{{number}}",
+    "selectSupplier": "Select supplier",
+    "selectInventory": "Select inventory",
+    "unitPrice": "Unit Price",
+    "totalPrice": "Total Price",
+    "emptyTitle": "No purchases found",
+    "emptySubtitle": "Create your first purchase record to get started",
+    "notFound": "Purchase not found",
+    "backToList": "Back to Purchases",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "success": "Success",
+      "cancel": "Cancelled"
+    },
+    "paymentType": {
+      "label": "Payment Method",
+      "cash": "Cash",
+      "ePayment": "E-Payment",
+      "creditCard": "Credit Card"
+    },
+    "deleteConfirm": {
+      "title": "Delete Purchase",
+      "description": "Are you sure you want to delete this purchase? This action cannot be undone."
+    },
+    "pagination": {
+      "showing": "Showing {{from}} to {{to}} of {{total}} results"
+    },
+    "errors": {
+      "suppliersRequired": "At least one supplier is required",
+      "supplierRequired": "Please select a supplier",
+      "ordersRequired": "At least one order is required per supplier",
+      "inventoryRequired": "Please select an inventory item",
+      "quantityRequired": "Quantity must be greater than zero",
+      "unitRequired": "Please select a unit"
+    },
+    "toast": {
+      "fetchError": "Failed to fetch purchases",
+      "fetchDetailError": "Failed to fetch purchase details",
+      "createSuccess": "Purchase created successfully",
+      "createError": "Failed to create purchase",
+      "updateSuccess": "Purchase updated successfully",
+      "updateError": "Failed to update purchase",
+      "deleted": "Purchase deleted successfully",
+      "deleteError": "Failed to delete purchase"
     }
   },
   "shoppingUsageUnit": {
