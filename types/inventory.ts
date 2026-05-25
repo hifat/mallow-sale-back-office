@@ -9,6 +9,7 @@ export interface Inventory {
   purchaseUnit: UsageUnit;
   yieldPercentage: number;
   remark?: string;
+  supplierID: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +25,7 @@ export const inventorySchema = z.object({
     .min(INVENTORY_YIELD_MIN, { message: "Yield percentage must be between 0 and 100" })
     .max(INVENTORY_YIELD_MAX, { message: "Yield percentage must be between 0 and 100" }),
   remark: z.string().optional(),
+  supplierID: z.string().min(1, "Supplier is required"),
 });
 
 export type InventoryInput = z.infer<typeof inventorySchema>;

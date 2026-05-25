@@ -37,9 +37,9 @@ export async function createInventory(item: Omit<Inventory, "id" | "createdAt" |
 }
 
 export async function updateInventory(id: string, item: Partial<Inventory>) {
-  if (item.name || item.purchaseUnit || item.purchasePrice || item.purchaseQuantity || item.yieldPercentage) {
+  if (item.name || item.purchaseUnit || item.purchasePrice || item.purchaseQuantity || item.yieldPercentage || item.supplierID) {
     const base = { ...item } as any
-    const parsed = inventorySchema.safeParse({ ...base, name: base.name ?? '', purchaseUnit: base.purchaseUnit ?? {code: '', name: ''}, purchasePrice: base.purchasePrice ?? 0, purchaseQuantity: base.purchaseQuantity ?? 0, yieldPercentage: base.yieldPercentage ?? 0 })
+    const parsed = inventorySchema.safeParse({ ...base, name: base.name ?? '', purchaseUnit: base.purchaseUnit ?? {code: '', name: ''}, purchasePrice: base.purchasePrice ?? 0, purchaseQuantity: base.purchaseQuantity ?? 0, yieldPercentage: base.yieldPercentage ?? 0, supplierID: base.supplierID ?? '' })
     if (!parsed.success) {
       throw new Error(parsed.error.errors[0]?.message || "Invalid data")
     }

@@ -35,6 +35,7 @@ export function RecipeForm({ recipe, settings, onSave, onCancel }: RecipeFormPro
     purchaseQuantity: 0,
     purchaseUnit: { code: '', name: '' } as UsageUnit,
     remark: '',
+    supplierID: '',
     updatedAt: '',
     yieldPercentage: 0,
   }

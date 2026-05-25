@@ -1,12 +1,15 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Calendar, DollarSign, Package, Percent } from "lucide-react"
+import { Edit, Calendar, DollarSign, Package, Percent, User } from "lucide-react"
 import { formatDate, calculateActualPrice, calculateCostPerUnit } from "@/lib/utils"
-import type { Inventory } from "@/types/inventory";
+import type { Inventory } from "@/types/inventory"
+import { fetchSupplierById } from "@/lib/supplier-api"
+import { useTranslation } from "@/hooks/use-translation"
 
 interface InventoryDetailsProps {
   item: Inventory
@@ -15,6 +18,19 @@ interface InventoryDetailsProps {
 }
 
 export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProps) {
+  const { t } = useTranslation()
+  const [supplierName, setSupplierName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!item.supplierID) {
+      setSupplierName(null)
+      return
+    }
+    fetchSupplierById(item.supplierID)
+      .then((supplier) => setSupplierName(supplier.name))
+      .catch(() => setSupplierName(null))
+  }, [item.supplierID])
+
   return (
     <ModalCard maxWidth="max-w-2xl">
       <ModalCardHeader
@@ -68,6 +84,16 @@ export function InventoryDetails({ item, onClose, onEdit }: InventoryDetailsProp
                 <div>
                   <p className="text-sm text-gray-600">Yield Percentage</p>
                   <p className="text-lg font-semibold text-gray-900">{item.yieldPercentage}%</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                <User className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="text-sm text-gray-600">{t("inventory.supplier")}</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {supplierName ?? (item.supplierID ? item.supplierID : "-")}
+                  </p>
                 </div>
               </div>
 

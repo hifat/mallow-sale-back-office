@@ -21,6 +21,7 @@ import { ListCardTable } from "@/components/list-card-table";
 import { CenteredEmptyState } from "@/components/ui/CenteredEmptyState";
 import { useTranslation } from "@/hooks/use-translation";
 import { ShoppingInventoryModal } from "@/components/shopping-inventory-modal"
+import { fetchSuppliers, type Supplier } from "@/lib/supplier-api"
 
 export default function InventoryPage() {
   const { t } = useTranslation()
@@ -33,13 +34,20 @@ export default function InventoryPage() {
   const [shoppingItem, setShoppingItem] = useState<Inventory | null>(null)
   const [loading, setLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+
+  const supplierNameById = (supplierID?: string) => {
+    if (!supplierID) return "-"
+    return suppliers.find((s) => s.id === supplierID)?.name ?? "-"
+  }
 
   useEffect(() => {
     setLoading(true)
-    fetchInventories()
-      .then((response) => {
-        setInventory(response.items)
-        setTotalCount(response.meta?.total || 0)
+    Promise.all([fetchInventories(), fetchSuppliers()])
+      .then(([inventoryRes, suppliersRes]) => {
+        setInventory(inventoryRes.items)
+        setTotalCount(inventoryRes.meta?.total || 0)
+        setSuppliers(suppliersRes.items)
       })
       .catch((e) => console.error("Failed to fetch inventory:", e))
       .finally(() => setLoading(false))
@@ -148,6 +156,7 @@ export default function InventoryPage() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("common.name")}</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.supplier")}</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.price")}</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.yield")}</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">{t("inventory.actualPrice")}</th>
@@ -165,6 +174,9 @@ export default function InventoryPage() {
                       <tr key={`skeleton-${index}`} className="border-b border-gray-100">
                         <td className="py-3 px-4">
                           <Skeleton className="h-4 w-32" />
+                        </td>
+                        <td className="py-3 px-4">
+                          <Skeleton className="h-4 w-24" />
                         </td>
                         <td className="py-3 px-4">
                           <Skeleton className="h-4 w-20" />
@@ -198,7 +210,7 @@ export default function InventoryPage() {
                     ))
                   ) : filteredInventory.length === 0 ? (
                     <tr>
-                      <td colSpan={9}>
+                      <td colSpan={10}>
                         <CenteredEmptyState
                           icon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
                           title={t("inventory.emptyTitle")}
@@ -215,6 +227,7 @@ export default function InventoryPage() {
                             {item.remark && <p className="text-sm text-gray-600">{item.remark}</p>}
                           </div>
                         </td>
+                        <td className="py-3 px-4 text-gray-900">{supplierNameById(item.supplierID)}</td>
                         <td className="py-3 px-4 text-gray-900">฿{item.purchasePrice}</td>
                         <td className="py-3 px-4 text-gray-900">{item.yieldPercentage}%</td>
                         <td className="py-3 px-4 text-gray-900">฿{calculateActualPrice(item.purchasePrice, item.yieldPercentage).toFixed(2)}</td>

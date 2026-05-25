@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,7 +11,9 @@ import { CardContent } from "@/components/ui/card"
 import { ModalCard, ModalCardHeader } from "@/components/ui/modal-card"
 import { FormActionRow } from "@/components/ui/FormActionRow"
 import { UsageUnit, USAGE_UNITS } from "@/types/usage-unit"
-import { inventorySchema, InventoryInput } from "@/types/inventory";
+import { inventorySchema, InventoryInput } from "@/types/inventory"
+import { fetchSuppliers, type Supplier } from "@/lib/supplier-api"
+import { useTranslation } from "@/hooks/use-translation"
 
 interface InventoryFormProps {
   item?: Partial<InventoryInput> | null;
@@ -20,14 +22,25 @@ interface InventoryFormProps {
 }
 
 export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState<InventoryInput>({
     name: item?.name || "",
     purchaseUnit: item?.purchaseUnit || { code: "", name: "" },
     yieldPercentage: item?.yieldPercentage || 0,
     remark: item?.remark || "",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+    supplierID: item?.supplierID || "",
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [loadingSuppliers, setLoadingSuppliers] = useState(true)
+
+  useEffect(() => {
+    fetchSuppliers()
+      .then((res) => setSuppliers(res.items))
+      .catch((err) => console.error("Failed to fetch suppliers:", err))
+      .finally(() => setLoadingSuppliers(false))
+  }, [])
 
   const validate = () => {
     const parsed = inventorySchema.safeParse(formData);
@@ -88,6 +101,29 @@ export function InventoryForm({ item, onSave, onCancel }: InventoryFormProps) {
                   placeholder="Enter item name"
                 />
                 {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="supplierID">{t("inventory.supplier")} *</Label>
+                <Select
+                  value={formData.supplierID}
+                  onValueChange={(value) => handleChange("supplierID", value)}
+                  disabled={loadingSuppliers}
+                >
+                  <SelectTrigger
+                    className={errors.supplierID ? "border-red-500" : "border-yellow-200 focus:border-yellow-500"}
+                  >
+                    <SelectValue placeholder={loadingSuppliers ? t("common.loading") : t("purchase.selectSupplier")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.supplierID && <p className="text-sm text-red-600">{errors.supplierID}</p>}
               </div>
 
               <div className="space-y-2">
