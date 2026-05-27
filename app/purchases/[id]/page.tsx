@@ -1,16 +1,31 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
+import type {
+  PaymentTypeCode,
+  Purchase,
+  PurchasePayload,
+  PurchaseStatusCode,
+  PurchaseSupplier,
+} from "@/types/purchase"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft } from "lucide-react"
+import { ChevronDown, ChevronLeft } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useTranslation } from "@/hooks/use-translation"
 import { fetchPurchaseById, updatePurchase } from "@/lib/purchase-api"
-import type { PaymentTypeCode, Purchase, PurchasePayload, PurchaseStatusCode } from "@/types/purchase"
 import { USAGE_UNITS } from "@/types/usage-unit"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import {
+  PurchaseEvidenceUpload,
+  type PurchaseEvidenceFile,
+} from "@/components/purchase-evidence-upload"
 import {
   Select,
   SelectContent,
@@ -56,6 +71,10 @@ export default function PurchaseDetailPage() {
   const [status1, setStatus1] = useState<UIStatusCode>("PENDING")
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [openSuppliers, setOpenSuppliers] = useState<Record<string, boolean>>({})
+  const [supplierEvidence, setSupplierEvidence] = useState<
+    Record<string, PurchaseEvidenceFile[]>
+  >({})
 
   useEffect(() => {
     const load = async () => {
@@ -65,6 +84,12 @@ export default function PurchaseDetailPage() {
         setPurchase(data)
         setDraft(data)
         setStatus1(toUIStatus(data.purchaseStatusCode))
+        setOpenSuppliers(
+          (data.suppliers || []).reduce<Record<string, boolean>>((acc, supplier) => {
+            acc[supplier.supplierId || `supplier-${supplier.supplierName}`] = true
+            return acc
+          }, {})
+        )
       } catch (error: unknown) {
         const message =
           error instanceof Error
@@ -186,6 +211,9 @@ export default function PurchaseDetailPage() {
     }
   }
 
+  const supplierKey = (supplier: PurchaseSupplier, index: number) =>
+    supplier.supplierId || `${supplier.supplierName || "supplier"}-${index}`
+
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto">
@@ -265,6 +293,11 @@ export default function PurchaseDetailPage() {
 
         <div className="space-y-3">
           {(draft?.suppliers || []).map((supplier, supplierIndex) => (
+            (() => {
+              const sKey = supplierKey(supplier, supplierIndex)
+              const isComplete = toUIStatus(supplier.statusCode) === "COMPLETE"
+              const inventoryOpen = openSuppliers[sKey] ?? true
+              return (
             <div
               key={`${supplier.supplierId}-${supplierIndex}`}
               className="rounded-lg border border-gray-100 overflow-hidden"
@@ -311,53 +344,86 @@ export default function PurchaseDetailPage() {
                 </div>
               </div>
 
-              <div className="divide-y divide-gray-100">
-                {supplier.orders.map((order, orderIndex) => (
-                  <div
-                    key={`${order.inventoryID}-${orderIndex}`}
-                    className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {order.inventoryName || "-"}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center rounded-md bg-white border border-gray-200 px-2 py-0.5 text-sm tabular-nums text-gray-800">
-                          {order.quantity}
-                        </span>
-                        <Badge
-                          variant="secondary"
-                          className="bg-yellow-50 text-yellow-800 border-yellow-100 font-normal"
-                        >
-                          {unitDisplayName(order.usageUnitCode)}
-                        </Badge>
-                      </div>
-                    </div>
-                    <Select
-                      value={toUIStatus(order.statusCode)}
-                      onValueChange={(v) =>
-                        handleStatus3Change(
-                          supplierIndex,
-                          orderIndex,
-                          v as UIStatusCode
-                        )
-                      }
+              <div className="p-3 space-y-3">
+                {isComplete && (
+                  <PurchaseEvidenceUpload
+                    files={supplierEvidence[sKey] || []}
+                    onFilesChange={(files) =>
+                      setSupplierEvidence((prev) => ({ ...prev, [sKey]: files }))
+                    }
+                  />
+                )}
+
+                <Collapsible
+                  open={inventoryOpen}
+                  onOpenChange={(open) =>
+                    setOpenSuppliers((prev) => ({ ...prev, [sKey]: open }))
+                  }
+                >
+                  <CollapsibleTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
                     >
-                      <SelectTrigger className="h-8 w-full sm:w-[150px] shrink-0">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {UI_STATUS_OPTIONS.map((status) => (
-                          <SelectItem key={status.code} value={status.code}>
-                            {status.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
+                      <span>Inventory List ({supplier.orders.length})</span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          inventoryOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 divide-y divide-gray-100 border border-gray-100 rounded-md">
+                    {supplier.orders.map((order, orderIndex) => (
+                      <div
+                        key={`${order.inventoryID}-${orderIndex}`}
+                        className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {order.inventoryName || "-"}
+                          </p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center rounded-md bg-white border border-gray-200 px-2 py-0.5 text-sm tabular-nums text-gray-800">
+                              {order.quantity}
+                            </span>
+                            <Badge
+                              variant="secondary"
+                              className="bg-yellow-50 text-yellow-800 border-yellow-100 font-normal"
+                            >
+                              {unitDisplayName(order.usageUnitCode)}
+                            </Badge>
+                          </div>
+                        </div>
+                        <Select
+                          value={toUIStatus(order.statusCode)}
+                          onValueChange={(v) =>
+                            handleStatus3Change(
+                              supplierIndex,
+                              orderIndex,
+                              v as UIStatusCode
+                            )
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-full sm:w-[150px] shrink-0">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {UI_STATUS_OPTIONS.map((status) => (
+                              <SelectItem key={status.code} value={status.code}>
+                                {status.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             </div>
+              )
+            })()
           ))}
         </div>
 
