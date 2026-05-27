@@ -1,4 +1,5 @@
 import type {
+  GroupBySupplierResponse,
   PaymentTypeCode,
   Purchase,
   PurchaseListItem,
@@ -128,4 +129,14 @@ export async function updatePurchase(
 export async function deletePurchase(id: string): Promise<void> {
   const res = await authorizedFetch(`${PURCHASES_BASE}/${id}`, { method: "DELETE" })
   if (!res.ok) await parseError(res, "Failed to delete purchase")
+}
+
+export async function fetchSupplierInventories(): Promise<GroupBySupplierResponse> {
+  const res = await authorizedFetch(`${API_BASE}/supplier-inventories`)
+  if (!res.ok) throw new Error("Failed to fetch supplier inventories")
+  const data = await res.json()
+  return {
+    items: data.items || [],
+    meta: data.meta || { total: 0 },
+  }
 }

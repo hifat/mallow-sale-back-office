@@ -36,6 +36,7 @@ export interface Purchase {
 }
 
 export interface PurchasePayload {
+  purchaseStatusCode?: PurchaseStatusCode
   suppliers: PurchaseSupplier[]
 }
 
@@ -45,4 +46,40 @@ export interface PurchaseListParams {
   search?: string
   sort?: string
   order?: "asc" | "desc"
+}
+
+export interface SupplierInventorySupplier {
+  id: string
+  imgUrl?: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SupplierInventoryItem {
+  createdAt: string
+  id: string
+  name: string
+  purchasePrice: number
+  purchaseQuantity: number
+  purchaseUnit: {
+    code: string
+    name: string
+  }
+  remark?: string
+  supplierID: string
+  updatedAt: string
+  yieldPercentage: number
+}
+
+export interface SupplierInventoryGroup {
+  supplier: SupplierInventorySupplier
+  inventories: SupplierInventoryItem[]
+}
+
+export interface GroupBySupplierResponse {
+  items: SupplierInventoryGroup[]
+  meta: {
+    total: number
+  }
 }
